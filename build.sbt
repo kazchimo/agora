@@ -5,10 +5,12 @@ ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "com.example"
 ThisBuild / organizationName := "example"
 
+lazy val rootDeps = Seq(scalaTest % Test, sttp)
+
 lazy val root = (project in file("."))
   .settings(
     name := "agora",
-    libraryDependencies += scalaTest % Test
+    libraryDependencies ++= rootDeps
   )
 
 // Uncomment the following for publishing to Sonatype.
