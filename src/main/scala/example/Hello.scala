@@ -7,18 +7,14 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
 import sttp.client3._
-import zio.ZIO
+import zio.{ExitCode, URIO, ZIO}
+import zio.console._
 
 import scala.util.Try
 
-case class CoincheckApi(apiKey: String, apiSecret: String) {
+case class CoincheckApi(accessKey: String, apiSecret: String) {
   private val Url = "https://coincheck.com/api/exchange/orders/transactions"
-  private val AccessKey = ZIO
-    .fromOption(sys.env.get("CC_ACCESS_KEY"))
-    .mapError(_ => "CC_ACCESS_KEY not found")
-  private val SecretKey = ZIO
-    .fromOption(sys.env.get("CC_SECRET_KEY"))
-    .mapError(_ => "CC_SECRET_KEY not found")
+
   private val encodeManner = "hmacSHA256"
 
   def transactions(): ZIO[Any, String, String] =
@@ -30,10 +26,8 @@ case class CoincheckApi(apiKey: String, apiSecret: String) {
 
   private def headers =
     for {
-      accessKey <- AccessKey
-      secKey <- SecretKey
-      nonce = createNonce
-      sig <- createSig(secKey, Url, nonce)
+      nonce <- ZIO.effectTotal(createNonce)
+      sig <- createSig(apiSecret, Url, nonce)
     } yield Map(
       "ACCESS-KEY" -> accessKey,
       "ACCESS-NONCE" -> nonce,
@@ -50,7 +44,7 @@ case class CoincheckApi(apiKey: String, apiSecret: String) {
       message: String
   ): ZIO[Any, String, String] =
     ZIO
-      .fromTry(Try {
+      .effect {
         val keySpec = new SecretKeySpec(
           secretKey.getBytes(StandardCharsets.UTF_8),
           encodeManner
@@ -60,9 +54,28 @@ case class CoincheckApi(apiKey: String, apiSecret: String) {
         Hex.encodeHexString(
           mac.doFinal(message.getBytes(StandardCharsets.UTF_8))
         )
-      })
+      }
       .mapError {
         case e: NoSuchAlgorithmException => s"wrong algorithm: ${e.getMessage}"
         case e: InvalidKeyException      => s"invalid key: ${e.getMessage}"
       }
+}
+
+object Main extends zio.App {
+  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] = app.exitCode
+
+  private val AccessKey = ZIO
+    .fromOption(sys.env.get("CC_ACCESS_KEY"))
+    .mapError(_ => "CC_ACCESS_KEY not found")
+  private val SecretKey = ZIO
+    .fromOption(sys.env.get("CC_SECRET_KEY"))
+    .mapError(_ => "CC_SECRET_KEY not found")
+
+  val app = for {
+    accessKey <- AccessKey
+    secKey <- SecretKey
+    api = CoincheckApi(accessKey, secKey)
+    tra <- api.transactions()
+    _ <- putStrLn(tra)
+  } yield ()
 }
