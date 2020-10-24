@@ -1,9 +1,4 @@
 package example
 
-object Hello extends Greeting with App {
-  println(greeting)
-}
+case class  CoincheckApi(apiKey: String, apiSecret: String) {}
 
-trait Greeting {
-  lazy val greeting: String = "hello"
-}
