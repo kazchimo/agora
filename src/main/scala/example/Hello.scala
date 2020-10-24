@@ -7,7 +7,7 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
 import sttp.client3._
-import zio.{Task, UIO, ZIO}
+import zio.ZIO
 
 import scala.util.Try
 
