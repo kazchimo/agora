@@ -27,9 +27,9 @@ case class CoincheckApi(accessKey: String, apiSecret: String) {
       nonce <- ZIO.effectTotal(createNonce)
       sig <- createSig(apiSecret, Url, nonce)
     } yield Map(
-        "ACCESS-KEY" -> accessKey,
-        "ACCESS-NONCE" -> nonce,
-        "ACCESS-SIGNATURE" -> sig
+      "ACCESS-KEY" -> accessKey,
+      "ACCESS-NONCE" -> nonce,
+      "ACCESS-SIGNATURE" -> sig
     )
 
   private def createNonce = (System.currentTimeMillis() / 1000).toString
@@ -38,18 +38,19 @@ case class CoincheckApi(accessKey: String, apiSecret: String) {
     hmacSHA256Encode(secretKey, url + nonce)
 
   def hmacSHA256Encode(
-      secretKey: String, message: String
+    secretKey: String,
+    message: String
   ): ZIO[Any, String, String] =
     ZIO
       .effect {
         val keySpec = new SecretKeySpec(
-            secretKey.getBytes(StandardCharsets.UTF_8),
-            encodeManner
+          secretKey.getBytes(StandardCharsets.UTF_8),
+          encodeManner
         )
         val mac = Mac.getInstance(encodeManner)
         mac.init(keySpec)
         Hex.encodeHexString(
-            mac.doFinal(message.getBytes(StandardCharsets.UTF_8))
+          mac.doFinal(message.getBytes(StandardCharsets.UTF_8))
         )
       }
       .mapError {
