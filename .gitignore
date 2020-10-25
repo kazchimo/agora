@@ -6,4 +6,5 @@
 project/target
 target
 .env
+.bsp
 
