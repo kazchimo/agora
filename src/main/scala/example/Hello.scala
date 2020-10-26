@@ -44,10 +44,10 @@ case class CoincheckApi(accessKey: String, apiSecret: String) {
   ): ZIO[Any, String, String] =
     ZIO
       .effect {
-        val keySpec = new SecretKeySpec(secretKey.getBytes(), encodeManner)
+        val keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.US_ASCII), encodeManner)
         val mac = Mac.getInstance(encodeManner)
         mac.init(keySpec)
-        Hex.encodeHexString(mac.doFinal(message.getBytes()))
+        Hex.encodeHexString(mac.doFinal(message.getBytes(StandardCharsets.US_ASCII)))
       }
       .mapError {
         case e: NoSuchAlgorithmException => s"wrong algorithm: ${e.getMessage}"
