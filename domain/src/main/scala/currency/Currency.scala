@@ -19,11 +19,10 @@ object Currency {
 
 final case class BitCoin(quantity: CurrencyQuantity) extends Currency {
   override final val tickerSymbol: CurrencyTickerSymbol = CurrencyTickerSymbol(
-    "JPY"
+    "btc"
   )
 }
 
-final case class Yen(
-  quantity: CurrencyQuantity,
-  tickerSymbol: CurrencyTickerSymbol
-) extends Currency
+final case class Yen(quantity: CurrencyQuantity) extends Currency {
+  override val tickerSymbol: CurrencyTickerSymbol = CurrencyTickerSymbol("jpy")
+}
