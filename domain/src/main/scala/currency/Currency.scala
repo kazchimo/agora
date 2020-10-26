@@ -1,6 +1,6 @@
 package domain.currency
 
-import domain.currency.Currency.{CurrencyQuantity, CurrencyTickerSymbol}
+import domain.currency.Currency.{CurQuantity, CurTickerSymbol}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
@@ -8,19 +8,19 @@ import io.estatico.newtype.macros.newtype
 import eu.timepit.refined.auto._
 
 sealed trait Currency {
-  val quantity: CurrencyQuantity
-  val tickerSymbol: CurrencyTickerSymbol
+  val quantity: CurQuantity
+  val tickerSymbol: CurTickerSymbol
 }
 
 object Currency {
-  @newtype case class CurrencyQuantity(value: Double Refined Positive)
-  @newtype case class CurrencyTickerSymbol(value: NonEmptyString)
+  @newtype case class CurQuantity(value: Double Refined Positive)
+  @newtype case class CurTickerSymbol(value: NonEmptyString)
 }
 
-final case class BitCoin(quantity: CurrencyQuantity) extends Currency {
-  override val tickerSymbol: CurrencyTickerSymbol = CurrencyTickerSymbol("btc")
+final case class BitCoin(quantity: CurQuantity) extends Currency {
+  override val tickerSymbol: CurTickerSymbol = CurTickerSymbol("btc")
 }
 
-final case class Yen(quantity: CurrencyQuantity) extends Currency {
-  override val tickerSymbol: CurrencyTickerSymbol = CurrencyTickerSymbol("jpy")
+final case class Yen(quantity: CurQuantity) extends Currency {
+  override val tickerSymbol: CurTickerSymbol = CurTickerSymbol("jpy")
 }
