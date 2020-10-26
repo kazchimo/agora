@@ -5,28 +5,16 @@ import java.security.{InvalidKeyException, NoSuchAlgorithmException}
 
 import eu.timepit.refined.auto._
 import eu.timepit.refined.types.string.NonEmptyString
-import exchange.CoinCheckExchangeConfig.{CCApiKey, CCSecretKey}
-import io.estatico.newtype.macros.newtype
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
 import sttp.client3._
 import zio.ZIO
 
-final case class CoinCheckExchangeConfig(
-  apiKey: CCApiKey,
-  secretKey: CCSecretKey
-)
-
-object CoinCheckExchangeConfig {
-  @newtype final case class CCApiKey(value: NonEmptyString)
-  @newtype final case class CCSecretKey(value: NonEmptyString)
-}
-
-final class CoinCheckExchange extends IExchange {
+final class CoinCheckExchange extends IExchange[CoinCheckExchange] {
   private val encodeManner = "hmacSHA256"
 
-  def transactions: ZIO[CoinCheckExchangeConfig, String, String] = for {
+  def transactions: ZIO[Conf, String, String] = for {
     url    <-
       ZIO.effectTotal("https://coincheck.com/api/exchange/orders/transactions")
     hs     <- headers(url)
@@ -37,7 +25,7 @@ final class CoinCheckExchange extends IExchange {
   private def headers(url: NonEmptyString) =
     for {
       nonce  <- ZIO.effectTotal(createNonce)
-      config <- ZIO.access[CoinCheckExchangeConfig].apply(identity)
+      config <- ZIO.access[Conf].apply(identity)
       sig    <- createSig(config.secretKey.value, url, nonce)
     } yield Map(
       "ACCESS-KEY"       -> config.apiKey.value.value,
