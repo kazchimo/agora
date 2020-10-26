@@ -15,9 +15,10 @@ case class CoincheckApi(accessKey: String, apiSecret: String) {
 
   private val encodeManner = "hmacSHA256"
 
-  def transactions(): ZIO[Any, String, String] =
+  def transactions(): ZIO[Console, String, String] =
     for {
       hs <- headers
+      _ <- putStrLn(hs.toString())
       request = basicRequest.get(uri"$Url").headers(hs)
       res <- ZIO.fromEither(request.send(HttpURLConnectionBackend()).body)
     } yield res
@@ -35,7 +36,7 @@ case class CoincheckApi(accessKey: String, apiSecret: String) {
   private def createNonce = (System.currentTimeMillis() / 1000).toString
 
   private def createSig(secretKey: String, url: String, nonce: String) =
-    hmacSHA256Encode(secretKey, url + nonce)
+    hmacSHA256Encode(secretKey, nonce + url)
 
   def hmacSHA256Encode(
     secretKey: String,
@@ -43,15 +44,10 @@ case class CoincheckApi(accessKey: String, apiSecret: String) {
   ): ZIO[Any, String, String] =
     ZIO
       .effect {
-        val keySpec = new SecretKeySpec(
-          secretKey.getBytes(StandardCharsets.UTF_8),
-          encodeManner
-        )
+        val keySpec = new SecretKeySpec(secretKey.getBytes(), encodeManner)
         val mac = Mac.getInstance(encodeManner)
         mac.init(keySpec)
-        Hex.encodeHexString(
-          mac.doFinal(message.getBytes(StandardCharsets.UTF_8))
-        )
+        Hex.encodeHexString(mac.doFinal(message.getBytes()))
       }
       .mapError {
         case e: NoSuchAlgorithmException => s"wrong algorithm: ${e.getMessage}"
@@ -73,6 +69,8 @@ object Main extends zio.App {
     accessKey <- AccessKey
     secKey <- SecretKey
     api = CoincheckApi(accessKey, secKey)
+    _ <- putStrLn(accessKey)
+    _ <- putStrLn(secKey)
     tra <- api.transactions()
     _ <- putStrLn(tra)
   } yield ()
