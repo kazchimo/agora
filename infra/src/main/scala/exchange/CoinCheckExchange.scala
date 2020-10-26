@@ -11,8 +11,9 @@ import org.apache.commons.codec.binary.Hex
 import sttp.client3._
 import zio.ZIO
 
-final class CoinCheckExchange extends IExchange[CoinCheckExchange] {
-  private val encodeManner = "hmacSHA256"
+final class CoinCheckExchange
+    extends IExchange[CoinCheckExchange]
+    with AuthStrategy {
 
   def transactions: ZIO[Conf, String, String] = for {
     url    <-
@@ -22,7 +23,14 @@ final class CoinCheckExchange extends IExchange[CoinCheckExchange] {
     res    <- ZIO.fromEither(request.send(HttpURLConnectionBackend()).body)
   } yield res
 
-  private def headers(url: NonEmptyString) =
+}
+
+private trait AuthStrategy { self: CoinCheckExchange =>
+  protected val encodeManner = "hmacSHA256"
+
+  protected def headers(
+    url: NonEmptyString
+  ): ZIO[Conf, String, Map[String, String]] =
     for {
       nonce  <- ZIO.effectTotal(createNonce)
       config <- ZIO.access[Conf].apply(identity)
