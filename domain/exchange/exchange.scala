@@ -1,0 +1,4 @@
+package exchange
+
+trait IExchange
+
