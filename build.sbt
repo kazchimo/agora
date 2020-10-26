@@ -39,3 +39,4 @@ lazy val infra = project
   .in(file("infra"))
   .settings(commonSettings)
   .settings(moduleName := "infra", name := "infra")
+  .dependsOn(domain)
