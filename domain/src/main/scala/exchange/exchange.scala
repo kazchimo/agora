@@ -1,4 +1,4 @@
-package src.main.exchange
+package exchange
 
 
 trait IExchange {

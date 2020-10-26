@@ -1,6 +1,6 @@
-package domain.currency
+package currency
 
-import domain.currency.Currency.{CurQuantity, CurTickerSymbol}
+import currency.Currency.{CurQuantity, CurTickerSymbol}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString

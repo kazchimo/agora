@@ -1,7 +1,7 @@
-package domain.exchange
+package exchange
 
-import domain.currency.Currency
-import domain.exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
+import currency.Currency
+import exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
