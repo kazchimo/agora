@@ -38,4 +38,4 @@ lazy val domain = project
 lazy val infra = project
   .in(file("infra"))
   .settings(commonSettings)
-  .settings(moduleName := "infra", name := "domain")
+  .settings(moduleName := "infra", name := "infra")
