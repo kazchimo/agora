@@ -7,6 +7,19 @@ ThisBuild / organizationName := "example"
 
 lazy val rootDeps = Seq(scalaTest % Test, sttp, zio, ziostreams, codec)
 
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-Xlint",
+  "-Xfatal-warnings",
+  "-language:existentials",
+  "-language:experimental.macros",
+  "-language:higherKinds",
+  "-language:implicitConversions",
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-unused"
+)
+
 lazy val root = (project in file("."))
   .settings(
     name := "agora",
