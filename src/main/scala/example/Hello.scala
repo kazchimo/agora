@@ -17,19 +17,19 @@ case class CoincheckApi(accessKey: String, apiSecret: String) {
 
   def transactions(): ZIO[Console, String, String] =
     for {
-      hs <- headers
-      _ <- putStrLn(hs.toString())
+      hs     <- headers
+      _      <- putStrLn(hs.toString())
       request = basicRequest.get(uri"$Url").headers(hs)
-      res <- ZIO.fromEither(request.send(HttpURLConnectionBackend()).body)
+      res    <- ZIO.fromEither(request.send(HttpURLConnectionBackend()).body)
     } yield res
 
   private def headers =
     for {
       nonce <- ZIO.effectTotal(createNonce)
-      sig <- createSig(apiSecret, Url, nonce)
+      sig   <- createSig(apiSecret, Url, nonce)
     } yield Map(
-      "ACCESS-KEY" -> accessKey,
-      "ACCESS-NONCE" -> nonce,
+      "ACCESS-KEY"       -> accessKey,
+      "ACCESS-NONCE"     -> nonce,
       "ACCESS-SIGNATURE" -> sig
     )
 
@@ -44,10 +44,15 @@ case class CoincheckApi(accessKey: String, apiSecret: String) {
   ): ZIO[Any, String, String] =
     ZIO
       .effect {
-        val keySpec = new SecretKeySpec(secretKey.getBytes(StandardCharsets.US_ASCII), encodeManner)
-        val mac = Mac.getInstance(encodeManner)
+        val keySpec = new SecretKeySpec(
+          secretKey.getBytes(StandardCharsets.US_ASCII),
+          encodeManner
+        )
+        val mac     = Mac.getInstance(encodeManner)
         mac.init(keySpec)
-        Hex.encodeHexString(mac.doFinal(message.getBytes(StandardCharsets.US_ASCII)))
+        Hex.encodeHexString(
+          mac.doFinal(message.getBytes(StandardCharsets.US_ASCII))
+        )
       }
       .mapError {
         case e: NoSuchAlgorithmException => s"wrong algorithm: ${e.getMessage}"
@@ -67,11 +72,11 @@ object Main extends zio.App {
 
   val app = for {
     accessKey <- AccessKey
-    secKey <- SecretKey
-    api = CoincheckApi(accessKey, secKey)
-    _ <- putStrLn(accessKey)
-    _ <- putStrLn(secKey)
-    tra <- api.transactions()
-    _ <- putStrLn(tra)
+    secKey    <- SecretKey
+    api        = CoincheckApi(accessKey, secKey)
+    _         <- putStrLn(accessKey)
+    _         <- putStrLn(secKey)
+    tra       <- api.transactions()
+    _         <- putStrLn(tra)
   } yield ()
 }
