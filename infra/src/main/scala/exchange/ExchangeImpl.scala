@@ -1,8 +1,9 @@
 package exchange
 
-import zio.ZLayer
+import zio.{Has, ZLayer}
 
 object ExchangeImpl {
-  val coinCheckExchange: ZLayer[CoinCheckExchangeConfig, Nothing, Exchange] =
-    ZLayer.fromFunction(CoinCheckExchange)
+  val coinCheckExchange
+    : ZLayer[Has[CoinCheckExchangeConfig], Nothing, Exchange] =
+    ZLayer.fromFunction(conf => CoinCheckExchange(conf.get))
 }

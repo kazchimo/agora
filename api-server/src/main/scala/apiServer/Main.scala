@@ -3,12 +3,12 @@ package apiServer
 import eu.timepit.refined._
 import eu.timepit.refined.predicates.all.NonEmpty
 import exchange.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
-import exchange.{CoinCheckExchange, CoinCheckExchangeConfig}
-import zio.{Has, ZIO}
+import exchange.{CoinCheckExchangeConfig, Exchange, ExchangeImpl}
+import zio.{ZIO, ZLayer}
 import zio.console.{Console, putStrLn}
 
 object Main extends zio.App {
-  override def run(args: List[String]) = app.provideCustomLayer(coinCheckExchangeConf).exitCode
+  override def run(args: List[String]) = app.provideCustomLayer(layer).exitCode
 
   private val AccessKey = ZIO
     .fromOption(sys.env.get("CC_ACCESS_KEY"))
@@ -27,13 +27,14 @@ object Main extends zio.App {
     CCESecretKey(refSecretKey)
   )).toLayer
 
-  val app: ZIO[Console with Has[CoinCheckExchangeConfig], String, Unit] = for {
+  val layer: ZLayer[Any, String, Exchange] = coinCheckExchangeConf >>> ExchangeImpl.coinCheckExchange
+
+  val app: ZIO[Console with Exchange, String, Unit] = for {
     accessKey <- AccessKey
     secKey    <- SecretKey
-    api        = CoinCheckExchange()
     _         <- putStrLn(accessKey)
     _         <- putStrLn(secKey)
-    tra       <- api.transactions
+    tra       <- Exchange.transactions
     _         <- putStrLn(tra)
   } yield ()
 }
