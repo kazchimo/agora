@@ -27,7 +27,7 @@ lazy val commonSettings = Seq(
 
 lazy val root = project
   .in(file("."))
-  .aggregate(domain)
+  .aggregate(domain, infra, apiServer)
   .settings(name := "agora", commonSettings)
 
 lazy val domain = project
