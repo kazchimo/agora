@@ -40,3 +40,9 @@ lazy val infra = project
   .settings(commonSettings)
   .settings(moduleName := "infra", name := "infra")
   .dependsOn(domain)
+
+lazy val apiServer = project
+  .in(file("api-server"))
+  .settings(commonSettings)
+  .settings(moduleName := "apiServer", name := "apiServer")
+  .dependsOn(domain, infra)
