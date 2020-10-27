@@ -7,8 +7,8 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
 import sttp.client3._
+import zio.ZIO
 import zio.console._
-import zio.{ExitCode, URIO, ZIO}
 
 case class CoincheckApi(accessKey: String, apiSecret: String) {
   private val Url = "https://coincheck.com/api/exchange/orders/transactions"

@@ -4,36 +4,52 @@ import java.nio.charset.StandardCharsets
 import java.security.{InvalidKeyException, NoSuchAlgorithmException}
 
 import eu.timepit.refined.auto._
+import eu.timepit.refined.collection.NonEmpty
+import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
+import exchange.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
+import io.estatico.newtype.macros.newtype
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
 import sttp.client3._
-import zio.ZIO
+import zio.{Has, ZIO}
+
+final case class CoinCheckExchangeConfig(
+  apiKey: CCEApiKey,
+  secretKey: CCESecretKey
+) extends ExchangeConfig[CoinCheckExchange]
+
+object CoinCheckExchangeConfig {
+  @newtype final case class CCEApiKey(value: NonEmptyString)
+  @newtype final case class CCESecretKey(value: NonEmptyString)
+}
 
 final case class CoinCheckExchange()
     extends IExchange[CoinCheckExchange]
     with AuthStrategy {
+  override type Conf = CoinCheckExchangeConfig
 
-  def transactions: ZIO[Conf, String, String] = for {
+  def transactions: ZIO[Has[Conf], String, String] = for {
     url    <-
       ZIO.effectTotal("https://coincheck.com/api/exchange/orders/transactions")
-    hs     <- headers(url)
+    refUrl <- ZIO.fromEither(refineV[NonEmpty](url))
+    hs     <- headers(refUrl)
     request = basicRequest.get(uri"$url").headers(hs)
     res    <- ZIO.fromEither(request.send(HttpURLConnectionBackend()).body)
   } yield res
 
 }
 
-private trait AuthStrategy { self: CoinCheckExchange =>
+private[exchange] trait AuthStrategy { self: CoinCheckExchange =>
   protected val encodeManner = "hmacSHA256"
 
   protected def headers(
     url: NonEmptyString
-  ): ZIO[Conf, String, Map[String, String]] =
+  ): ZIO[Has[Conf], String, Map[String, String]] =
     for {
       nonce  <- ZIO.effectTotal(createNonce)
-      config <- ZIO.access[Conf].apply(identity)
+      config <- ZIO.access[Has[Conf]](_.get)
       sig    <- createSig(config.secretKey.value, url, nonce)
     } yield Map(
       "ACCESS-KEY"       -> config.apiKey.value.value,
