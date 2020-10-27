@@ -26,7 +26,7 @@ object Main extends zio.App {
     coinCheckExchangeConf >>> ExchangeImpl.coinCheckExchange
 
   val app: ZIO[Console with Exchange, String, Unit] = for {
-    tra <- Exchange.transactions
+    tra <- Exchange.transactions.mapError(_.getMessage)
     _   <- putStrLn(tra)
   } yield ()
 }
