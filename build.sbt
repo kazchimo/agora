@@ -36,7 +36,8 @@ lazy val commonSettings = Seq(
     Wart.Any,
     Wart.ImplicitConversion,
     Wart.ImplicitParameter,
-    Wart.Nothing
+    Wart.Nothing,
+    Wart.Overloading
   )
 )
 

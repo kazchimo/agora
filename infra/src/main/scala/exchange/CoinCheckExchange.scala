@@ -22,7 +22,16 @@ final case class CoinCheckExchangeConfig(
 
 object CoinCheckExchangeConfig {
   @newtype final case class CCEApiKey(value: NonEmptyString)
+  object CCEApiKey {
+    def apply(value: String): IO[String, CCEApiKey] =
+      ZIO.fromEither(refineV[NonEmpty](value)).map(CCEApiKey(_))
+  }
+
   @newtype final case class CCESecretKey(value: NonEmptyString)
+  object CCESecretKey {
+    def apply(value: String): IO[String, CCESecretKey] =
+      ZIO.fromEither(refineV[NonEmpty](value)).map(CCESecretKey(_))
+  }
 }
 
 final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
