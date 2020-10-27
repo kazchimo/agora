@@ -14,7 +14,8 @@ lazy val rootDeps =
     codec,
     newtype,
     refined,
-    zioMacros
+    zioMacros,
+    sttpZio
   )
 
 lazy val commonSettings = Seq(

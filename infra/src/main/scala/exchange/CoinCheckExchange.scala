@@ -13,6 +13,7 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
 import sttp.client3._
+import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio.{IO, ZIO}
 
 final case class CoinCheckExchangeConfig(
@@ -42,9 +43,15 @@ final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
       ZIO.effectTotal("https://coincheck.com/api/exchange/orders/transactions")
     refUrl <- ZIO.fromEither(refineV[NonEmpty](url))
     hs     <- headers(refUrl)
-    request = basicRequest.get(uri"$url").headers(hs)
-    res    <- ZIO.fromEither(request.send(HttpURLConnectionBackend()).body)
-  } yield res
+    res    <- AsyncHttpClientZioBackend.managed().mapError(_.getMessage).use { backend =>
+                basicRequest
+                  .get(uri"$url")
+                  .headers(hs)
+                  .send(backend)
+                  .mapError(_.getMessage)
+              }
+    ress   <- ZIO.fromEither(res.body)
+  } yield ress
 }
 
 private[exchange] trait AuthStrategy { self: CoinCheckExchange =>
