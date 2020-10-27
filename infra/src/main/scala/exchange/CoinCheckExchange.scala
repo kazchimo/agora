@@ -7,7 +7,7 @@ import eu.timepit.refined.auto._
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
-import exchange.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
+import CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
 import io.estatico.newtype.macros.newtype
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
