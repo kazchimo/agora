@@ -4,8 +4,8 @@ import eu.timepit.refined._
 import eu.timepit.refined.predicates.all.NonEmpty
 import exchange.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
 import exchange.{CoinCheckExchange, CoinCheckExchangeConfig}
-import zio.ZIO
-import zio.console.putStrLn
+import zio.{Has, ZIO}
+import zio.console.{Console, putStrLn}
 
 object Main extends zio.App {
   override def run(args: List[String]) = app.provideCustomLayer(coinCheckExchangeConf).exitCode
@@ -27,7 +27,7 @@ object Main extends zio.App {
     CCESecretKey(refSecretKey)
   )).toLayer
 
-  val app = for {
+  val app: ZIO[Console with Has[CoinCheckExchangeConfig], String, Unit] = for {
     accessKey <- AccessKey
     secKey    <- SecretKey
     api        = CoinCheckExchange()

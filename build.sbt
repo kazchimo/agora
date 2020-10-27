@@ -22,7 +22,13 @@ lazy val commonSettings = Seq(
     "-Ywarn-unused",
     "-Ymacro-annotations"
   ),
-  libraryDependencies ++= rootDeps
+  libraryDependencies ++= rootDeps,
+  wartremoverErrors.in(Compile, compile) ++= Warts.allBut(
+    Wart.Any,
+    Wart.ImplicitConversion,
+    Wart.ImplicitParameter,
+    Wart.Nothing
+  )
 )
 
 lazy val root = project
