@@ -1,8 +1,9 @@
 package apiServer
 
-import exchange.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
-import exchange.{CoinCheckExchangeConfig, Exchange, ExchangeImpl}
-import zio.console.{putStrLn, Console}
+import exchange.coincheck.CoinCheckExchangeConfig
+import exchange.coincheck.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
+import exchange.{Exchange, ExchangeImpl}
+import zio.console.{Console, putStrLn}
 import zio.{ZIO, ZLayer}
 
 object Main extends zio.App {

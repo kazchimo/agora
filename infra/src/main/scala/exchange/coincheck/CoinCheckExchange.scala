@@ -1,4 +1,4 @@
-package exchange
+package exchange.coincheck
 
 import java.nio.charset.StandardCharsets
 
@@ -6,46 +6,31 @@ import eu.timepit.refined.auto._
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
-import exchange.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
+import exchange.Exchange
 import infra.InfraError
-import io.estatico.newtype.macros.newtype
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
+import sttp.client3.circe._
+import io.circe.generic.auto._
 import zio.{IO, Task, ZIO}
-
-final case class CoinCheckExchangeConfig(
-  apiKey: CCEApiKey,
-  secretKey: CCESecretKey
-)
-
-object CoinCheckExchangeConfig {
-  @newtype final case class CCEApiKey(value: NonEmptyString)
-  object CCEApiKey {
-    def apply(value: String): IO[String, CCEApiKey] =
-      ZIO.fromEither(refineV[NonEmpty](value)).map(CCEApiKey(_))
-  }
-
-  @newtype final case class CCESecretKey(value: NonEmptyString)
-  object CCESecretKey {
-    def apply(value: String): IO[String, CCESecretKey] =
-      ZIO.fromEither(refineV[NonEmpty](value)).map(CCESecretKey(_))
-  }
-}
 
 final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
     extends Exchange.Service
     with AuthStrategy {
-  def transactions: IO[Throwable, String] = for {
+  def transactions: IO[Throwable, Seq[TransactionsResponse]] = for {
     url    <-
       ZIO.effectTotal("https://coincheck.com/api/exchange/orders/transactions")
     refUrl <- ZIO.fromEither(refineV[NonEmpty](url)).mapError(InfraError)
     hs     <- headers(refUrl)
-    req     = basicRequest.get(uri"$url").headers(hs)
+    req     = basicRequest
+                .get(uri"$url")
+                .headers(hs)
+                .response(asJson[Seq[TransactionsResponse]])
     res    <- AsyncHttpClientZioBackend.managed().use(req.send(_))
-    ress   <- ZIO.fromEither(res.body).mapError(InfraError)
+    ress   <- ZIO.fromEither(res.body)
   } yield ress
 }
 

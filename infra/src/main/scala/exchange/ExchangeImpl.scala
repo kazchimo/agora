@@ -1,5 +1,6 @@
 package exchange
 
+import exchange.coincheck.{CoinCheckExchange, CoinCheckExchangeConfig}
 import zio.{Has, ZLayer}
 
 object ExchangeImpl {
