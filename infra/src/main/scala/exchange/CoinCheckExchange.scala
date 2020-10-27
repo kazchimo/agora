@@ -43,12 +43,8 @@ final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
       ZIO.effectTotal("https://coincheck.com/api/exchange/orders/transactions")
     refUrl <- ZIO.fromEither(refineV[NonEmpty](url)).mapError(InfraError)
     hs     <- headers(refUrl)
-    res    <- AsyncHttpClientZioBackend.managed().use {
-                basicRequest
-                  .get(uri"$url")
-                  .headers(hs)
-                  .send(_)
-              }
+    req     = basicRequest.get(uri"$url").headers(hs)
+    res    <- AsyncHttpClientZioBackend.managed().use(req.send(_))
     ress   <- ZIO.fromEither(res.body).mapError(InfraError)
   } yield ress
 }
