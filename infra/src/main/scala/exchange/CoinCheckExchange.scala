@@ -11,7 +11,7 @@ import org.apache.commons.codec.binary.Hex
 import sttp.client3._
 import zio.ZIO
 
-final class CoinCheckExchange
+final case class CoinCheckExchange()
     extends IExchange[CoinCheckExchange]
     with AuthStrategy {
 

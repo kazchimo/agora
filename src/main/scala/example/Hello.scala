@@ -60,23 +60,3 @@ case class CoincheckApi(accessKey: String, apiSecret: String) {
       }
 }
 
-object Main extends zio.App {
-  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] = app.exitCode
-
-  private val AccessKey = ZIO
-    .fromOption(sys.env.get("CC_ACCESS_KEY"))
-    .mapError(_ => "CC_ACCESS_KEY not found")
-  private val SecretKey = ZIO
-    .fromOption(sys.env.get("CC_SECRET_KEY"))
-    .mapError(_ => "CC_SECRET_KEY not found")
-
-  val app = for {
-    accessKey <- AccessKey
-    secKey    <- SecretKey
-    api        = CoincheckApi(accessKey, secKey)
-    _         <- putStrLn(accessKey)
-    _         <- putStrLn(secKey)
-    tra       <- api.transactions()
-    _         <- putStrLn(tra)
-  } yield ()
-}
