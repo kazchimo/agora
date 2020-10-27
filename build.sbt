@@ -5,8 +5,17 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "com.example"
 ThisBuild / organizationName := "example"
 
-lazy val rootDeps       =
-  Seq(scalaTest % Test, sttp, zio, ziostreams, codec, newtype, refined)
+lazy val rootDeps =
+  Seq(
+    scalaTest % Test,
+    sttp,
+    zio,
+    ziostreams,
+    codec,
+    newtype,
+    refined,
+    zioMacros
+  )
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
