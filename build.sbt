@@ -15,7 +15,8 @@ lazy val rootDeps =
     newtype,
     refined,
     zioMacros,
-    sttpZio
+    sttpZio,
+    sttpCirce
   )
 
 lazy val commonSettings = Seq(
