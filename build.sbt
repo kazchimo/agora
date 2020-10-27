@@ -17,7 +17,7 @@ lazy val rootDeps =
     zioMacros,
     sttpZio,
     sttpCirce
-  )
+  ) ++ circeDeps
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(

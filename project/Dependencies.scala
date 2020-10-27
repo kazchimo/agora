@@ -2,9 +2,17 @@ import sbt._
 
 object Dependencies {
   object Versions {
-    lazy val zio  = "1.0.3"
-    lazy val sttp = "3.0.0-RC7"
+    val zio   = "1.0.3"
+    val sttp  = "3.0.0-RC7"
+    val circe = "0.12.3"
+
   }
+
+  val circeDeps      = Seq(
+    "io.circe" %% "circe-core",
+    "io.circe" %% "circe-generic",
+    "io.circe" %% "circe-parser"
+  ).map(_ % Versions.circe)
 
   lazy val scalaTest = "org.scalatest"                 %% "scalatest" % "3.2.2"
   lazy val sttp      = "com.softwaremill.sttp.client3" %% "core"      % Versions.sttp
