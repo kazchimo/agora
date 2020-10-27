@@ -13,7 +13,7 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
 import sttp.client3._
-import zio.{Has, ZIO}
+import zio.{Has, IO, ZIO}
 
 final case class CoinCheckExchangeConfig(
   apiKey: CCEApiKey,
@@ -25,12 +25,10 @@ object CoinCheckExchangeConfig {
   @newtype final case class CCESecretKey(value: NonEmptyString)
 }
 
-final case class CoinCheckExchange()
-    extends IExchange[CoinCheckExchange]
+final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
+    extends Exchange.Service
     with AuthStrategy {
-  override type Conf = CoinCheckExchangeConfig
-
-  def transactions: ZIO[Has[Conf], String, String] = for {
+  def transactions: IO[String, String] = for {
     url    <-
       ZIO.effectTotal("https://coincheck.com/api/exchange/orders/transactions")
     refUrl <- ZIO.fromEither(refineV[NonEmpty](url))
@@ -38,21 +36,17 @@ final case class CoinCheckExchange()
     request = basicRequest.get(uri"$url").headers(hs)
     res    <- ZIO.fromEither(request.send(HttpURLConnectionBackend()).body)
   } yield res
-
 }
 
 private[exchange] trait AuthStrategy { self: CoinCheckExchange =>
   protected val encodeManner = "hmacSHA256"
 
-  protected def headers(
-    url: NonEmptyString
-  ): ZIO[Has[Conf], String, Map[String, String]] =
+  protected def headers(url: NonEmptyString): IO[String, Map[String, String]] =
     for {
-      nonce  <- ZIO.effectTotal(createNonce)
-      config <- ZIO.access[Has[Conf]](_.get)
-      sig    <- createSig(config.secretKey.value, url, nonce)
+      nonce <- ZIO.effectTotal(createNonce)
+      sig   <- createSig(conf.secretKey.value, url, nonce)
     } yield Map(
-      "ACCESS-KEY"       -> config.apiKey.value.value,
+      "ACCESS-KEY"       -> conf.apiKey.value.value,
       "ACCESS-NONCE"     -> nonce,
       "ACCESS-SIGNATURE" -> sig
     )
@@ -65,7 +59,7 @@ private[exchange] trait AuthStrategy { self: CoinCheckExchange =>
   private def hmacSHA256Encode(
     secretKey: String,
     message: String
-  ): ZIO[Any, String, String] =
+  ): IO[String, String] =
     ZIO
       .effect {
         val keySpec = new SecretKeySpec(
