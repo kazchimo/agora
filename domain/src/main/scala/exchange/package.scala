@@ -5,10 +5,10 @@ package object exchange {
 
   object Exchange {
     trait Service {
-      def transactions: IO[Throwable, String]
+      def transactions: IO[Throwable, Seq[Transaction]]
     }
 
-    def transactions: ZIO[Exchange, Throwable, String] =
+    def transactions: ZIO[Exchange, Throwable, Seq[Transaction]] =
       ZIO.accessM(_.get.transactions)
   }
 
