@@ -2,12 +2,11 @@ package domain.exchange
 
 import domain.DomainError
 import domain.currency.Currency
+import domain.exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
-import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
-import Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import io.estatico.newtype.macros.newtype
 import lib.refined.refineVZE
 import zio.{IO, ZIO}
