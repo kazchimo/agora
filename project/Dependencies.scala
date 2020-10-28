@@ -4,14 +4,15 @@ object Dependencies {
   object Versions {
     val zio   = "1.0.3"
     val sttp  = "3.0.0-RC7"
-    val circe = "0.12.3"
+    val circe = "0.13.0"
 
   }
 
   val circeDeps      = Seq(
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",
-    "io.circe" %% "circe-parser"
+    "io.circe" %% "circe-parser",
+    "io.circe" %% "circe-generic-extras"
   ).map(_ % Versions.circe)
 
   lazy val scalaTest = "org.scalatest"                 %% "scalatest" % "3.2.2"
