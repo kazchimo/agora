@@ -1,6 +1,6 @@
 package infra.exchange.coincheck
 
-import domain.currency.Currency
+import domain.currency.{Currency, TickerSymbol}
 import domain.exchange.Transaction
 import domain.exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import io.scalaland.chimney.Transformer
@@ -30,15 +30,24 @@ object TransactionResponse {
       id         <- TraId(res.id)
       side       <- TraSide(res.side)
       currencies  = res.pair.split("_")
-      sell       <- ZIO.effect(if (side.isBuy) currencies.head else currencies(1))
-      buy        <- ZIO.effect(if (side.isBuy) currencies(1) else currencies.head)
-      sellQua    <- ZIO.effect(res.funds(sell).toDouble)
-      buyQua     <- ZIO.effect(res.funds(buy).toDouble)
+      sellTicker <- TickerSymbol(
+                      if (side.isBuy) currencies.head else currencies(1)
+                    )
+      buyTicker  <- TickerSymbol(
+                      if (side.isBuy) currencies(1) else currencies.head
+                    )
+      sellQua    <- ZIO.effect(res.funds(sellTicker.value).toDouble)
+      buyQua     <- ZIO.effect(res.funds(buyTicker.value).toDouble)
       createdAt  <- TraCreatedAt(res.created_at)
       doubleRate <- ZIO.effect(res.rate.toDouble)
       rate       <- TraRate(doubleRate)
-      sellCur    <- Currency(sellQua, buy)
-      buyCur     <- Currency(buyQua, sell)
-    } yield Transaction(id, sellCur, buyCur, side, createdAt, rate)
+    } yield Transaction(
+      id,
+      Currency(sellTicker, sellQua),
+      Currency(buyTicker, buyQua),
+      side,
+      createdAt,
+      rate
+    )
   }
 }
