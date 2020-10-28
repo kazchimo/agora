@@ -46,6 +46,11 @@ lazy val commonSettings = Seq(
   )
 )
 
+addCommandAlias("root", ";project root")
+addCommandAlias("api", ";project apiServer")
+addCommandAlias("domain", ";project domain")
+addCommandAlias("infra", ";project infra")
+
 lazy val root = project
   .in(file("."))
   .aggregate(domain, infra, apiServer, lib)
