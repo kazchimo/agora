@@ -16,7 +16,7 @@ object Currency {
     tickerSymbol match {
       case "btc" => ZIO.succeed(BitCoin(CurQuantity(quantity)))
       case "jpy" => ZIO.succeed(Yen(CurQuantity(quantity)))
-      case _     => ZIO.fail(DomainError(s"invalid ticker symbol: $quantity"))
+      case _     => ZIO.fail(DomainError(s"invalid ticker symbol: $tickerSymbol"))
     }
 }
 
