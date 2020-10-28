@@ -1,7 +1,8 @@
 package apiServer
 
+import domain.exchange.Exchange
+import infra.exchange.coincheck.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
 import infra.exchange.{ExchangeImpl, coincheck}
-import infra.exchange.coincheck.CoinCheckExchangeConfig
 import zio.console.{Console, putStrLn}
 import zio.{ZIO, ZLayer}
 

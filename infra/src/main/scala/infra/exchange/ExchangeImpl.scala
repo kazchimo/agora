@@ -1,6 +1,6 @@
 package infra.exchange
 
-import exchange.coincheck.CoinCheckExchange
+import domain.exchange.Exchange
 import infra.exchange.coincheck.{CoinCheckExchange, CoinCheckExchangeConfig}
 import zio.{Has, ZLayer}
 
