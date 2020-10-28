@@ -23,26 +23,31 @@ final case class Transaction(
 object Transaction {
   @newtype case class TraId(value: Long Refined Positive)
   object TraId {
-    def apply(v: Long): IO[String, TraId] =
-      ZIO.fromEither(refineV[Positive](v)).map(TraId(_))
+    def apply(v: Long): IO[Throwable, TraId] =
+      ZIO.effect(refineV[Positive].unsafeFrom(v)).map(TraId(_))
   }
 
   @newtype case class TraCreatedAt(
     value: NonEmptyString
   ) // TODO: validate with iso date regex
   object TraCreatedAt {
-    def apply(v: String): IO[String, TraCreatedAt] =
-      ZIO.fromEither(refineV[NonEmpty](v)).map(TraCreatedAt(_))
+    def apply(v: String): IO[Throwable, TraCreatedAt] =
+      ZIO.effect(refineV[NonEmpty].unsafeFrom(v)).map(TraCreatedAt(_))
   }
 
   @newtype case class TraRate(value: Double Refined Positive)
   object TraRate {
-    def apply(v: Double): IO[String, TraRate] =
-      ZIO.fromEither(refineV[Positive](v)).map(TraRate(_))
+    def apply(v: Double): IO[Throwable, TraRate] =
+      ZIO.effect(refineV[Positive].unsafeFrom(v)).map(TraRate(_))
   }
 
-  sealed trait TraSide { val v: String }
-  object TraSide       {
+  sealed trait TraSide {
+    val v: String
+    val isBuy: Boolean
+    val isSell: Boolean
+  }
+
+  object TraSide {
     def apply(v: String): IO[DomainError, TraSide] = v match {
       case Buy.v  => ZIO.succeed(Buy)
       case Sell.v => ZIO.succeed(Sell)
@@ -54,9 +59,14 @@ object Transaction {
   }
 
   case object Buy  extends TraSide {
-    override val v: String = "buy"
+    override val v: String       = "buy"
+    override val isBuy: Boolean  = true
+    override val isSell: Boolean = false
   }
+
   case object Sell extends TraSide {
-    override val v: String = "sell"
+    override val v: String       = "sell"
+    override val isBuy: Boolean  = false
+    override val isSell: Boolean = true
   }
 }
