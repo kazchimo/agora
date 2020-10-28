@@ -48,22 +48,28 @@ lazy val commonSettings = Seq(
 
 lazy val root = project
   .in(file("."))
-  .aggregate(domain, infra, apiServer)
+  .aggregate(domain, infra, apiServer, lib)
   .settings(name := "agora", commonSettings)
 
 lazy val domain = project
   .in(file("domain"))
   .settings(commonSettings)
   .settings(moduleName := "domain", name := "domain")
+  .dependsOn(lib)
 
 lazy val infra = project
   .in(file("infra"))
   .settings(commonSettings)
   .settings(moduleName := "infra", name := "infra")
-  .dependsOn(domain)
+  .dependsOn(domain, lib)
 
 lazy val apiServer = project
   .in(file("api-server"))
   .settings(commonSettings)
   .settings(moduleName := "apiServer", name := "apiServer")
-  .dependsOn(domain, infra)
+  .dependsOn(domain, infra, lib)
+
+lazy val lib = project
+  .in(file("lib"))
+  .settings(commonSettings)
+  .settings(moduleName := "lib", name := "lib")
