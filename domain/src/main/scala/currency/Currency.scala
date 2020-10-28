@@ -1,26 +1,30 @@
 package currency
 
-import currency.Currency.{CurQuantity, CurTickerSymbol}
+import currency.Currency.CurQuantity
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
-import eu.timepit.refined.types.string.NonEmptyString
+import eu.timepit.refined.refineV
 import io.estatico.newtype.macros.newtype
-import eu.timepit.refined.auto._
+import zio.{IO, ZIO}
 
 sealed trait Currency {
   val quantity: CurQuantity
-  val tickerSymbol: CurTickerSymbol
 }
 
 object Currency {
   @newtype case class CurQuantity(value: Double Refined Positive)
-  @newtype case class CurTickerSymbol(value: NonEmptyString)
+  object CurQuantity {
+    def apply(v: Double): IO[String, CurQuantity] =
+      ZIO.fromEither(refineV[Positive](v).map(CurQuantity(_)))
+  }
+
+  def apply(quantity: Double, tickerSymbol: String): IO[String, Currency] =
+    tickerSymbol match {
+      case "btc" => CurQuantity(quantity).map(BitCoin)
+      case "jpy" => CurQuantity(quantity).map(Yen)
+      case _     => ZIO.fail(s"invalid ticker symbol: $quantity")
+    }
 }
 
-final case class BitCoin(quantity: CurQuantity) extends Currency {
-  override val tickerSymbol: CurTickerSymbol = CurTickerSymbol("btc")
-}
-
-final case class Yen(quantity: CurQuantity) extends Currency {
-  override val tickerSymbol: CurTickerSymbol = CurTickerSymbol("jpy")
-}
+final case class BitCoin(quantity: CurQuantity) extends Currency
+final case class Yen(quantity: CurQuantity)     extends Currency
