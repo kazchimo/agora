@@ -26,4 +26,5 @@ object Dependencies {
   lazy val codec      = "commons-codec" % "commons-codec" % "1.15"
   lazy val newtype    = "io.estatico"  %% "newtype"       % "0.4.4"
   lazy val refined    = "eu.timepit"   %% "refined"       % "0.9.17"
+  lazy val chimney    = "io.scalaland" %% "chimney"       % "0.6.0"
 }
