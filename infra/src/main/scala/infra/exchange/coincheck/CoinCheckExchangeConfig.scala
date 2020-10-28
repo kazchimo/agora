@@ -1,9 +1,9 @@
-package exchange.coincheck
+package infra.exchange.coincheck
 
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
-import exchange.coincheck.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
+import CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
 import io.estatico.newtype.macros.newtype
 import zio.{IO, ZIO}
 

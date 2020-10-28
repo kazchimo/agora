@@ -1,8 +1,7 @@
 package apiServer
 
-import exchange.coincheck.CoinCheckExchangeConfig
-import exchange.coincheck.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
-import exchange.{Exchange, ExchangeImpl}
+import infra.exchange.{ExchangeImpl, coincheck}
+import infra.exchange.coincheck.CoinCheckExchangeConfig
 import zio.console.{Console, putStrLn}
 import zio.{ZIO, ZLayer}
 
@@ -21,7 +20,7 @@ object Main extends zio.App {
   private val coinCheckExchangeConf = (for {
     apiKey    <- AccessKey
     secretKey <- SecretKey
-  } yield CoinCheckExchangeConfig(apiKey, secretKey)).toLayer
+  } yield coincheck.CoinCheckExchangeConfig(apiKey, secretKey)).toLayer
 
   val layer: ZLayer[Any, String, Exchange] =
     coinCheckExchangeConf >>> ExchangeImpl.coinCheckExchange

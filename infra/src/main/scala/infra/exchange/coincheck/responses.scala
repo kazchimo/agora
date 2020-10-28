@@ -1,4 +1,4 @@
-package exchange.coincheck
+package infra.exchange.coincheck
 
 import domain.currency.Currency
 import exchange.Transaction
