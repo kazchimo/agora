@@ -18,7 +18,8 @@ lazy val rootDeps =
     sttpZio,
     sttpCirce,
     chimney,
-    cats
+    cats,
+    zioCats
   ) ++ circeDeps
 
 lazy val commonSettings = Seq(

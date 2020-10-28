@@ -20,12 +20,13 @@ object Dependencies {
     "com.softwaremill.sttp.client3" %% "circe" % Versions.sttp
   lazy val sttpZio =
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % Versions.sttp
-  lazy val zio        = "dev.zio"       %% "zio"           % Versions.zio
-  lazy val ziostreams = "dev.zio"       %% "zio-streams"   % Versions.zio
-  lazy val zioMacros  = "dev.zio"       %% "zio-macros"    % Versions.zio
-  lazy val codec      = "commons-codec"  % "commons-codec" % "1.15"
-  lazy val newtype    = "io.estatico"   %% "newtype"       % "0.4.4"
-  lazy val refined    = "eu.timepit"    %% "refined"       % "0.9.17"
-  lazy val chimney    = "io.scalaland"  %% "chimney"       % "0.6.0"
-  lazy val cats       = "org.typelevel" %% "cats-core"     % "2.2.0"
+  lazy val zio        = "dev.zio"       %% "zio"              % Versions.zio
+  lazy val ziostreams = "dev.zio"       %% "zio-streams"      % Versions.zio
+  lazy val zioMacros  = "dev.zio"       %% "zio-macros"       % Versions.zio
+  lazy val zioCats    = "dev.zio"       %% "zio-interop-cats" % "2.2.0.1"
+  lazy val codec      = "commons-codec"  % "commons-codec"    % "1.15"
+  lazy val newtype    = "io.estatico"   %% "newtype"          % "0.4.4"
+  lazy val refined    = "eu.timepit"    %% "refined"          % "0.9.17"
+  lazy val chimney    = "io.scalaland"  %% "chimney"          % "0.6.0"
+  lazy val cats       = "org.typelevel" %% "cats-core"        % "2.2.0"
 }
