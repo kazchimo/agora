@@ -1,16 +1,15 @@
 package exchange
 
 import currency.Currency
-import exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
+import domain.DomainError
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
+import exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import io.estatico.newtype.macros.newtype
 import zio.{IO, ZIO}
-import cats.syntax.either._
-import domain.DomainError
 
 final case class Transaction(
   id: TraId,
