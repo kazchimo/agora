@@ -9,6 +9,8 @@ import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
 import zio.{IO, ZIO}
+import cats.syntax.either._
+import domain.DomainError
 
 final case class Transaction(
   id: TraId,
@@ -40,7 +42,22 @@ object Transaction {
       ZIO.fromEither(refineV[Positive](v)).map(TraRate(_))
   }
 
-  sealed trait TraSide
-  case object Buy  extends TraSide
-  case object Sell extends TraSide
+  sealed trait TraSide { val v: String }
+  object TraSide       {
+    def apply(v: String): IO[DomainError, TraSide] = v match {
+      case Buy.v  => ZIO.succeed(Buy)
+      case Sell.v => ZIO.succeed(Sell)
+      case _      =>
+        ZIO.fail(
+          DomainError(s"failed to parse string as Transaction string: $v")
+        )
+    }
+  }
+
+  case object Buy  extends TraSide {
+    override val v: String = "buy"
+  }
+  case object Sell extends TraSide {
+    override val v: String = "sell"
+  }
 }
