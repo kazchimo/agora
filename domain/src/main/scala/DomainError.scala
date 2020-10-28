@@ -1,3 +1,3 @@
 package domain
 
-case class DomainError(message: String) extends Exception
+final case class DomainError(message: String) extends Exception
