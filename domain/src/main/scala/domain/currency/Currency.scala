@@ -1,6 +1,6 @@
-package currency
+package domain.currency
 
-import currency.Currency.CurQuantity
+import Currency.CurQuantity
 import domain.DomainError
 import io.estatico.newtype.macros.newtype
 import zio.{Task, ZIO}

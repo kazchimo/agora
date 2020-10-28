@@ -1,6 +1,6 @@
 package exchange.coincheck
 
-import currency.Currency
+import domain.currency.Currency
 import exchange.Transaction
 import exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import io.scalaland.chimney.Transformer

@@ -1,3 +1,5 @@
+package domain
+
 import zio.{Has, IO, ZIO}
 
 package object exchange {

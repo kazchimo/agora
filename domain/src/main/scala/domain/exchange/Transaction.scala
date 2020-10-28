@@ -1,13 +1,13 @@
-package exchange
+package domain.exchange
 
-import currency.Currency
 import domain.DomainError
+import domain.currency.Currency
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
-import exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
+import Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import io.estatico.newtype.macros.newtype
 import zio.{IO, ZIO}
 
