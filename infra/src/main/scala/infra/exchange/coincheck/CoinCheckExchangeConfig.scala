@@ -1,11 +1,11 @@
 package infra.exchange.coincheck
 
 import eu.timepit.refined.collection.NonEmpty
-import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
-import CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
+import infra.exchange.coincheck.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
 import io.estatico.newtype.macros.newtype
-import zio.{IO, ZIO}
+import lib.refined._
+import zio.IO
 
 final case class CoinCheckExchangeConfig(
   apiKey: CCEApiKey,
@@ -16,12 +16,12 @@ object CoinCheckExchangeConfig {
   @newtype final case class CCEApiKey(value: NonEmptyString)
   object CCEApiKey {
     def apply(value: String): IO[String, CCEApiKey] =
-      ZIO.fromEither(refineV[NonEmpty](value)).map(CCEApiKey(_))
+      refineVZ[NonEmpty, String](value).map(CCEApiKey(_))
   }
 
   @newtype final case class CCESecretKey(value: NonEmptyString)
   object CCESecretKey {
     def apply(value: String): IO[String, CCESecretKey] =
-      ZIO.fromEither(refineV[NonEmpty](value)).map(CCESecretKey(_))
+      refineVZ[NonEmpty, String](value).map(CCESecretKey(_))
   }
 }

@@ -9,6 +9,7 @@ import eu.timepit.refined.refineV
 import eu.timepit.refined.types.string.NonEmptyString
 import Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import io.estatico.newtype.macros.newtype
+import lib.refined.refineVZE
 import zio.{IO, ZIO}
 
 final case class Transaction(
@@ -24,7 +25,7 @@ object Transaction {
   @newtype case class TraId(value: Long Refined Positive)
   object TraId {
     def apply(v: Long): IO[Throwable, TraId] =
-      ZIO.effect(refineV[Positive].unsafeFrom(v)).map(TraId(_))
+      refineVZE[Positive, Long](v).map(TraId(_))
   }
 
   @newtype case class TraCreatedAt(
@@ -32,13 +33,13 @@ object Transaction {
   ) // TODO: validate with iso date regex
   object TraCreatedAt {
     def apply(v: String): IO[Throwable, TraCreatedAt] =
-      ZIO.effect(refineV[NonEmpty].unsafeFrom(v)).map(TraCreatedAt(_))
+      refineVZE[NonEmpty, String](v).map(TraCreatedAt(_))
   }
 
   @newtype case class TraRate(value: Double Refined Positive)
   object TraRate {
     def apply(v: Double): IO[Throwable, TraRate] =
-      ZIO.effect(refineV[Positive].unsafeFrom(v)).map(TraRate(_))
+      refineVZE[Positive, Double](v).map(TraRate(_))
   }
 
   sealed trait TraSide {
@@ -58,7 +59,7 @@ object Transaction {
     }
   }
 
-  case object Buy  extends TraSide {
+  case object Buy extends TraSide {
     override val v: String       = "buy"
     override val isBuy: Boolean  = true
     override val isSell: Boolean = false
