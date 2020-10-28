@@ -7,20 +7,25 @@ import io.scalaland.chimney.Transformer
 import zio.{Task, ZIO}
 
 final case class TransactionsResponse(
+  success: Boolean,
+  transactions: List[TransactionResponse]
+)
+
+final case class TransactionResponse(
   id: Long,
-  orderId: Long,
-  createdAt: String,
+  order_id: Long,
+  created_at: String,
   funds: Map[String, String],
   pair: String,
   rate: String,
-  feeCurrency: String,
+  fee_currency: Option[String],
   liquidity: String,
   side: String
 )
 
-object TransactionsResponse {
+object TransactionResponse {
   implicit val toTransactionTransformer
-    : Transformer[TransactionsResponse, Task[Transaction]] = res => {
+    : Transformer[TransactionResponse, Task[Transaction]] = res => {
     for {
       id         <- TraId(res.id)
       side       <- TraSide(res.side)
@@ -29,7 +34,7 @@ object TransactionsResponse {
       buy        <- ZIO.effect(if (side.isBuy) currencies(1) else currencies.head)
       sellQua    <- ZIO.effect(res.funds(sell).toDouble)
       buyQua     <- ZIO.effect(res.funds(buy).toDouble)
-      createdAt  <- TraCreatedAt(res.createdAt)
+      createdAt  <- TraCreatedAt(res.created_at)
       doubleRate <- ZIO.effect(res.rate.toDouble)
       rate       <- TraRate(doubleRate)
       sellCur    <- Currency(sellQua, buy)

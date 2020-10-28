@@ -2,8 +2,10 @@ package exchange.coincheck
 
 import java.nio.charset.StandardCharsets
 
+import cats.syntax.traverse._
 import eu.timepit.refined.auto._
 import exchange.{Exchange, Transaction}
+import infra.InfraError
 import io.circe.generic.auto._
 import io.scalaland.chimney.dsl._
 import javax.crypto.Mac
@@ -12,26 +14,31 @@ import org.apache.commons.codec.binary.Hex
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import sttp.client3.circe._
+import zio.interop.catz.core._
 import zio.{IO, Task, ZIO}
+
+import scala.annotation.nowarn
 
 final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
     extends Exchange.Service
     with AuthStrategy {
   def transactions: IO[Throwable, Seq[Transaction]] = {
-    val url                     = "https://coincheck.com/api/exchange/orders/transactions"
-    def request(header: Header) = basicRequest
+    val url                             = "https://coincheck.com/api/exchange/orders/transactions"
+    // ignore by-name implicit conversion warning
+    // see -> https://users.scala-lang.org/t/2-13-3-by-name-implicit-linting-error/6334/2
+    @nowarn def request(header: Header) = basicRequest
       .get(uri"$url")
       .headers(header)
       .response(
-        asJson[Seq[TransactionsResponse]]
-          .mapRight(_.map(_.transformInto[Transaction]))
+        asJson[TransactionsResponse]
+          .mapRight(_.transactions.traverse(_.transformInto[Task[Transaction]]))
       )
 
     for {
       hs   <- headers(url)
       req   = request(hs)
       res  <- AsyncHttpClientZioBackend.managed().use(req.send(_))
-      ress <- ZIO.fromEither(res.body)
+      ress <- res.body.sequence.rightOrFail(InfraError("failed to request"))
     } yield ress
   }
 }
