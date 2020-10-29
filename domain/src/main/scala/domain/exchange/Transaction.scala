@@ -1,6 +1,5 @@
 package domain.exchange
 
-import domain.DomainError
 import domain.currency.Currency
 import domain.exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import eu.timepit.refined.api.Refined
@@ -8,8 +7,7 @@ import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
-import lib.factory.VOFactory
-import zio.{IO, ZIO}
+import lib.factory.{SumVOFactory, VOFactory}
 
 final case class Transaction(
   id: TraId,
@@ -36,21 +34,16 @@ object Transaction {
     override type VO = TraRate
   }
 
-  sealed trait TraSide {
+  sealed trait TraSide extends Serializable with Product {
     val v: String
     val isBuy: Boolean
     val isSell: Boolean
   }
 
-  object TraSide {
-    def apply(v: String): IO[DomainError, TraSide] = v match {
-      case Buy.v  => ZIO.succeed(Buy)
-      case Sell.v => ZIO.succeed(Sell)
-      case _      =>
-        ZIO.fail(
-          DomainError(s"failed to parse string as Transaction string: $v")
-        )
-    }
+  object TraSide extends SumVOFactory {
+    override type VO = TraSide
+    override val sums: Seq[TraSide]               = Seq(Buy, Sell)
+    override def extractValue(v: VO): String = v.v
   }
 
   case object Buy extends TraSide {

@@ -1,9 +1,12 @@
 package apiServer
 
 import domain.exchange.Exchange
-import infra.exchange.coincheck.CoinCheckExchangeConfig.{CCEApiKey, CCESecretKey}
-import infra.exchange.{ExchangeImpl, coincheck}
-import zio.console.{Console, putStrLn}
+import infra.exchange.coincheck.CoinCheckExchangeConfig.{
+  CCEApiKey,
+  CCESecretKey
+}
+import infra.exchange.{coincheck, ExchangeImpl}
+import zio.console.{putStrLn, Console}
 import zio.{ZIO, ZLayer}
 
 object Main extends zio.App {
@@ -11,11 +14,11 @@ object Main extends zio.App {
 
   private val AccessKey = ZIO
     .fromOption(sys.env.get("CC_ACCESS_KEY"))
-    .bimap(_ => "CC_ACCESS_KEY not found", CCEApiKey(_))
+    .bimap(_ => "CC_ACCESS_KEY not found", CCEApiKey.applyS(_))
     .flatten
   private val SecretKey = ZIO
     .fromOption(sys.env.get("CC_SECRET_KEY"))
-    .bimap(_ => "CC_SECRET_KEY not found", CCESecretKey(_))
+    .bimap(_ => "CC_SECRET_KEY not found", CCESecretKey.applyS(_))
     .flatten
 
   private val coinCheckExchangeConf = (for {
