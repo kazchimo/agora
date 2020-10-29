@@ -2,7 +2,8 @@ package lib.factory
 
 import eu.timepit.refined.api.{Refined, Validate}
 import lib.refined.refineVZE
-import zio.Task
+import zio.{Task, ZIO}
+import cats.syntax.eq._
 
 trait VOFactory[V, P] {
   type VO
@@ -11,4 +12,22 @@ trait VOFactory[V, P] {
 
   def apply(v: V)(implicit V: Validate[V, P]): Task[VO] =
     refineVZE[P, V](v).map(apply)
+}
+
+trait SumVOFactory {
+  type VO
+  val sums: Seq[VO]
+  def extractValue(v: VO): String
+
+  def apply(v: String): Task[VO] = {
+    val fac = sums.foldLeft(PartialFunction.empty[String, VO]) {
+      case (prev, elem) =>
+        prev.orElse {
+          case key if key === extractValue(elem) => elem
+        }
+    }
+
+    if (fac.isDefinedAt(v)) ZIO.succeed(fac(v))
+    else ZIO.fail(new Exception(s"factory is not defined at $v "))
+  }
 }
