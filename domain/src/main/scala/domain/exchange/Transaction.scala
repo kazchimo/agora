@@ -8,7 +8,7 @@ import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
-import lib.refined.refineVZE
+import lib.factory.VOFactory
 import zio.{IO, ZIO}
 
 final case class Transaction(
@@ -22,23 +22,18 @@ final case class Transaction(
 
 object Transaction {
   @newtype case class TraId(value: Long Refined Positive)
-  object TraId {
-    def apply(v: Long): IO[Throwable, TraId] =
-      refineVZE[Positive, Long](v).map(TraId(_))
-  }
+  object TraId extends VOFactory[Long, Positive] { override type VO = TraId }
 
   @newtype case class TraCreatedAt(
     value: NonEmptyString
   ) // TODO: validate with iso date regex
-  object TraCreatedAt {
-    def apply(v: String): IO[Throwable, TraCreatedAt] =
-      refineVZE[NonEmpty, String](v).map(TraCreatedAt(_))
+  object TraCreatedAt extends VOFactory[String, NonEmpty] {
+    override type VO = TraCreatedAt
   }
 
   @newtype case class TraRate(value: Double Refined Positive)
-  object TraRate {
-    def apply(v: Double): IO[Throwable, TraRate] =
-      refineVZE[Positive, Double](v).map(TraRate(_))
+  object TraRate extends VOFactory[Double, Positive] {
+    override type VO = TraRate
   }
 
   sealed trait TraSide {
