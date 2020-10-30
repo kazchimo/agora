@@ -46,7 +46,6 @@ lazy val commonSettings = Seq(
   )
 )
 
-
 addCommandAlias("root", ";project root")
 addCommandAlias("api", ";project apiServer")
 addCommandAlias("domain", ";project domain")
@@ -55,7 +54,7 @@ addCommandAlias("t", "test")
 
 lazy val root = project
   .in(file("."))
-  .aggregate(domain, infra, apiServer, lib)
+  .aggregate(domain, infra, apiServer, lib, test)
   .settings(name := "agora", commonSettings)
 
 lazy val domain = project
@@ -80,3 +79,9 @@ lazy val lib = project
   .in(file("lib"))
   .settings(commonSettings)
   .settings(moduleName := "lib", name := "lib")
+
+lazy val test = project
+  .in(file("test"))
+  .settings(commonSettings)
+  .settings(moduleName := "test", name := "test")
+  .dependsOn(lib, apiServer, infra, domain)
