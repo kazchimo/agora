@@ -6,7 +6,7 @@ sealed trait TickerSymbol extends Serializable with Product {
   val value: String
 }
 
-object TickerSymbol       extends SumVOFactory              {
+object TickerSymbol extends SumVOFactory {
   override type VO = TickerSymbol
   override val sums: Seq[TickerSymbol]               = Seq(BitCoin, Jpy)
   override def extractValue(v: TickerSymbol): String = v.value
