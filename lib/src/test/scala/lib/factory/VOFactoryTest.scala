@@ -3,6 +3,7 @@ package lib.factory
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
+import zio.ZIO
 import zio.test.Assertion._
 import zio.test._
 
@@ -51,4 +52,28 @@ object VOFactoryTest extends DefaultRunnableSpec {
   )
 
   override def spec = suite("VOFactory")(applyTest, applySTest)
+}
+
+object SumVOFactoryTest extends DefaultRunnableSpec {
+  sealed trait Sum { val v: String }
+  object Sum    extends SumVOFactory {
+    override type VO = Sum
+    override val sums: Seq[Sum]               = Seq(A, B)
+    override def extractValue(v: Sum): String = v.v
+  }
+  case object A extends Sum          { val v = "a" }
+  case object B extends Sum          { val v = "b" }
+
+  override def spec = suite("SumVOFactory")(applyTest)
+
+  val applyTest = suite("apply")(
+    testM("invalid string fails with Throwable") {
+      assertM(Sum("c").run)(fails(isSubtype[Throwable](anything)))
+    },
+    testM("valid string creates an object") {
+      ZIO.mapN(assertM(Sum("a"))(equalTo(A)), assertM(Sum("b"))(equalTo(B)))(
+        _ && _
+      )
+    }
+  )
 }

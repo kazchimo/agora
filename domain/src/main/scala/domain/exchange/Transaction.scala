@@ -42,7 +42,7 @@ object Transaction {
 
   object TraSide extends SumVOFactory {
     override type VO = TraSide
-    override val sums: Seq[TraSide]               = Seq(Buy, Sell)
+    override val sums: Seq[TraSide]          = Seq(Buy, Sell)
     override def extractValue(v: VO): String = v.v
   }
 
