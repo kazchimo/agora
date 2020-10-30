@@ -4,7 +4,6 @@ ThisBuild / scalaVersion := "2.13.3"
 
 lazy val rootDeps =
   Seq(
-    scalaTest % Test,
     sttp,
     zio,
     ziostreams,
@@ -37,6 +36,7 @@ lazy val commonSettings = Seq(
     "-Ymacro-annotations"
   ),
   libraryDependencies ++= rootDeps,
+  testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
   wartremoverErrors.in(Compile, compile) ++= Warts.allBut(
     Wart.Any,
     Wart.ImplicitConversion,
@@ -46,10 +46,12 @@ lazy val commonSettings = Seq(
   )
 )
 
+
 addCommandAlias("root", ";project root")
 addCommandAlias("api", ";project apiServer")
 addCommandAlias("domain", ";project domain")
 addCommandAlias("infra", ";project infra")
+addCommandAlias("t", "test")
 
 lazy val root = project
   .in(file("."))
