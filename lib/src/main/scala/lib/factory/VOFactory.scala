@@ -1,9 +1,9 @@
 package lib.factory
 
+import cats.syntax.eq._
 import eu.timepit.refined.api.{Refined, Validate}
 import lib.refined.refineVZE
 import zio.{IO, Task, ZIO}
-import cats.syntax.eq._
 
 trait VOFactory[V, P] {
   type VO
@@ -15,6 +15,8 @@ trait VOFactory[V, P] {
 
   def applyS(v: V)(implicit V: Validate[V, P]): IO[String, VO] =
     refineVZE[P, V](v).map(apply).mapError(_.getMessage)
+
+  def unsafeFrom(v: V): VO = apply(Refined.unsafeApply[V, P](v))
 }
 
 trait SumVOFactory {
