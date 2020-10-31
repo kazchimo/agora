@@ -30,15 +30,17 @@ final case class CoinCheckExchangeImpl(conf: CoinCheckExchangeConfig)
 private[exchange] trait Orders extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
   @nowarn def request(order: CCOrder) = for {
-    h <- headers(Endpoints.orders)
+    h <- headers(Endpoints.orders, order.asJson.noSpaces)
   } yield basicRequest
     .post(uri"${Endpoints.orders}")
-    .body(order.asJson)
+    .contentType("application/json")
+    .body(order.asJson.noSpaces)
     .headers(h)
     .response(asJson[OrdersResponse])
 
   def orders(order: CCOrder): Task[Unit] = for {
     req  <- request(order)
+    _     = println(req.body)
     res  <- AsyncHttpClientZioBackend.managed().use(req.send(_))
     body <- ZIO.fromEither(res.body)
     r    <- if (body.success) Task.succeed(())
@@ -73,10 +75,10 @@ private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>
   protected val encodeManner = "hmacSHA256"
   type Header = Map[String, String]
 
-  protected def headers(url: String): IO[Throwable, Header] =
+  protected def headers(url: String, body: String = ""): IO[Throwable, Header] =
     for {
       nonce <- ZIO.effectTotal(createNonce)
-      sig   <- createSig(conf.secretKey.value, url, nonce)
+      sig   <- createSig(conf.secretKey.value, url, nonce, body)
     } yield Map(
       "ACCESS-KEY"       -> conf.apiKey.value.value,
       "ACCESS-NONCE"     -> nonce,
@@ -85,8 +87,13 @@ private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>
 
   private def createNonce = (System.currentTimeMillis() / 1000).toString
 
-  private def createSig(secretKey: String, url: String, nonce: String) =
-    hmacSHA256Encode(secretKey, nonce + url)
+  private def createSig(
+    secretKey: String,
+    url: String,
+    nonce: String,
+    body: String
+  ) =
+    hmacSHA256Encode(secretKey, nonce + url + body)
 
   private def hmacSHA256Encode(
     secretKey: String,
