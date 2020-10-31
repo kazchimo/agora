@@ -11,16 +11,21 @@ object CCOrderConverter {
   implicit val codecConfig: Configuration =
     Configuration.default.withSnakeCaseMemberNames
 
-  implicit val encodeOrder: Encoder[CCOrder] = Encoder.instance {
-    case a: CCBuy            => a.asJson
-    case a: CCStopBuy        => a.asJson
-    case a: CCSell           => a.asJson
-    case a: CCStopSell       => a.asJson
-    case a: CCMarketBuy      => a.asJson
-    case a: CCMarketStopBuy  => a.asJson
-    case a: CCMarketSell     => a.asJson
-    case a: CCMarketStopSell => a.asJson
-  }
+  implicit val encodeOrder: Encoder[CCOrder] = Encoder
+    .instance {
+      case a: CCBuy            => a.asJson.mapObject(_.+:("pair" -> "btc_jpy".asJson))
+      case a: CCStopBuy        => a.asJson.mapObject(_.+:("pair" -> "btc_jpy".asJson))
+      case a: CCSell           => a.asJson.mapObject(_.+:("pair" -> "btc_jpy".asJson))
+      case a: CCStopSell       => a.asJson.mapObject(_.+:("pair" -> "btc_jpy".asJson))
+      case a: CCMarketBuy      =>
+        a.asJson.mapObject(_.+:("pair" -> "btc_jpy".asJson))
+      case a: CCMarketStopBuy  =>
+        a.asJson.mapObject(_.+:("pair" -> "btc_jpy".asJson))
+      case a: CCMarketSell     =>
+        a.asJson.mapObject(_.+:("pair" -> "btc_jpy".asJson))
+      case a: CCMarketStopSell =>
+        a.asJson.mapObject(_.+:("pair" -> "btc_jpy".asJson))
+    }
 
   private val orderType       = "order_type"
   private val rate            = "rate"
