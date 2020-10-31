@@ -1,13 +1,13 @@
-package infra.exchange.coincheck
+package infra.exchange.coincheck.responses
 
 import domain.currency.{Currency, TickerSymbol}
+import domain.exchange.coincheck.CCTransaction
 import domain.exchange.coincheck.CCTransaction.{
   CCTraCreatedAt,
   CCTraId,
   CCTraRate,
   CCTraSide
 }
-import domain.exchange.coincheck.CCTransaction
 import io.scalaland.chimney.Transformer
 import zio.{Task, ZIO}
 
