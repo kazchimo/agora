@@ -46,7 +46,8 @@ object CCOrderConverterTest extends DefaultRunnableSpec {
             Json.obj(
               "order_type" -> "buy".asJson,
               "rate"       -> r.rate.asJson,
-              "amount"     -> r.amount.asJson
+              "amount"     -> r.amount.asJson,
+              "pair"       -> "btc_jpy".asJson
             )
           )
         )
@@ -62,7 +63,8 @@ object CCOrderConverterTest extends DefaultRunnableSpec {
             Json.obj(
               "order_type"        -> "market_buy".asJson,
               "stop_loss_rate"    -> r.stopLossRate.asJson,
-              "market_buy_amount" -> r.marketBuyAmount.asJson
+              "market_buy_amount" -> r.marketBuyAmount.asJson,
+              "pair"              -> "btc_jpy".asJson
             )
           )
         )
