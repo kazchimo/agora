@@ -8,13 +8,13 @@ package object coincheck {
   object CoincheckExchange {
     trait Service {
       def transactions: IO[Throwable, Seq[CCTransaction]]
-      def orders(order: Order): Task[Unit]
+      def orders(order: CCOrder): Task[Unit]
     }
 
     def transactions: ZIO[CoincheckExchange, Throwable, Seq[CCTransaction]] =
       ZIO.accessM(_.get.transactions)
 
-    def orders(order: Order): ZIO[CoincheckExchange, Throwable, Unit] =
+    def orders(order: CCOrder): ZIO[CoincheckExchange, Throwable, Unit] =
       ZIO.accessM(_.get.orders(order))
   }
 

@@ -3,7 +3,7 @@ package infra.exchange.coincheck
 import java.nio.charset.StandardCharsets
 
 import cats.syntax.traverse._
-import domain.exchange.coincheck.{CCTransaction, CoincheckExchange, Order}
+import domain.exchange.coincheck.{CCOrder, CCTransaction, CoincheckExchange}
 import eu.timepit.refined.auto._
 import infra.InfraError
 import infra.exchange.coincheck.bodyconverter.OrderConverter._
@@ -29,7 +29,7 @@ final case class CoinCheckExchangeImpl(conf: CoinCheckExchangeConfig)
 
 private[exchange] trait Orders extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
-  @nowarn def request(order: Order) = for {
+  @nowarn def request(order: CCOrder) = for {
     h <- headers(Endpoints.orders)
   } yield basicRequest
     .post(uri"${Endpoints.orders}")
@@ -37,7 +37,7 @@ private[exchange] trait Orders extends AuthStrategy {
     .headers(h)
     .response(asJson[OrdersResponse])
 
-  def orders(order: Order): Task[Unit] = for {
+  def orders(order: CCOrder): Task[Unit] = for {
     req  <- request(order)
     res  <- AsyncHttpClientZioBackend.managed().use(req.send(_))
     body <- ZIO.fromEither(res.body)

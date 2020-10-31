@@ -1,7 +1,7 @@
 package infra.exchange.coincheck.bodyconverter
 
-import domain.exchange.coincheck.MarketBuy.MarketBuyAmount
-import domain.exchange.coincheck.Order.{OrderAmount, OrderRate}
+import domain.exchange.coincheck.CCMarketBuy.CCMarketBuyAmount
+import domain.exchange.coincheck.CCOrder.{CCOrderAmount, CCOrderRate}
 import domain.exchange.coincheck._
 import io.circe.Encoder
 import io.circe.generic.extras.Configuration
@@ -12,15 +12,15 @@ object OrderConverter extends AnyValConverter {
   implicit val codecConfig: Configuration =
     Configuration.default.withSnakeCaseMemberNames
 
-  implicit val encodeOrder: Encoder[Order] = Encoder.instance {
-    case a: Buy            => a.asJson
-    case a: StopBuy        => a.asJson
-    case a: Sell           => a.asJson
-    case a: StopSell       => a.asJson
-    case a: MarketBuy      => a.asJson
-    case a: MarketStopBuy  => a.asJson
-    case a: MarketSell     => a.asJson
-    case a: MarketStopSell => a.asJson
+  implicit val encodeOrder: Encoder[CCOrder] = Encoder.instance {
+    case a: CCBuy           => a.asJson
+    case a: CCStopBuy       => a.asJson
+    case a: CCSell          => a.asJson
+    case a: CCStopSell      => a.asJson
+    case a: CCMarketBuy     => a.asJson
+    case a: CCMarketStopBuy => a.asJson
+    case a: CCMarketSell    => a.asJson
+    case a: MarketStopSell  => a.asJson
   }
 
   private val orderType       = "order_type"
@@ -29,44 +29,44 @@ object OrderConverter extends AnyValConverter {
   private val marketBuyAmount = "market_buy_amount"
   private val stopLossRate    = "stop_loss_rate"
 
-  implicit val orderRateEncoder: Encoder[OrderRate] =
+  implicit val orderRateEncoder: Encoder[CCOrderRate] =
     Encoder.instance(_.value.value.asJson)
 
-  implicit val orderAmountEncoder: Encoder[OrderAmount] =
+  implicit val orderAmountEncoder: Encoder[CCOrderAmount] =
     Encoder.instance(_.value.value.asJson)
 
-  implicit val marketBuyAmountEncoder: Encoder[MarketBuyAmount] =
+  implicit val marketBuyAmountEncoder: Encoder[CCMarketBuyAmount] =
     Encoder.instance(_.value.value.asJson)
 
-  implicit val buyEncoder: Encoder[Buy] =
+  implicit val buyEncoder: Encoder[CCBuy] =
     Encoder.forProduct3(orderType, rate, amount)(a => ("buy", a.rate, a.amount))
 
-  implicit val stopBuyEncoder: Encoder[StopBuy] =
+  implicit val stopBuyEncoder: Encoder[CCStopBuy] =
     Encoder.forProduct4(orderType, rate, stopLossRate, amount)(a =>
       ("buy", a.rate, a.stopLossRate, a.amount)
     )
 
-  implicit val sellEncoder: Encoder[Sell] =
+  implicit val sellEncoder: Encoder[CCSell] =
     Encoder.forProduct3(orderType, rate, amount)(a =>
       ("sell", a.rate, a.amount)
     )
 
-  implicit val stopSellEncoder: Encoder[StopSell] =
+  implicit val stopSellEncoder: Encoder[CCStopSell] =
     Encoder.forProduct4(orderType, rate, stopLossRate, amount)(a =>
       ("buy", a.rate, a.stopLossRate, a.amount)
     )
 
-  implicit val encodeMarketBuy: Encoder[MarketBuy] =
+  implicit val encodeMarketBuy: Encoder[CCMarketBuy] =
     Encoder.forProduct2(orderType, marketBuyAmount)(a =>
       ("market_buy", a.marketBuyAmount)
     )
 
-  implicit val encodeMarketStopBuy: Encoder[MarketStopBuy] =
+  implicit val encodeMarketStopBuy: Encoder[CCMarketStopBuy] =
     Encoder.forProduct3(orderType, stopLossRate, marketBuyAmount)(a =>
       ("market_buy", a.stopLossRate, a.marketBuyAmount)
     )
 
-  implicit val encodeMarketSell: Encoder[MarketSell] =
+  implicit val encodeMarketSell: Encoder[CCMarketSell] =
     Encoder.forProduct2(orderType, amount)(a => ("market_sell", a.amount))
 
   implicit val encodeMarketStopSell: Encoder[MarketStopSell] =
