@@ -1,5 +1,8 @@
 package infra.exchange.coincheck
 
 private[coincheck] object Endpoints {
-  val transactions = "https://coincheck.com/api/exchange/orders/transactions"
+  private def url(s: String) = "https://coincheck.com/api/" + s
+
+  val transactions: String = url("exchange/orders/transactions")
+  val orders: String       = url("exchange/orders")
 }
