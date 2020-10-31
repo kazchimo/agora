@@ -51,6 +51,7 @@ addCommandAlias("api", ";project apiServer")
 addCommandAlias("domain", ";project domain")
 addCommandAlias("infra", ";project infra")
 addCommandAlias("t", "test")
+addCommandAlias("c", "compile")
 
 lazy val root = project
   .in(file("."))
