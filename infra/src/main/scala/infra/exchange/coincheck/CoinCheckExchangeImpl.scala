@@ -20,7 +20,7 @@ import zio.{IO, Task, ZIO}
 
 import scala.annotation.nowarn
 
-final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
+final case class CoinCheckExchangeImpl(conf: CoinCheckExchangeConfig)
     extends CoincheckExchange.Service
     with AuthStrategy {
   def transactions: IO[Throwable, Seq[CCTransaction]] = {
@@ -45,7 +45,7 @@ final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
   }
 }
 
-private[exchange] trait AuthStrategy { self: CoinCheckExchange =>
+private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>
   protected val encodeManner = "hmacSHA256"
   type Header = Map[String, String]
 
