@@ -1,6 +1,6 @@
 package domain
 
-import domain.exchange.Transaction.{Buy, Sell}
+import domain.exchange.coincheck.CCTransaction.{Buy, Sell}
 import zio.test._
 import zio.test.Assertion._
 

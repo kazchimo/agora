@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets
 import cats.syntax.traverse._
 import eu.timepit.refined.auto._
 import domain.exchange.coincheck.Exchange
-import domain.exchange.coincheck.Transaction
+import domain.exchange.coincheck.CCTransaction
 import infra.InfraError
 import io.circe.generic.auto._
 import io.scalaland.chimney.dsl._
@@ -23,7 +23,7 @@ import scala.annotation.nowarn
 final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
     extends Exchange.Service
     with AuthStrategy {
-  def transactions: IO[Throwable, Seq[Transaction]] = {
+  def transactions: IO[Throwable, Seq[CCTransaction]] = {
     val url                             = "https://coincheck.com/api/exchange/orders/transactions"
     // ignore by-name implicit conversion warning
     // see -> https://users.scala-lang.org/t/2-13-3-by-name-implicit-linting-error/6334/2
@@ -32,7 +32,9 @@ final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
       .headers(header)
       .response(
         asJson[TransactionsResponse]
-          .mapRight(_.transactions.traverse(_.transformInto[Task[Transaction]]))
+          .mapRight(
+            _.transactions.traverse(_.transformInto[Task[CCTransaction]])
+          )
       )
 
     for {

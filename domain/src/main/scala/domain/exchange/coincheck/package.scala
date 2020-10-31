@@ -7,10 +7,10 @@ package object coincheck {
 
   object Exchange {
     trait Service {
-      def transactions: IO[Throwable, Seq[Transaction]]
+      def transactions: IO[Throwable, Seq[CCTransaction]]
     }
 
-    def transactions: ZIO[Exchange, Throwable, Seq[Transaction]] =
+    def transactions: ZIO[Exchange, Throwable, Seq[CCTransaction]] =
       ZIO.accessM(_.get.transactions)
   }
 
