@@ -24,11 +24,10 @@ final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
     extends CoincheckExchange.Service
     with AuthStrategy {
   def transactions: IO[Throwable, Seq[CCTransaction]] = {
-    val url                             = "https://coincheck.com/api/exchange/orders/transactions"
     // ignore by-name implicit conversion warning
     // see -> https://users.scala-lang.org/t/2-13-3-by-name-implicit-linting-error/6334/2
     @nowarn def request(header: Header) = basicRequest
-      .get(uri"$url")
+      .get(uri"${Endpoints.transactions}")
       .headers(header)
       .response(
         asJson[TransactionsResponse]
@@ -38,7 +37,7 @@ final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
       )
 
     for {
-      hs   <- headers(url)
+      hs   <- headers(Endpoints.transactions)
       req   = request(hs)
       res  <- AsyncHttpClientZioBackend.managed().use(req.send(_))
       ress <- res.body.sequence.rightOrFail(InfraError("failed to request"))
