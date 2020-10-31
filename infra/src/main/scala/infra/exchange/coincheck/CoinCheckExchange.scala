@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets
 
 import cats.syntax.traverse._
 import eu.timepit.refined.auto._
-import domain.exchange.coincheck.Exchange
+import domain.exchange.coincheck.CoincheckExchange
 import domain.exchange.coincheck.CCTransaction
 import infra.InfraError
 import io.circe.generic.auto._
@@ -21,7 +21,7 @@ import zio.{IO, Task, ZIO}
 import scala.annotation.nowarn
 
 final case class CoinCheckExchange(conf: CoinCheckExchangeConfig)
-    extends Exchange.Service
+    extends CoincheckExchange.Service
     with AuthStrategy {
   def transactions: IO[Throwable, Seq[CCTransaction]] = {
     val url                             = "https://coincheck.com/api/exchange/orders/transactions"
