@@ -2,6 +2,8 @@ package lib.circe
 
 import io.circe.{Decoder, Encoder}
 
+object AnyValConverter extends AnyValConverter
+
 trait AnyValConverter {
   import shapeless._
 
