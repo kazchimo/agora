@@ -4,22 +4,13 @@ ThisBuild / scalaVersion := "2.13.3"
 
 lazy val rootDeps =
   Seq(
-    sttp,
-    zio,
-    ziostreams,
     codec,
     newtype,
     refined,
-    zioMacros,
-    sttpZio,
-    sttpCirce,
     chimney,
     cats,
-    zioCats,
-    zioTest,
-    zioTestSbt,
-    zioTestMagnolia
-  ) ++ circeDeps
+    zioCats
+  ) ++ circeDeps ++ zioDeps ++ sttpDeps ++ testDeps
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
