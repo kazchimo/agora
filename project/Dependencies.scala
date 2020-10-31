@@ -12,7 +12,9 @@ object Dependencies {
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",
     "io.circe" %% "circe-parser",
-    "io.circe" %% "circe-generic-extras"
+    "io.circe" %% "circe-generic-extras",
+    "io.circe" %% "circe-shapes",
+    "io.circe" %% "circe-refined"
   ).map(_ % Versions.circe)
 
   lazy val scalaTest = "org.scalatest"                 %% "scalatest" % "3.2.2"
