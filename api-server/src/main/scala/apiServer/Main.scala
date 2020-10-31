@@ -7,11 +7,13 @@ import infra.exchange.coincheck.CoinCheckExchangeConfig.{
   CCESecretKey
 }
 import infra.exchange.{coincheck, ExchangeImpl}
+import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 import zio.console.{putStrLn, Console}
 import zio.{ZIO, ZLayer}
 
 object Main extends zio.App {
-  override def run(args: List[String]) = app.provideCustomLayer(layer).exitCode
+  override def run(args: List[String]) =
+    app.provideCustomLayer(layer).exitCode
 
   private val AccessKey = ZIO
     .fromOption(sys.env.get("CC_ACCESS_KEY"))
@@ -27,19 +29,22 @@ object Main extends zio.App {
     secretKey <- SecretKey
   } yield coincheck.CoinCheckExchangeConfig(apiKey, secretKey)).toLayer
 
-  val layer: ZLayer[Any, String, CoincheckExchange] =
-    coinCheckExchangeConf >>> ExchangeImpl.coinCheckExchange
+  val layer: ZLayer[Any, String, CoincheckExchange with SttpClient] =
+    (coinCheckExchangeConf >>> ExchangeImpl.coinCheckExchange) ++ AsyncHttpClientZioBackend
+      .layer()
+      .mapError(_.getMessage)
 
-  val app: ZIO[Console with CoincheckExchange, String, Unit] = for {
-    _ <-
-      CoincheckExchange
-        .orders(
-          CCSell(
-            CCOrderRate.unsafeFrom(1538857),
-            CCOrderAmount.unsafeFrom(0.005)
+  val app: ZIO[Console with SttpClient with CoincheckExchange, String, Unit] =
+    for {
+      _ <-
+        CoincheckExchange
+          .orders(
+            CCSell(
+              CCOrderRate.unsafeFrom(1538857),
+              CCOrderAmount.unsafeFrom(0.005)
+            )
           )
-        )
-        .onError(e => putStrLn(e.map(_.getMessage).prettyPrint + "adfasdf"))
-        .mapError(_.toString)
-  } yield ()
+          .onError(e => putStrLn(e.map(_.getMessage).prettyPrint + "adfasdf"))
+          .mapError(_.toString)
+    } yield ()
 }

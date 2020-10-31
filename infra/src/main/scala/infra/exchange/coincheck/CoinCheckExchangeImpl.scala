@@ -15,10 +15,14 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
 import sttp.client3._
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
+import sttp.client3.asynchttpclient.zio.{
+  send,
+  AsyncHttpClientZioBackend,
+  SttpClient
+}
 import sttp.client3.circe._
 import zio.interop.catz.core._
-import zio.{IO, Task, ZIO}
+import zio.{IO, RIO, Task, ZIO}
 
 import scala.annotation.nowarn
 
@@ -38,10 +42,10 @@ private[exchange] trait Orders extends AuthStrategy {
     .headers(h)
     .response(asJson[OrdersResponse])
 
-  def orders(order: CCOrder): Task[Unit] = for {
+  def orders(order: CCOrder): RIO[SttpClient, Unit] = for {
     req  <- request(order)
     _     = println(req.body)
-    res  <- AsyncHttpClientZioBackend.managed().use(req.send(_))
+    res  <- send(req)
     body <- ZIO.fromEither(res.body)
     r    <- if (body.success) Task.succeed(())
             else
