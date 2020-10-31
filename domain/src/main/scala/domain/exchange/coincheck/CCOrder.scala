@@ -56,7 +56,7 @@ object CCMarketBuy {
 
 final case class CCMarketSell(amount: CCOrderAmount) extends CCOrder
 
-final case class MarketStopSell(
+final case class CCMarketStopSell(
   stopLossRate: CCOrderRate,
   amount: CCOrderAmount
 ) extends CCOrder
