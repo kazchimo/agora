@@ -4,7 +4,8 @@ import java.nio.charset.StandardCharsets
 
 import cats.syntax.traverse._
 import eu.timepit.refined.auto._
-import domain.exchange.{Exchange, Transaction}
+import domain.exchange.coincheck.Exchange
+import domain.exchange.coincheck.Transaction
 import infra.InfraError
 import io.circe.generic.auto._
 import io.scalaland.chimney.dsl._

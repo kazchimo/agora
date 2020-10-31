@@ -1,13 +1,13 @@
-package domain.exchange
+package domain.exchange.coincheck
 
 import domain.currency.Currency
-import domain.exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
 import lib.factory.{SumVOFactory, VOFactory}
+import Transaction._
 
 final case class Transaction(
   id: TraId,

@@ -1,6 +1,6 @@
 package apiServer
 
-import domain.exchange.Exchange
+import domain.exchange.coincheck.Exchange
 import infra.exchange.coincheck.CoinCheckExchangeConfig.{
   CCEApiKey,
   CCESecretKey

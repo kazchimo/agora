@@ -1,8 +1,13 @@
 package infra.exchange.coincheck
 
 import domain.currency.{Currency, TickerSymbol}
-import domain.exchange.Transaction
-import domain.exchange.Transaction.{TraCreatedAt, TraId, TraRate, TraSide}
+import domain.exchange.coincheck.Transaction.{
+  TraCreatedAt,
+  TraId,
+  TraRate,
+  TraSide
+}
+import domain.exchange.coincheck.Transaction
 import io.scalaland.chimney.Transformer
 import zio.{Task, ZIO}
 

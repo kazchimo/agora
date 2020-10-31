@@ -1,8 +1,8 @@
-package domain
+package domain.exchange
 
 import zio.{Has, IO, ZIO}
 
-package object exchange {
+package object coincheck {
   type Exchange = Has[Exchange.Service]
 
   object Exchange {

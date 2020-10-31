@@ -1,4 +1,4 @@
-package domain.exchange
+package domain.exchange.coincheck
 
 sealed trait Order
 
