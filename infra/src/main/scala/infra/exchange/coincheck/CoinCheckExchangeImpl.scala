@@ -22,7 +22,10 @@ import scala.annotation.nowarn
 
 final case class CoinCheckExchangeImpl(conf: CoinCheckExchangeConfig)
     extends CoincheckExchange.Service
-    with AuthStrategy {
+    with Transactions
+
+private[exchange] trait Transactions extends AuthStrategy {
+  self: CoinCheckExchangeImpl =>
   def transactions: IO[Throwable, Seq[CCTransaction]] = {
     // ignore by-name implicit conversion warning
     // see -> https://users.scala-lang.org/t/2-13-3-by-name-implicit-linting-error/6334/2
