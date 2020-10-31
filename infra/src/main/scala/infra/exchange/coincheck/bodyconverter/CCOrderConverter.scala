@@ -6,9 +6,8 @@ import domain.exchange.coincheck._
 import io.circe.Encoder
 import io.circe.generic.extras.Configuration
 import io.circe.syntax._
-import lib.circe.AnyValConverter
 
-object OrderConverter extends AnyValConverter {
+object CCOrderConverter {
   implicit val codecConfig: Configuration =
     Configuration.default.withSnakeCaseMemberNames
 

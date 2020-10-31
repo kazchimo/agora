@@ -6,7 +6,7 @@ import cats.syntax.traverse._
 import domain.exchange.coincheck.{CCOrder, CCTransaction, CoincheckExchange}
 import eu.timepit.refined.auto._
 import infra.InfraError
-import infra.exchange.coincheck.bodyconverter.OrderConverter._
+import infra.exchange.coincheck.bodyconverter.CCOrderConverter._
 import infra.exchange.coincheck.responses.{OrdersResponse, TransactionsResponse}
 import io.circe.generic.auto._
 import io.circe.syntax._
