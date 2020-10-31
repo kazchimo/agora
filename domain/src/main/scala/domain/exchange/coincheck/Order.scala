@@ -25,15 +25,26 @@ object Order {
 
 final case class Buy(rate: OrderRate, amount: OrderAmount) extends Order
 
-final case class StopBuy(rate: OrderRate, amount: OrderAmount) extends Order
+final case class StopBuy(
+  rate: OrderRate,
+  stopLossRate: OrderRate,
+  amount: OrderAmount
+) extends Order
 
 final case class Sell(rate: OrderRate, amount: OrderAmount) extends Order
 
-final case class StopSell(rate: OrderRate, amount: OrderAmount) extends Order
+final case class StopSell(
+  rate: OrderRate,
+  stopLossRate: OrderRate,
+  amount: OrderAmount
+) extends Order
 
-final case class MarketBuy(amount: MarketBuyAmount) extends Order
+final case class MarketBuy(marketBuyAmount: MarketBuyAmount) extends Order
 
-final case class MarketStopBuy(amount: MarketBuyAmount) extends Order
+final case class MarketStopBuy(
+  stopLossRate: OrderRate,
+  marketBuyAmount: MarketBuyAmount
+) extends Order
 
 object MarketBuy {
   @newtype case class MarketBuyAmount(value: Double Refined Positive)
@@ -44,4 +55,5 @@ object MarketBuy {
 
 final case class MarketSell(amount: OrderAmount) extends Order
 
-final case class MarketStopSell(amount: OrderAmount) extends Order
+final case class MarketStopSell(stopLossRate: OrderRate, amount: OrderAmount)
+    extends Order
