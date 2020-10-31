@@ -1,6 +1,7 @@
 package apiServer
 
-import domain.exchange.coincheck.CoincheckExchange
+import domain.exchange.coincheck.CCOrder.{CCOrderAmount, CCOrderRate}
+import domain.exchange.coincheck.{CCSell, CoincheckExchange}
 import infra.exchange.coincheck.CoinCheckExchangeConfig.{
   CCEApiKey,
   CCESecretKey
@@ -30,7 +31,15 @@ object Main extends zio.App {
     coinCheckExchangeConf >>> ExchangeImpl.coinCheckExchange
 
   val app: ZIO[Console with CoincheckExchange, String, Unit] = for {
-    tra <- CoincheckExchange.transactions.mapError(_.getMessage)
-    _   <- putStrLn(tra.toString())
+    _ <-
+      CoincheckExchange
+        .orders(
+          CCSell(
+            CCOrderRate.unsafeFrom(1538857),
+            CCOrderAmount.unsafeFrom(0.005)
+          )
+        )
+        .onError(e => putStrLn(e.map(_.getMessage).prettyPrint + "adfasdf"))
+        .mapError(_.toString)
   } yield ()
 }
