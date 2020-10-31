@@ -3,11 +3,13 @@ package infra.exchange.coincheck
 import java.nio.charset.StandardCharsets
 
 import cats.syntax.traverse._
+import domain.exchange.coincheck.{CCTransaction, CoincheckExchange, Order}
 import eu.timepit.refined.auto._
-import domain.exchange.coincheck.CoincheckExchange
-import domain.exchange.coincheck.CCTransaction
 import infra.InfraError
+import infra.exchange.coincheck.bodyconverter.OrderConverter._
+import infra.exchange.coincheck.responses.{OrdersResponse, TransactionsResponse}
 import io.circe.generic.auto._
+import io.circe.syntax._
 import io.scalaland.chimney.dsl._
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -23,29 +25,48 @@ import scala.annotation.nowarn
 final case class CoinCheckExchangeImpl(conf: CoinCheckExchangeConfig)
     extends CoincheckExchange.Service
     with Transactions
+    with Orders
+
+private[exchange] trait Orders extends AuthStrategy {
+  self: CoinCheckExchangeImpl =>
+  @nowarn def request(order: Order) = for {
+    h <- headers(Endpoints.orders)
+  } yield basicRequest
+    .post(uri"${Endpoints.orders}")
+    .body(order.asJson)
+    .headers(h)
+    .response(asJson[OrdersResponse])
+
+  def orders(order: Order): Task[Unit] = for {
+    req  <- request(order)
+    res  <- AsyncHttpClientZioBackend.managed().use(req.send(_))
+    body <- ZIO.fromEither(res.body)
+    r    <- if (body.success) Task.succeed(())
+            else
+              Task.fail(InfraError(s"failed to order: ${order.getClass.toString}"))
+  } yield r
+
+}
 
 private[exchange] trait Transactions extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
-  def transactions: IO[Throwable, Seq[CCTransaction]] = {
-    // ignore by-name implicit conversion warning
-    // see -> https://users.scala-lang.org/t/2-13-3-by-name-implicit-linting-error/6334/2
-    @nowarn def request(header: Header) = basicRequest
-      .get(uri"${Endpoints.transactions}")
-      .headers(header)
-      .response(
-        asJson[TransactionsResponse]
-          .mapRight(
-            _.transactions.traverse(_.transformInto[Task[CCTransaction]])
-          )
-      )
+  // ignore by-name implicit conversion warning
+  // see -> https://users.scala-lang.org/t/2-13-3-by-name-implicit-linting-error/6334/2
+  @nowarn def request(header: Header) = basicRequest
+    .get(uri"${Endpoints.transactions}")
+    .headers(header)
+    .response(
+      asJson[TransactionsResponse]
+        .mapRight(_.transactions.traverse(_.transformInto[Task[CCTransaction]]))
+    )
 
+  def transactions: IO[Throwable, Seq[CCTransaction]] =
     for {
       hs   <- headers(Endpoints.transactions)
       req   = request(hs)
       res  <- AsyncHttpClientZioBackend.managed().use(req.send(_))
       ress <- res.body.sequence.rightOrFail(InfraError("failed to request"))
     } yield ress
-  }
 }
 
 private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>
