@@ -14,13 +14,17 @@ import io.scalaland.chimney.dsl._
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
+import sttp.capabilities.zio.ZioStreams
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.{
   send,
+  sendR,
   AsyncHttpClientZioBackend,
   SttpClient
 }
 import sttp.client3.circe._
+import sttp.ws.WebSocket
+import zio.console.Console
 import zio.interop.catz.core._
 import zio.{IO, RIO, Task, ZIO}
 
@@ -30,6 +34,8 @@ final case class CoinCheckExchangeImpl(conf: CoinCheckExchangeConfig)
     extends CoincheckExchange.Service
     with Transactions
     with Orders
+    with AuthStrategy
+    with PublicTransactions
 
 private[exchange] trait Orders extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
@@ -73,6 +79,18 @@ private[exchange] trait Transactions extends AuthStrategy {
       res  <- AsyncHttpClientZioBackend.managed().use(req.send(_))
       ress <- res.body.sequence.rightOrFail(InfraError("failed to request"))
     } yield ress
+}
+
+private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
+  private def useWebsocket(ws: WebSocket[Task[_]]) = ws.receiveText()
+
+  def publicTransactions: ZIO[SttpClient, Throwable, Response[Nothing]] =
+    sendR(
+      basicRequest
+        .get(uri"${Endpoints.websocket}")
+        .body(Map("type" -> "subscribe", "channel" -> "btc_jpy-trades"))
+        .response(asWebSocketStreamAlways(ZioStreams))
+    )
 }
 
 private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>

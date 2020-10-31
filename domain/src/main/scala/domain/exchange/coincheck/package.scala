@@ -10,6 +10,7 @@ package object coincheck {
     trait Service {
       def transactions: IO[Throwable, Seq[CCTransaction]]
       def orders(order: CCOrder): RIO[SttpClient, Unit]
+      def publicTransactions
     }
 
     def transactions: ZIO[CoincheckExchange, Throwable, Seq[CCTransaction]] =
