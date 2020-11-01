@@ -12,10 +12,6 @@ lazy val rootDeps =
     zioCats
   ) ++ circeDeps ++ zioDeps ++ sttpDeps ++ testDeps
 
-addCompilerPlugin(
-  ("org.typelevel" %% "kind-projector" % "0.11.0").cross(CrossVersion.full)
-)
-
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-deprecation",
@@ -39,6 +35,9 @@ lazy val commonSettings = Seq(
     Wart.Nothing,
     Wart.Overloading,
     Wart.DefaultArguments
+  ),
+  addCompilerPlugin(
+    ("org.typelevel" %% "kind-projector" % "0.11.0").cross(CrossVersion.full)
   )
 )
 
