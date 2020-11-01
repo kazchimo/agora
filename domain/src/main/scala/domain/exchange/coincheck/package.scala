@@ -1,6 +1,7 @@
 package domain.exchange
 
 import sttp.client3.asynchttpclient.zio.SttpClient
+import zio.stream.ZStream
 import zio.{Has, IO, RIO, ZIO}
 
 package object coincheck {
@@ -11,6 +12,7 @@ package object coincheck {
       def transactions: IO[Throwable, Seq[CCTransaction]]
       def orders(order: CCOrder): RIO[SttpClient, Unit]
       def publicTransactions
+        : ZIO[SttpClient, Throwable, ZStream[Any, Nothing, String]]
     }
 
     def transactions: ZIO[CoincheckExchange, Throwable, Seq[CCTransaction]] =
