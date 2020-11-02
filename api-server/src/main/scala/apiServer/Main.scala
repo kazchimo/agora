@@ -1,14 +1,13 @@
 package apiServer
 
-import domain.exchange.coincheck.CCOrder.{CCOrderAmount, CCOrderRate}
-import domain.exchange.coincheck.{CCSell, CoincheckExchange}
+import domain.exchange.coincheck.{CoincheckEnv, CoincheckExchange}
 import infra.exchange.coincheck.CoinCheckExchangeConfig.{
   CCEApiKey,
   CCESecretKey
 }
 import infra.exchange.{coincheck, ExchangeImpl}
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
-import zio.console.{putStrLn, Console}
+import zio.console.putStrLn
 import zio.{ZIO, ZLayer}
 
 object Main extends zio.App {
@@ -34,17 +33,14 @@ object Main extends zio.App {
       .layer()
       .mapError(_.getMessage)
 
-  val app: ZIO[Console with SttpClient with CoincheckExchange, String, Unit] =
+  val app: ZIO[CoincheckEnv, String, Unit] =
     for {
-      _ <-
-        CoincheckExchange
-          .orders(
-            CCSell(
-              CCOrderRate.unsafeFrom(1538857),
-              CCOrderAmount.unsafeFrom(0.005)
-            )
-          )
+      _      <- putStrLn("start")
+      stream <-
+        CoincheckExchange.publicTransactions
           .onError(e => putStrLn(e.map(_.getMessage).prettyPrint + "adfasdf"))
           .mapError(_.toString)
+      _      <- stream.foreach(s => ZIO.effectTotal(println(s)))
+      _      <- putStrLn("get stream")
     } yield ()
 }
