@@ -38,8 +38,6 @@ object CCTransaction {
 
   sealed trait CCTraSide extends Serializable with Product {
     val v: String
-    val isBuy: Boolean
-    val isSell: Boolean
   }
 
   object CCTraSide extends SumVOFactory {
@@ -49,14 +47,10 @@ object CCTransaction {
   }
 
   case object Buy extends CCTraSide {
-    override val v: String       = "buy"
-    override val isBuy: Boolean  = true
-    override val isSell: Boolean = false
+    override val v: String = "buy"
   }
 
   case object Sell extends CCTraSide {
-    override val v: String       = "sell"
-    override val isBuy: Boolean  = false
-    override val isSell: Boolean = true
+    override val v: String = "sell"
   }
 }
