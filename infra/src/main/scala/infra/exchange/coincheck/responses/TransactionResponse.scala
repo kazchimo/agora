@@ -3,10 +3,12 @@ package infra.exchange.coincheck.responses
 import domain.currency.{Currency, TickerSymbol}
 import domain.exchange.coincheck.CCTransaction
 import domain.exchange.coincheck.CCTransaction.{
+  Buy,
   CCTraCreatedAt,
   CCTraId,
   CCTraRate,
-  CCTraSide
+  CCTraSide,
+  Sell
 }
 import io.scalaland.chimney.Transformer
 import zio.{Task, ZIO}
@@ -26,33 +28,51 @@ final case class TransactionResponse(
   fee_currency: Option[String],
   liquidity: String,
   side: String
-)
+) {
+  def dId: Task[CCTraId] = CCTraId(id)
+
+  def dSide: Task[CCTraSide] = CCTraSide(side)
+
+  private val currencies = pair.split("_")
+
+  def sellCurrency: Task[Currency] =
+    for {
+      s         <- dSide
+      rawTicker <- Task.effect {
+                     s match {
+                       case Buy  => currencies.head
+                       case Sell => currencies(1)
+                     }
+                   }
+      qua       <- Task.effect(funds(rawTicker).toDouble)
+      ticker    <- TickerSymbol(rawTicker)
+    } yield Currency(ticker, qua)
+
+  def buyCurrency: Task[Currency] = for {
+    s         <- dSide
+    rawTicker <- Task.effect {
+                   s match {
+                     case Buy  => currencies(1)
+                     case Sell => currencies.head
+                   }
+                 }
+    qua       <- Task.effect(funds(rawTicker).toDouble)
+    ticker    <- TickerSymbol(rawTicker)
+  } yield Currency(ticker, qua)
+
+  def dRate: Task[CCTraRate] = ZIO.effect(rate.toDouble).flatMap(CCTraRate(_))
+}
 
 object TransactionResponse {
   implicit val toTransactionTransformer
     : Transformer[TransactionResponse, Task[CCTransaction]] = res => {
     for {
-      id         <- CCTraId(res.id)
-      side       <- CCTraSide(res.side)
-      currencies  = res.pair.split("_")
-      sellTicker <- TickerSymbol(
-                      if (side.isBuy) currencies.head else currencies(1)
-                    )
-      buyTicker  <- TickerSymbol(
-                      if (side.isBuy) currencies(1) else currencies.head
-                    )
-      sellQua    <- ZIO.effect(res.funds(sellTicker.value).toDouble)
-      buyQua     <- ZIO.effect(res.funds(buyTicker.value).toDouble)
-      createdAt  <- CCTraCreatedAt(res.created_at)
-      doubleRate <- ZIO.effect(res.rate.toDouble)
-      rate       <- CCTraRate(doubleRate)
-    } yield CCTransaction(
-      id,
-      Currency(sellTicker, sellQua),
-      Currency(buyTicker, buyQua),
-      side,
-      createdAt,
-      rate
-    )
+      id        <- CCTraId(res.id)
+      sellCur   <- res.sellCurrency
+      buyCur    <- res.buyCurrency
+      side      <- CCTraSide(res.side)
+      createdAt <- CCTraCreatedAt(res.created_at)
+      rate      <- res.dRate
+    } yield CCTransaction(id, sellCur, buyCur, side, createdAt, rate)
   }
 }
