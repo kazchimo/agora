@@ -33,7 +33,7 @@ private[exchange] trait Orders extends AuthStrategy {
     body <- ZIO.fromEither(res.body)
     r    <- if (body.success) Task.succeed(())
             else
-              Task.fail(InfraError(s"failed to order: ${order.getClass.toString}"))
+              Task.fail(InfraError(s"failed to order: ${order.toString}"))
   } yield r
 
 }
