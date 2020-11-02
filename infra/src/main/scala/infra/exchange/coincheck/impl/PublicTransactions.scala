@@ -11,7 +11,7 @@ import zio.stream.{Stream, ZStream}
 import zio._
 
 private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
-  def useWS(que: Queue[String])(ws: WebSocket[RIO[Clock, *]]) = {
+  private def useWS(que: Queue[String])(ws: WebSocket[RIO[Clock, *]]) = {
     val send    =
       ws.sendText("{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}")
     val receive = for {
