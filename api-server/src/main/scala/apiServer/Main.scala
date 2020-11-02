@@ -16,9 +16,12 @@ object Main extends zio.App {
       .layer()
 
   val app: ZIO[CoincheckEnv, Throwable, Unit] =
-    putStrLn("start") *>
-      CoincheckExchange.publicTransactions
-        .onError(e => putStrLn(e.map(_.getMessage).prettyPrint + "adfasdf"))
-        .map(_.foreach(s => putStrLn(s))) *>
-      putStrLn("get stream")
+    for {
+      _      <- putStrLn("start")
+      stream <-
+        CoincheckExchange.publicTransactions
+          .onError(e => putStrLn(e.map(_.getMessage).prettyPrint + "adfasdf"))
+      _      <- stream.foreach(s => putStrLn(s))
+      _      <- putStrLn("get stream")
+    } yield ()
 }
