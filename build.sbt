@@ -36,6 +36,11 @@ lazy val commonSettings = Seq(
     Wart.Overloading,
     Wart.DefaultArguments,
     Wart.ToString
+  ) ++ ContribWart.allBut(
+    ContribWart.Apply,
+    ContribWart.MissingOverride,
+    ContribWart.SymbolicName,
+    ContribWart.NoNeedForMonad
   ),
   addCompilerPlugin(
     ("org.typelevel" %% "kind-projector" % "0.11.0").cross(CrossVersion.full)

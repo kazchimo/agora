@@ -19,7 +19,7 @@ private[exchange] trait Transactions extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
   // ignore by-name implicit conversion warning
   // see -> https://users.scala-lang.org/t/2-13-3-by-name-implicit-linting-error/6334/2
-  @nowarn def request(header: Header) = basicRequest
+  @nowarn private def request(header: Header) = basicRequest
     .get(uri"${Endpoints.transactions}")
     .headers(header)
     .response(
@@ -27,7 +27,7 @@ private[exchange] trait Transactions extends AuthStrategy {
         .mapRight(_.transactions.traverse(_.transformInto[Task[CCTransaction]]))
     )
 
-  def transactions: IO[Throwable, Seq[CCTransaction]] =
+  final def transactions: IO[Throwable, Seq[CCTransaction]] =
     for {
       hs   <- headers(Endpoints.transactions)
       req   = request(hs)

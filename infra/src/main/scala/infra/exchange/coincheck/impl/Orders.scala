@@ -17,7 +17,7 @@ import scala.annotation.nowarn
 
 private[exchange] trait Orders extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
-  @nowarn def request(order: CCOrder) = for {
+  @nowarn private def request(order: CCOrder) = for {
     h <- headers(Endpoints.orders, order.asJson.noSpaces)
   } yield basicRequest
     .post(uri"${Endpoints.orders}")
@@ -26,7 +26,7 @@ private[exchange] trait Orders extends AuthStrategy {
     .headers(h)
     .response(asJson[OrdersResponse])
 
-  def orders(order: CCOrder): RIO[SttpClient, Unit] = for {
+  override final def orders(order: CCOrder): RIO[SttpClient, Unit] = for {
     req  <- request(order)
     _     = println(req.body)
     res  <- send(req)

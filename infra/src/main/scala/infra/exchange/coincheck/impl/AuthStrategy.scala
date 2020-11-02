@@ -12,7 +12,10 @@ private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>
   protected val encodeManner = "hmacSHA256"
   type Header = Map[String, String]
 
-  protected def headers(url: String, body: String = ""): IO[Throwable, Header] =
+  final protected def headers(
+    url: String,
+    body: String = ""
+  ): IO[Throwable, Header] =
     for {
       nonce <- ZIO.effectTotal(createNonce)
       sig   <- createSig(conf.secretKey.value, url, nonce, body)

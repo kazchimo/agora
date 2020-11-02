@@ -10,13 +10,13 @@ trait VOFactory[V, P] {
 
   def apply(v: V Refined P): VO
 
-  def apply(v: V)(implicit V: Validate[V, P]): Task[VO] =
+  final def apply(v: V)(implicit V: Validate[V, P]): Task[VO] =
     refineVZE[P, V](v).map(apply)
 
-  def applyS(v: V)(implicit V: Validate[V, P]): IO[String, VO] =
+  final def applyS(v: V)(implicit V: Validate[V, P]): IO[String, VO] =
     refineVZE[P, V](v).map(apply).mapError(_.getMessage)
 
-  def unsafeFrom(v: V): VO = apply(Refined.unsafeApply[V, P](v))
+  final def unsafeFrom(v: V): VO = apply(Refined.unsafeApply[V, P](v))
 }
 
 trait SumVOFactory {
@@ -24,7 +24,7 @@ trait SumVOFactory {
   val sums: Seq[VO]
   def extractValue(v: VO): String
 
-  def apply(v: String): Task[VO] = {
+  final def apply(v: String): Task[VO] = {
     val fac = sums.foldLeft(PartialFunction.empty[String, VO]) {
       case (prev, elem) =>
         prev.orElse {

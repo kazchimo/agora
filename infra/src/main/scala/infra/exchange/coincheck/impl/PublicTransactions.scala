@@ -30,7 +30,7 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
     send *> ZIO.effectTotal(println("send websocket")) *> receive.forever
   }
 
-  override def publicTransactions
+  final override def publicTransactions
     : ZIO[SttpClient with ZEnv, Throwable, ZStream[Any, Nothing, String]] =
     for {
       _   <- putStrLn("start public transactions")
