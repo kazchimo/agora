@@ -34,7 +34,8 @@ lazy val commonSettings = Seq(
     Wart.ImplicitParameter,
     Wart.Nothing,
     Wart.Overloading,
-    Wart.DefaultArguments
+    Wart.DefaultArguments,
+    Wart.ToString
   ),
   addCompilerPlugin(
     ("org.typelevel" %% "kind-projector" % "0.11.0").cross(CrossVersion.full)
