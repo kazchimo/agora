@@ -18,9 +18,9 @@ private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>
   ): IO[Throwable, Header] =
     for {
       nonce <- ZIO.effectTotal(createNonce)
-      sig   <- createSig(conf.secretKey.value, url, nonce, body)
+      sig   <- createSig(secretKey.value.value, url, nonce, body)
     } yield Map(
-      "ACCESS-KEY"       -> conf.apiKey.value.value,
+      "ACCESS-KEY"       -> accessKey.value.value,
       "ACCESS-NONCE"     -> nonce,
       "ACCESS-SIGNATURE" -> sig
     )
