@@ -10,15 +10,17 @@ import helpers.gen.infra.exchange.coincheck.responses.TransactionResponseGen.{
 }
 import helpers.gen.std.StdGen.negativeDoubleGen
 import infra.InfraError
+import io.circe.parser.decode
 import io.scalaland.chimney.dsl._
 import zio.Task
 import zio.test.Assertion._
 import zio.test._
 
 object TransactionsResponseTest extends DefaultRunnableSpec {
-  override def spec = suite("TransactionsResponse")(transformerTest)
+  override def spec =
+    suite("TransactionsResponse")(transformerTest, decoderTest)
 
-  val transformerTest = suite("chimney transformer")(
+  val transformerTest = suite("transformer to Task[List[CCTransaction]]")(
     testM("transform into CCTransactions from SuccessTransactionsResponse")(
       checkM(transactionsResponseGen)(t =>
         assertM(t.transformInto[Task[List[CCTransaction]]])(
@@ -31,6 +33,23 @@ object TransactionsResponseTest extends DefaultRunnableSpec {
         assertM(t.transformInto[Task[List[CCTransaction]]].run)(
           fails(isSubtype[InfraError](hasMessage(containsString("error"))))
         )
+      )
+    )
+  )
+
+  val successJson =
+    "{\n  \"success\": true,\n  \"transactions\": [\n    {\n      \"id\": 38,\n      \"order_id\": 49,\n      \"created_at\": \"2015-11-18T07:02:21.000Z\",\n      \"funds\": {\n        \"btc\": \"0.1\",\n        \"jpy\": \"-4096.135\"\n      },\n      \"pair\": \"btc_jpy\",\n      \"rate\": \"40900.0\",\n      \"fee_currency\": \"JPY\",\n      \"fee\": \"6.135\",\n      \"liquidity\": \"T\",\n      \"side\": \"buy\"\n    },\n    {\n      \"id\": 37,\n      \"order_id\": 48,\n      \"created_at\": \"2015-11-18T07:02:21.000Z\",\n      \"funds\": {\n        \"btc\": \"-0.1\",\n        \"jpy\": \"4094.09\"\n      },\n      \"pair\": \"btc_jpy\",\n      \"rate\": \"40900.0\",\n      \"fee_currency\": \"JPY\",\n      \"fee\": \"-4.09\",\n      \"liquidity\": \"M\",\n      \"side\": \"sell\"\n    }\n  ]\n}"
+  val failJson    = "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
+
+  val decoderTest = suite("decoder")(
+    test("decode a success json to a SuccessTransactionsResponse")(
+      assert(decode[TransactionsResponse](successJson))(
+        isRight(isSubtype[SuccessTransactionsResponse](anything))
+      )
+    ),
+    test("decode a fail json to a FailedTransactionsResponse")(
+      assert(decode[TransactionsResponse](failJson))(
+        isRight(isSubtype[FailedTransactionsResponse](anything))
       )
     )
   )

@@ -1,22 +1,49 @@
 package infra.exchange.coincheck.responses
 
+import cats.syntax.functor._
+import cats.syntax.traverse._
 import domain.currency.{Currency, TickerSymbol}
 import domain.exchange.coincheck.CCTransaction
-import domain.exchange.coincheck.CCTransaction.{
-  Buy,
-  CCTraCreatedAt,
-  CCTraId,
-  CCTraRate,
-  CCTraSide,
-  Sell
-}
+import domain.exchange.coincheck.CCTransaction._
+import infra.InfraError
+import io.circe.Decoder
+import io.circe.generic.auto._
 import io.scalaland.chimney.Transformer
+import io.scalaland.chimney.dsl._
+import zio.interop.catz.core._
 import zio.{Task, ZIO}
 
-final case class TransactionsResponse(
-  success: Boolean,
+sealed trait TransactionsResponse {
+  val success: Boolean
+}
+
+object TransactionsResponse {
+  implicit val toTransactionsTransformer
+    : Transformer[TransactionsResponse, Task[List[CCTransaction]]] = {
+    case SuccessTransactionsResponse(transactions) =>
+      transactions.traverse(_.transformInto[Task[CCTransaction]])
+    case FailedTransactionsResponse(error)         =>
+      Task.fail(InfraError(s"occurred error while request: $error"))
+  }
+
+  implicit val transactionsResponseDecoder: Decoder[TransactionsResponse] =
+    List[Decoder[TransactionsResponse]](
+      Decoder[SuccessTransactionsResponse].widen,
+      Decoder[FailedTransactionsResponse].widen
+    ).reduceLeft(_ or _)
+
+}
+
+final case class SuccessTransactionsResponse(
   transactions: List[TransactionResponse]
-)
+) extends TransactionsResponse {
+  override val success: Boolean = true
+}
+
+final case class FailedTransactionsResponse(error: String)
+    extends TransactionsResponse {
+  override val success: Boolean = false
+}
 
 final case class TransactionResponse(
   id: Long,

@@ -5,8 +5,7 @@ import java.nio.charset.StandardCharsets
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Hex
-import zio.{IO, Task, ZIO}
-import eu.timepit.refined.auto._
+import zio.{Task, ZIO}
 
 private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>
   protected val encodeManner = "hmacSHA256"
