@@ -1,11 +1,40 @@
 package infra.exchange.coincheck.responses
 
 import domain.currency.{BitCoin, Currency, Jpy, TickerSymbol}
+import domain.exchange.coincheck.CCTransaction
 import domain.exchange.coincheck.CCTransaction.CCTraRate
-import helpers.gen.infra.exchange.coincheck.responses.TransactionResponseGen.transactionResponseGen
+import helpers.gen.infra.exchange.coincheck.responses.TransactionResponseGen.{
+  failedTransactionsResponseGen,
+  transactionResponseGen,
+  transactionsResponseGen
+}
 import helpers.gen.std.StdGen.negativeDoubleGen
+import infra.InfraError
+import io.scalaland.chimney.dsl._
+import zio.Task
 import zio.test.Assertion._
 import zio.test._
+
+object TransactionsResponseTest extends DefaultRunnableSpec {
+  override def spec = suite("TransactionsResponse")(transformerTest)
+
+  val transformerTest = suite("chimney transformer")(
+    testM("transform into CCTransactions from SuccessTransactionsResponse")(
+      checkM(transactionsResponseGen)(t =>
+        assertM(t.transformInto[Task[List[CCTransaction]]])(
+          isSubtype[List[CCTransaction]](anything)
+        )
+      )
+    ),
+    testM("transform into a error")(
+      checkM(failedTransactionsResponseGen)(t =>
+        assertM(t.transformInto[Task[List[CCTransaction]]].run)(
+          fails(isSubtype[InfraError](anything))
+        )
+      )
+    )
+  )
+}
 
 object TransactionResponseTest extends DefaultRunnableSpec {
   override def spec =
