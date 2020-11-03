@@ -30,7 +30,13 @@ trait TransactionsTest { self: CoinCheckExchangeImplTest.type =>
 
         assertM(
           testEffect.provideLayer(AsyncHttpClientZioBackend.stubLayer).run
-        )(fails(isSubtype[InfraError](anything)))
+        )(
+          fails(
+            isSubtype[InfraError](
+              hasMessage(containsString("Internal") && containsString("500"))
+            )
+          )
+        )
       },
       testM("fails with failed response") {
         val testEffect =

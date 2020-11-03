@@ -31,6 +31,8 @@ private[exchange] trait Transactions extends AuthStrategy {
       hs   <- headers(Endpoints.transactions)
       req   = request(hs)
       res  <- send(req)
-      ress <- res.body.sequence.rightOrFail(InfraError("failed to request"))
+      ress <- res.body.sequence.rightOrFailWith((e: Throwable) =>
+                InfraError(s"failed to request: ${e.toString}")
+              )
     } yield ress
 }
