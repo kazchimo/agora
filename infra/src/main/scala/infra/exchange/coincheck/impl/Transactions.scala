@@ -1,17 +1,17 @@
 package infra.exchange.coincheck.impl
 
+import cats.syntax.traverse._
 import domain.exchange.coincheck.CCTransaction
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.TransactionsResponse
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import sttp.client3._
-import sttp.client3.circe.asJson
 import io.circe.generic.auto._
-import cats.syntax.traverse._
 import io.scalaland.chimney.dsl._
-import zio.{IO, Task}
+import sttp.client3._
+import sttp.client3.asynchttpclient.zio.{send, SttpClient}
+import sttp.client3.circe.asJson
 import zio.interop.catz.core._
+import zio.{Task, ZIO}
 
 import scala.annotation.nowarn
 
@@ -27,11 +27,11 @@ private[exchange] trait Transactions extends AuthStrategy {
         .mapRight(_.transactions.traverse(_.transformInto[Task[CCTransaction]]))
     )
 
-  final def transactions: IO[Throwable, Seq[CCTransaction]] =
+  final def transactions: ZIO[SttpClient, Throwable, Seq[CCTransaction]] =
     for {
       hs   <- headers(Endpoints.transactions)
       req   = request(hs)
-      res  <- AsyncHttpClientZioBackend.managed().use(req.send(_))
+      res  <- send(req)
       ress <- res.body.sequence.rightOrFail(InfraError("failed to request"))
     } yield ress
 }
