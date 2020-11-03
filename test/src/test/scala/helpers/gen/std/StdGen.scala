@@ -1,7 +1,7 @@
 package helpers.gen.std
 
 import zio.random.Random
-import zio.test.Gen
+import zio.test.{Gen, Sized}
 
 object StdGen {
   val positiveLongGen: Gen[Random, Long] =
@@ -15,4 +15,7 @@ object StdGen {
 
   val negativeDoubleGen: Gen[Random, Double] =
     Gen.anyDouble.map(a => if (a > 0) -a else a)
+
+  val nonEmptyStringGen: Gen[Random with Sized, String] =
+    Gen.anyString.zipWith(Gen.anyChar)(_ + _)
 }
