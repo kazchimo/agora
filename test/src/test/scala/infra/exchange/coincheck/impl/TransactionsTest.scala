@@ -15,8 +15,9 @@ trait TransactionsTest { self: CoinCheckExchangeImplTest.type =>
   val transactionsSuite =
     suite("#transactions")(
       testM("returns transactions") {
-        val testEffect = whenRequestMatches(
-          _.uri.toString == Endpoints.transactions
+        val testEffect = whenRequestMatches(r =>
+          r.uri.toString == Endpoints.transactions && r.method
+            .toString() == "GET"
         ).thenRespond(successJson) *> exchange.transactions
 
         assertM(testEffect.provideLayer(AsyncHttpClientZioBackend.stubLayer))(
