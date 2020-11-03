@@ -5,13 +5,12 @@ import domain.exchange.coincheck.CCTransaction
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.TransactionsResponse
-import io.circe.generic.auto._
 import io.scalaland.chimney.dsl._
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.{send, SttpClient}
 import sttp.client3.circe.asJson
+import zio.{RIO, Task}
 import zio.interop.catz.core._
-import zio.{Task, ZIO}
 
 import scala.annotation.nowarn
 
@@ -24,10 +23,10 @@ private[exchange] trait Transactions extends AuthStrategy {
     .headers(header)
     .response(
       asJson[TransactionsResponse]
-        .mapRight(_.transactions.traverse(_.transformInto[Task[CCTransaction]]))
+        .mapRight(_.transformInto[Task[List[CCTransaction]]])
     )
 
-  final def transactions: ZIO[SttpClient, Throwable, Seq[CCTransaction]] =
+  final def transactions: RIO[SttpClient, Seq[CCTransaction]] =
     for {
       hs   <- headers(Endpoints.transactions)
       req   = request(hs)
