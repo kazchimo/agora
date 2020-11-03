@@ -12,10 +12,10 @@ import zio._
 import helpers.mockModule.zio.console.devNull
 
 trait OrdersTest { self: CoinCheckExchangeImplTest.type =>
-  val matchedWehn         = whenRequestMatches(r =>
+  private val matchedWhen = whenRequestMatches(r =>
     r.uri.toString() == Endpoints.orders && r.method == POST
   )
-  val layer               =
+  private val layer       =
     AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live ++ devNull
   private val successJson =
     "{\n  \"success\": true,\n  \"id\": 12345,\n  \"rate\": \"30010.0\",\n  \"amount\": \"1.3\",\n  \"order_type\": \"sell\",\n  \"stop_loss_rate\": null,\n  \"pair\": \"btc_jpy\",\n  \"created_at\": \"2015-01-10T05:55:38.000Z\"\n}"
@@ -25,7 +25,7 @@ trait OrdersTest { self: CoinCheckExchangeImplTest.type =>
       testM("fails if failed json returned") {
         checkM(ccOrderGen) { o =>
           val testEffect =
-            matchedWehn.thenRespond(failJson) *> exchange.orders(o)
+            matchedWhen.thenRespond(failJson) *> exchange.orders(o)
 
           assertM(testEffect.provideLayer(layer).run)(
             fails(
@@ -38,7 +38,7 @@ trait OrdersTest { self: CoinCheckExchangeImplTest.type =>
       },
       testM("returns () if order succeed")(checkM(ccOrderGen) { o =>
         val testEffect =
-          matchedWehn.thenRespond(successJson) *> exchange.orders(o)
+          matchedWhen.thenRespond(successJson) *> exchange.orders(o)
 
         assertM(testEffect.provideLayer(layer))(isSubtype[Unit](anything))
       })

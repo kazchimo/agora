@@ -5,41 +5,44 @@ import infra.exchange.coincheck.Endpoints
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.{sendR, SttpClient}
 import sttp.ws.WebSocket
-import zio.clock.Clock
-import zio.console.putStrLn
-import zio.stream.{Stream, ZStream}
 import zio._
+import zio.console.putStrLn
+import zio.stream.Stream
 
 private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
-  private def useWS(que: Queue[String])(ws: WebSocket[RIO[Clock, *]]) = {
+  private def useWS(que: Queue[String])(ws: WebSocket[RIO[ZEnv, *]]) = {
     val send    =
       ws.sendText("{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}")
     val receive = for {
-      textEither <- ws.receiveTextFrame()
+      textEither <-
+        ws.receiveTextFrame()
+      _          <- putStrLn(s"received: ${textEither.toString}")
       text       <-
         ZIO
           .fromEither(textEither)
+          .onError(_ => putStrLn("shutdown") *> que.shutdown)
           .mapError(c =>
             InfraError(
               s"close websocket connection: statusCode=${c.statusCode.toString} reason=${c.reasonText}"
             )
           )
+      _          <- putStrLn(text.toString)
       _          <- que.offer(text.payload)
     } yield ()
 
-    send *> ZIO.effectTotal(println("send websocket")) *> receive.forever
+    send *> putStrLn("send websocket") *> receive.forever
   }
 
   final override def publicTransactions
-    : ZIO[SttpClient with ZEnv, Throwable, ZStream[Any, Nothing, String]] =
+    : ZIO[SttpClient with ZEnv, Throwable, Stream[Nothing, String]] =
     for {
       _   <- putStrLn("start public transactions")
       que <- Queue.unbounded[String]
-      _   <- sendR[Long, Clock](
+      _   <- sendR[Unit, ZEnv](
                basicRequest
                  .get(uri"${Endpoints.websocket}")
                  .response(asWebSocketAlways(useWS(que)))
              ).fork
       _   <- putStrLn("send complete")
-    } yield Stream.fromQueue(que)
+    } yield Stream.fromQueueWithShutdown(que).interruptWhen(que.awaitShutdown)
 }

@@ -6,7 +6,8 @@ import zio.test.{suite, DefaultRunnableSpec}
 object CoinCheckExchangeImplTest
     extends DefaultRunnableSpec
     with TransactionsTest
-    with OrdersTest {
+    with OrdersTest
+    with PublicTransactionsTest {
   val exchange = CoinCheckExchangeImpl(
     CCEAccessKey.unsafeFrom("hoge"),
     CCESecretKey.unsafeFrom("hoge")
@@ -15,5 +16,9 @@ object CoinCheckExchangeImplTest
     "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
 
   override def spec =
-    suite("CoinCheckExchangeImpl")(transactionsSuite, ordersSuite)
+    suite("CoinCheckExchangeImpl")(
+      transactionsSuite,
+      ordersSuite,
+      publicTransactionsTest
+    )
 }
