@@ -29,7 +29,7 @@ object TransactionsResponseTest extends DefaultRunnableSpec {
     testM("transform into a error")(
       checkM(failedTransactionsResponseGen)(t =>
         assertM(t.transformInto[Task[List[CCTransaction]]].run)(
-          fails(isSubtype[InfraError](anything))
+          fails(isSubtype[InfraError](hasMessage(containsString("error"))))
         )
       )
     )
