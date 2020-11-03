@@ -40,8 +40,8 @@ final case class TransactionResponse(
       s         <- dSide
       rawTicker <- Task.effect {
                      s match {
-                       case Buy  => currencies.head
-                       case Sell => currencies(1)
+                       case Buy  => currencies(1)
+                       case Sell => currencies.head
                      }
                    }
       qua       <- Task.effect(funds(rawTicker).toDouble)
@@ -52,8 +52,8 @@ final case class TransactionResponse(
     s         <- dSide
     rawTicker <- Task.effect {
                    s match {
-                     case Buy  => currencies(1)
-                     case Sell => currencies.head
+                     case Buy  => currencies.head
+                     case Sell => currencies(1)
                    }
                  }
     qua       <- Task.effect(funds(rawTicker).toDouble)
