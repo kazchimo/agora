@@ -9,6 +9,7 @@ import sttp.model.Method.POST
 import zio.test.Assertion._
 import zio.test._
 import zio._
+import helpers.mockModule.zio.console.empty
 
 trait OrdersTest { self: CoinCheckExchangeImplTest.type =>
   val matchedWehn = whenRequestMatches(r =>
@@ -22,7 +23,9 @@ trait OrdersTest { self: CoinCheckExchangeImplTest.type =>
 
         assertM(
           testEffect
-            .provideLayer(AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live)
+            .provideLayer(
+              AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live ++ empty
+            )
             .run
         )(
           fails(
