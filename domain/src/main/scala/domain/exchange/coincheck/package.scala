@@ -1,8 +1,8 @@
 package domain.exchange
 
 import sttp.client3.asynchttpclient.zio.SttpClient
-import zio.stream.{Stream, ZStream}
 import zio._
+import zio.stream.Stream
 
 package object coincheck {
   type CoincheckExchange = Has[CoincheckExchange.Service]
@@ -13,7 +13,7 @@ package object coincheck {
       def transactions: RIO[SttpClient, Seq[CCTransaction]]
       def orders(order: CCOrder): RIO[SttpClient, Unit]
       def publicTransactions
-        : ZIO[SttpClient with ZEnv, Throwable, ZStream[Any, Nothing, String]]
+        : ZIO[SttpClient with ZEnv, Throwable, Stream[Nothing, String]]
     }
 
     def transactions: ZIO[CoincheckEnv, Throwable, Seq[CCTransaction]] =
