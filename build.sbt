@@ -16,7 +16,6 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-deprecation",
     "-Xlint",
-    "-Xfatal-warnings",
     "-language:existentials",
     "-language:experimental.macros",
     "-language:higherKinds",
@@ -35,12 +34,14 @@ lazy val commonSettings = Seq(
     Wart.Nothing,
     Wart.Overloading,
     Wart.DefaultArguments,
-    Wart.ToString
+    Wart.ToString,
+    Wart.TraversableOps
   ) ++ ContribWart.allBut(
     ContribWart.Apply,
     ContribWart.MissingOverride,
     ContribWart.SymbolicName,
-    ContribWart.NoNeedForMonad
+    ContribWart.NoNeedForMonad,
+    ContribWart.SomeApply
   ),
   addCompilerPlugin(
     ("org.typelevel" %% "kind-projector" % "0.11.0").cross(CrossVersion.full)
