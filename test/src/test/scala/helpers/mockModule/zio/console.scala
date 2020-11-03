@@ -6,7 +6,7 @@ import zio.console.Console
 import zio.{IO, UIO, ULayer, ZLayer}
 
 object console {
-  val empty: ULayer[Console] = ZLayer.succeed(new Console.Service {
+  val devNull: ULayer[Console] = ZLayer.succeed(new Console.Service {
     override def putStr(line: String): UIO[Unit] = UIO.succeed(())
 
     override def putStrErr(line: String): UIO[Unit] = UIO.succeed(())
