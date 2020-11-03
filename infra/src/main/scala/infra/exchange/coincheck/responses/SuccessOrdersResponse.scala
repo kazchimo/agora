@@ -1,6 +1,18 @@
 package infra.exchange.coincheck.responses
 
+import io.circe.Decoder
+import io.circe.generic.auto._
+import cats.syntax.functor._
+
 sealed trait OrdersResponse extends CoincheckResponse
+
+object OrdersResponse {
+  implicit val ordersResponseDecoder: Decoder[OrdersResponse] =
+    List[Decoder[OrdersResponse]](
+      Decoder[SuccessOrdersResponse].widen,
+      Decoder[FailedOrdersResponse].widen
+    ).reduceLeft(_ or _)
+}
 
 final case class SuccessOrdersResponse(
   id: Long,
