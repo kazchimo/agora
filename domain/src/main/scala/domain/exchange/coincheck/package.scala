@@ -11,7 +11,7 @@ package object coincheck {
   object CoincheckExchange {
     trait Service {
       def transactions: RIO[SttpClient, Seq[CCTransaction]]
-      def orders(order: CCOrder): RIO[SttpClient, Unit]
+      def orders(order: CCOrder): RIO[SttpClient with ZEnv, Unit]
       def publicTransactions
         : ZIO[SttpClient with ZEnv, Throwable, Stream[Nothing, String]]
     }
