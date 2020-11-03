@@ -3,7 +3,7 @@ package infra.exchange.coincheck.impl
 import domain.exchange.coincheck.CCOrder
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
-import infra.exchange.coincheck.responses.OrdersResponse
+import infra.exchange.coincheck.responses.SuccessOrdersResponse
 import sttp.client3.asynchttpclient.zio.{send, SttpClient}
 import sttp.client3.basicRequest
 import sttp.client3.circe.asJson
@@ -24,7 +24,7 @@ private[exchange] trait Orders extends AuthStrategy {
     .contentType("application/json")
     .body(order.asJson.noSpaces)
     .headers(h)
-    .response(asJson[OrdersResponse])
+    .response(asJson[SuccessOrdersResponse])
 
   override final def orders(order: CCOrder): RIO[SttpClient, Unit] = for {
     req  <- request(order)
