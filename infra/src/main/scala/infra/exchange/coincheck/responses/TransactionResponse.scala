@@ -29,8 +29,6 @@ final case class TransactionResponse(
   liquidity: String,
   side: String
 ) {
-  def dId: Task[CCTraId] = CCTraId(id)
-
   def dSide: Task[CCTraSide] = CCTraSide(side)
 
   private val currencies = pair.split("_")
