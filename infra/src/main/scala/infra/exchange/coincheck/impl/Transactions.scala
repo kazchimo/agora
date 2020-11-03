@@ -9,8 +9,8 @@ import io.scalaland.chimney.dsl._
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.{send, SttpClient}
 import sttp.client3.circe.asJson
-import zio.{RIO, Task}
 import zio.interop.catz.core._
+import zio.{RIO, Task}
 
 import scala.annotation.nowarn
 
