@@ -13,9 +13,7 @@ import io.scalaland.chimney.dsl._
 import zio.interop.catz.core._
 import zio.{Task, ZIO}
 
-sealed trait TransactionsResponse {
-  val success: Boolean
-}
+sealed trait TransactionsResponse extends CoincheckResponse
 
 object TransactionsResponse {
   implicit val toTransactionsTransformer
