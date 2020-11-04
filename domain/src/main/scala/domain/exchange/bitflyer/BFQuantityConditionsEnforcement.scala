@@ -1,6 +1,6 @@
 package domain.exchange.bitflyer
 
-sealed abstract class BFQuantityConditionsEnforcement(v: String)
+sealed abstract class BFQuantityConditionsEnforcement(val v: String)
 
 case object FBGoodTilCanceledQCE extends BFQuantityConditionsEnforcement("GTC")
 
