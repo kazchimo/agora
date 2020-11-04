@@ -7,7 +7,6 @@ import zio.stream.Stream
 
 package object coincheck {
   type CoincheckExchange = Has[CoincheckExchange.Service]
-  type CoincheckEnv      = SttpClient with CoincheckExchange with ZEnv
 
   @accessible
   object CoincheckExchange {
