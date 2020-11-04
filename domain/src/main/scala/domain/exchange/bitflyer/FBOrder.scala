@@ -10,14 +10,7 @@ import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
 import lib.factory.VOFactory
 
-sealed abstract class BFChildOrderType(val v: String)
-case object BFLimitOrderType  extends BFChildOrderType("LIMIT")
-case object BFMarketOrderType extends BFChildOrderType("MARKET")
-
-sealed abstract class BFOrderSide(val v: String)
-case object BFBuy  extends BFChildOrderType("BUY")
-case object BFSell extends BFChildOrderType("SELL")
-
+// https://lightning.bitflyer.com/docs?lang=ja#%E6%96%B0%E8%A6%8F%E6%B3%A8%E6%96%87%E3%82%92%E5%87%BA%E3%81%99
 final case class BFChildOrder(
   tpe: BFChildOrderType,
   side: BFOrderSide,
@@ -43,3 +36,11 @@ object BFChildOrder {
     override type VO = BFOrderMinuteToExpire
   }
 }
+
+sealed abstract class BFChildOrderType(val v: String)
+case object BFLimitOrderType  extends BFChildOrderType("LIMIT")
+case object BFMarketOrderType extends BFChildOrderType("MARKET")
+
+sealed abstract class BFOrderSide(val v: String)
+case object BFBuy  extends BFChildOrderType("BUY")
+case object BFSell extends BFChildOrderType("SELL")
