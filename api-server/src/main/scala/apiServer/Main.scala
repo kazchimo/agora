@@ -1,11 +1,11 @@
 package apiServer
 
-import domain.exchange.coincheck.{CoincheckEnv, CoincheckExchange}
+import domain.exchange.coincheck.CoincheckExchange
 import infra.conf.ConfImpl
 import infra.exchange.ExchangeImpl
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
+import zio.ZLayer
 import zio.console.putStrLn
-import zio.{ZIO, ZLayer}
 
 object Main extends zio.App {
   override def run(args: List[String]) =
@@ -15,7 +15,7 @@ object Main extends zio.App {
     ConfImpl.layer >>> ExchangeImpl.coinCheckExchange ++ AsyncHttpClientZioBackend
       .layer()
 
-  val app: ZIO[CoincheckEnv, Throwable, Unit] =
+  private val app =
     for {
       _      <- putStrLn("start")
       stream <-
