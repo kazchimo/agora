@@ -17,6 +17,7 @@ final case class BFChildOrder(
   price: BFOrderPrice,
   size: BFOrderSize,
   timeInForce: BFQuantityConditionsEnforcement,
+  productCode: BFProductCode,
   minuteToExpire: Option[BFOrderMinuteToExpire] = None
 )
 
