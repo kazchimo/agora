@@ -1,14 +1,9 @@
 package infra.exchange.coincheck.impl
 
-import java.nio.charset.StandardCharsets
-
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
-import org.apache.commons.codec.binary.Hex
+import lib.cripto.HmacSha256Encode.hmacSHA256Encode
 import zio.{Task, ZIO}
 
 private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>
-  protected val encodeManner = "hmacSHA256"
   type Header = Map[String, String]
 
   final protected def headers(url: String, body: String = ""): Task[Header] =
@@ -30,22 +25,5 @@ private[exchange] trait AuthStrategy { self: CoinCheckExchangeImpl =>
     body: String
   ) =
     hmacSHA256Encode(secretKey, nonce + url + body)
-
-  private def hmacSHA256Encode(
-    secretKey: String,
-    message: String
-  ): Task[String] =
-    ZIO
-      .effect {
-        val keySpec = new SecretKeySpec(
-          secretKey.getBytes(StandardCharsets.US_ASCII),
-          encodeManner
-        )
-        val mac     = Mac.getInstance(encodeManner)
-        mac.init(keySpec)
-        Hex.encodeHexString(
-          mac.doFinal(message.getBytes(StandardCharsets.US_ASCII))
-        )
-      }
 
 }
