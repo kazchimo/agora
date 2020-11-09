@@ -1,5 +1,15 @@
 package apiServer
 
+import domain.exchange.bitflyer.BFChildOrder.{BFOrderPrice, BFOrderSize}
+import domain.exchange.bitflyer.{
+  BFBtcJpy,
+  BFBuy,
+  BFChildOrder,
+  BFGoodTilCanceledQCE,
+  BFLimitOrderType,
+  BFQuantityConditionsEnforcement,
+  BitflyerExchange
+}
 import domain.exchange.coincheck.CoincheckExchange
 import infra.conf.ConfImpl
 import infra.exchange.ExchangeImpl
@@ -11,17 +21,25 @@ object Main extends zio.App {
   override def run(args: List[String]) =
     app.provideCustomLayer(layer).exitCode
 
-  val layer: ZLayer[Any, Throwable, CoincheckExchange with SttpClient] =
-    ConfImpl.layer >>> ExchangeImpl.coinCheckExchange ++ AsyncHttpClientZioBackend
+  val layer: ZLayer[Any, Throwable, BitflyerExchange with SttpClient] =
+    ConfImpl.layer >>> ExchangeImpl.bitflyerExchange ++ AsyncHttpClientZioBackend
       .layer()
 
   private val app =
     for {
-      _      <- putStrLn("start")
-      stream <-
-        CoincheckExchange.publicTransactions
-          .onError(e => putStrLn(e.map(_.getMessage).prettyPrint + "adfasdf"))
-      _      <- stream.foreach(s => putStrLn(s))
-      _      <- putStrLn("get stream")
+      _ <- putStrLn("start")
+      _ <-
+        BitflyerExchange
+          .childOrder(
+            BFChildOrder(
+              BFLimitOrderType,
+              BFBuy,
+              BFOrderPrice.unsafeFrom(3),
+              BFOrderSize.unsafeFrom(4),
+              BFGoodTilCanceledQCE,
+              BFBtcJpy
+            )
+          )
+      _ <- putStrLn("end")
     } yield ()
 }
