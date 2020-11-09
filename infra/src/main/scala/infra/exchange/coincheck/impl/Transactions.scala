@@ -12,13 +12,9 @@ import sttp.client3.circe.asJson
 import zio.interop.catz.core._
 import zio.{RIO, Task}
 
-import scala.annotation.nowarn
-
 private[exchange] trait Transactions extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
-  // ignore by-name implicit conversion warning
-  // see -> https://users.scala-lang.org/t/2-13-3-by-name-implicit-linting-error/6334/2
-  @nowarn private def request(header: Header) = basicRequest
+  private def request(header: Header) = basicRequest
     .get(uri"${Endpoints.transactions}")
     .headers(header)
     .response(
