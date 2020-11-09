@@ -18,7 +18,7 @@ import zio.{RIO, Task, ZEnv, ZIO}
 
 import scala.annotation.nowarn
 
-private[exchange] trait Orders extends AuthStrategy {
+private[coincheck] trait Orders extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
   @nowarn private def request(order: CCOrder) = for {
     h <- headers(Endpoints.orders, order.asJson.noSpaces)
