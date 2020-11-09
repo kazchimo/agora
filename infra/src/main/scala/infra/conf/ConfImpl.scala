@@ -1,23 +1,33 @@
 package infra.conf
 
-import domain.conf.{CCEAccessKey, CCESecretKey, Conf}
+import domain.conf.{BFAccessKey, BFSecretKey, CCEAccessKey, CCESecretKey, Conf}
 import infra.InfraError
 import zio.{Has, Task, ULayer, ZIO, ZLayer}
 
 object ConfImpl {
   val layer: ULayer[Has[Conf.Service]] = ZLayer.succeed {
-    val accessKey = ZIO
+    val ccAccessKey = ZIO
       .fromOption(sys.env.get("CC_ACCESS_KEY"))
-      .mapError(_ => InfraError("CC_ACCESS_KEY not found"))
+      .orElseFail(InfraError("CC_ACCESS_KEY not found"))
       .flatMap(CCEAccessKey(_))
-    val secKey    = ZIO
+    val ccSecKey    = ZIO
       .fromOption(sys.env.get("CC_SECRET_KEY"))
-      .mapError(_ => InfraError("CC_SECRET_KEY not found"))
+      .orElseFail(InfraError("CC_SECRET_KEY not found"))
       .flatMap(CCESecretKey(_))
+    val bfAccessKey = ZIO
+      .fromOption(sys.env.get("BF_ACCESS_KEY"))
+      .orElseFail(InfraError("BF_ACCESS_KEY not found"))
+      .flatMap(BFAccessKey(_))
+    val bfSecKey    = ZIO
+      .fromOption(sys.env.get("BF_SECRET_KEY"))
+      .orElseFail(InfraError("BF_SECRET_KEY not found"))
+      .flatMap(BFSecretKey(_))
 
     new Conf.Service {
-      override val CCAccessKey: Task[CCEAccessKey] = accessKey
-      override val CCSecretKey: Task[CCESecretKey] = secKey
+      override val CCAccessKey: Task[CCEAccessKey] = ccAccessKey
+      override val CCSecretKey: Task[CCESecretKey] = ccSecKey
+      override val BFAccessKey: Task[BFAccessKey]  = bfAccessKey
+      override val BFSecretKey: Task[BFSecretKey]  = bfSecKey
     }
   }
 }
