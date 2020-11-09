@@ -16,11 +16,9 @@ import sttp.client3.{basicRequest, UriContext}
 import zio.interop.console.cats.putStrLn
 import zio.{RIO, Task, ZEnv, ZIO}
 
-import scala.annotation.nowarn
-
 private[coincheck] trait Orders extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
-  @nowarn private def request(order: CCOrder) = for {
+  private def request(order: CCOrder) = for {
     h <- headers(Endpoints.orders, order.asJson.noSpaces)
   } yield basicRequest
     .post(uri"${Endpoints.orders}")
