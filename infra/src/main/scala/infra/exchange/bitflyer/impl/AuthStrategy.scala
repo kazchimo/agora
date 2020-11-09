@@ -4,7 +4,7 @@ import lib.cripto.HmacSha256Encode.hmacSHA256Encode
 import zio.{Task, ZIO}
 
 private[bitflyer] trait AuthStrategy { self: BitflyerExchangeImpl =>
-  private type Header = Map[String, String]
+  type Header = Map[String, String]
 
   final def headers(method: String, path: String, body: String): Task[Header] =
     for {
