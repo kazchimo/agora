@@ -15,6 +15,8 @@ package object conf {
     trait Service {
       val CCAccessKey: Task[CCEAccessKey]
       val CCSecretKey: Task[CCESecretKey]
+      val BFAccessKey: Task[BFAccessKey]
+      val BFSecretKey: Task[BFSecretKey]
     }
   }
 
@@ -26,5 +28,15 @@ package object conf {
   @newtype final case class CCESecretKey(value: NonEmptyString)
   object CCESecretKey extends VOFactory[String, NonEmpty] {
     override type VO = CCESecretKey
+  }
+
+  @newtype final case class BFAccessKey(value: NonEmptyString)
+  object BFAccessKey extends VOFactory[String, NonEmpty] {
+    override type VO = BFAccessKey
+  }
+
+  @newtype final case class BFSecretKey(value: NonEmptyString)
+  object BFSecretKey extends VOFactory[String, NonEmpty] {
+    override type VO = BFSecretKey
   }
 }
