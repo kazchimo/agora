@@ -29,11 +29,15 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
               s"close websocket connection: statusCode=${c.statusCode.toString} reason=${c.reasonText}"
             )
           )
-      body       <- PublicTransactions.textToModel(text.payload)
+      body       <- PublicTransactions
+                      .textToModel(text.payload).tapError(e =>
+                        log.error(s"Failed to parse text: ${e.toString}")
+                      )
       _          <- que.offer(body)
     } yield ()
 
-    send *> receive.forever
+    log.debug("websocket connection start") *> send *> receive.forever *> log
+      .debug("websocket connection shutdowned")
   }
 
   final override def publicTransactions: ZIO[
@@ -41,6 +45,7 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
     Throwable,
     Stream[Nothing, CCPublicTransaction]
   ] = for {
+    _   <- log.debug("Querying coincheck public transactions...")
     que <- Queue.unbounded[CCPublicTransaction]
     _   <- sendR[Unit, ZEnv with Logging](
              basicRequest
@@ -51,23 +56,26 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
 }
 
 object PublicTransactions {
-  def textToModel(text: String): ZIO[Any, Throwable, CCPublicTransaction] = {
-    val regex = """[(\d),"(.*)","(\d*\.\d)","(\d*\.\d)","(.*)"]""".r
+  def textToModel(
+    text: String
+  ): ZIO[Logging, Throwable, CCPublicTransaction] = {
+    val regex = """\[(\d*),"(.*?)","(\d*\.\d*)","(\d*\.\d*)","(.*?)"\]""".r
+    val error = InternalInfraError(
+      s"Failed to parse body of Coincheck public transaction: $text"
+    )
 
-    def parse(s: String): IO[InternalInfraError, String] =
-      ZIO.fromOption(Option(s)).orElseFail {
-        InternalInfraError(
-          s"Failed to parse body of Coincheck public transaction: $text"
-        )
-      }
+    def parse(s: => String) = ZIO
+      .effect(s).foldM(
+        e => ZIO.fail(error.copy(cause = Some(e))),
+        {
+          case null => ZIO.fail(error)
+          case a    => ZIO.succeed(a)
+        }
+      )
 
     for {
-      m           <- ZIO
-                       .fromOption(regex.findFirstMatchIn(text)).orElseFail(
-                         InternalInfraError(
-                           s"Failed to parse body of Coincheck public transaction: $text"
-                         )
-                       )
+      m           <- ZIO.fromOption(regex.findFirstMatchIn(text)).orElseFail(error)
+      _           <- log.debug(s"Text: $text Matched object: ${m.toString()}")
       id          <- parse(m.group(1)).flatMap(CCPubTraId(_))
       pair        <- parse(m.group(2)).flatMap(CCPubTraPair(_))
       strRate     <- parse(m.group(3))

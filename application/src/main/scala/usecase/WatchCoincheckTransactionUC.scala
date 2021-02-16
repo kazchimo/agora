@@ -13,7 +13,7 @@ object WatchCoincheckTransactionUC {
   ] = for {
     _      <- log.info("Watching Coincheck transactions...")
     stream <- CoincheckExchange.publicTransactions
-    _      <- stream.foreach(s => log.info(s))
+    _      <- stream.foreach(s => log.info(s.toString))
     _      <- log.info("Finished watching Coincheck transactions")
   } yield ()
 }
