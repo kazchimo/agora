@@ -14,7 +14,7 @@ trait VOFactory[V, P] {
     refineVZE[P, V](v).map(apply)
 
   final def applyS(v: V)(implicit V: Validate[V, P]): IO[String, VO] =
-    refineVZE[P, V](v).map(apply).mapError(_.getMessage)
+    refineVZE[P, V](v).bimap(_.getMessage, apply)
 
   final def unsafeFrom(v: V): VO = apply(Refined.unsafeApply[V, P](v))
 }
