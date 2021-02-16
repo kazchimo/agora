@@ -2,8 +2,7 @@ import infra.conf.ConfImpl
 import infra.exchange.ExchangeImpl
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import usecase.WatchCoincheckTransactionUC
-import zio.console.putStrLn
-import zio.logging.Logging
+import zio.logging.{Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv}
 
@@ -18,6 +17,6 @@ object Main extends zio.App {
     .exitCode
 
   private val app =
-    putStrLn("start") *> WatchCoincheckTransactionUC.watch *> putStrLn("end")
+    log.info("start") *> WatchCoincheckTransactionUC.watch *> log.info("end")
 
 }
