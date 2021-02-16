@@ -1,11 +1,16 @@
 package usecase
 
 import domain.exchange.coincheck.CoincheckExchange
-import zio.logging.log
-import zio.Has
+import sttp.client3.asynchttpclient.zio.SttpClient
+import zio.ZIO
+import zio.logging.{Logging, log}
 
 object WatchCoincheckTransactionUC {
-  def watch: ZIO[Has[CoincheckExchange.Service] with SttpClient with ZEnv with Logging,Throwable,Unit] = for {
+  def watch: ZIO[
+    CoincheckExchange with zio.ZEnv with Logging with SttpClient,
+    Throwable,
+    Unit
+  ] = for {
     _      <- log.info("Watching Coincheck transactions...")
     stream <- CoincheckExchange.publicTransactions
     _      <- stream.foreach(s => log.info(s))
