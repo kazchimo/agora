@@ -1,4 +1,5 @@
 import Dependencies._
+import sbtwelcome.UsefulTask
 
 ThisBuild / scalaVersion := "2.13.3"
 
@@ -48,12 +49,25 @@ lazy val commonSettings = Seq(
   )
 )
 
-addCommandAlias("root", ";project root")
-addCommandAlias("api", ";project apiServer")
-addCommandAlias("domain", ";project domain")
-addCommandAlias("infra", ";project infra")
-addCommandAlias("t", "test")
-addCommandAlias("c", "compile")
+logo :=
+  """
+    |    _
+    |   / \   __ _  ___  _ __ __ _
+    |  / _ \ / _` |/ _ \| '__/ _` |
+    | / ___ \ (_| | (_) | | | (_| |
+    |/_/   \_\__, |\___/|_|  \__,_|
+    |        |___/
+    |""".stripMargin
+
+usefulTasks := Seq(
+  UsefulTask("c", "compile", "Compile all modules"),
+  UsefulTask("root", "project root", "Move to root project"),
+  UsefulTask("api", "project apiServer", "Move to api project"),
+  UsefulTask("domain", "project domain", "Move to domain project"),
+  UsefulTask("infra", "project infra", "Move to infra project"),
+  UsefulTask("t", "test", "Test"),
+  UsefulTask("r", "reload", "Reload projects")
+)
 
 lazy val root = project
   .in(file("."))
