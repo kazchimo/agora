@@ -20,23 +20,25 @@ trait PublicTransactionsTest { self: CoinCheckExchangeImplTest.type =>
   private val layer       =
     AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live ++ Logging.ignore
 
-  protected val publicTransactionsTest: Spec[Annotations,TestFailure[Throwable],TestSuccess] = suite("#publicTransactions")(
-    testM("fails if websocket closed") {
-      val stub = WebSocketStub.noInitialReceive.thenRespond {
-        case WebSocketFrame.Text(
-              "{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}",
-              true,
-              None
-            ) => List(WebSocketFrame.text("asdf"), WebSocketFrame.text("k"))
-      }
+  protected val publicTransactionsTest
+    : Spec[Annotations, TestFailure[Throwable], TestSuccess] =
+    suite("#publicTransactions")(
+      testM("fails if websocket closed") {
+        val stub = WebSocketStub.noInitialReceive.thenRespond {
+          case WebSocketFrame.Text(
+                "{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}",
+                true,
+                None
+              ) => List(WebSocketFrame.text("asdf"), WebSocketFrame.text("k"))
+        }
 
-      (for {
-        _   <- matchedWhen.thenRespond(stub)
-        r   <- exchange.publicTransactions.fork
-        res <- r.join.map(_.runCount)
-      } yield assert(res)(isSubtype[Stream[Nothing, String]](anything)))
-        .provideLayer(layer)
-    } @@ ignore,
-    test("returns websocket data as stream")(assert(1)(anything)) @@ ignore
-  )
+        (for {
+          _   <- matchedWhen.thenRespond(stub)
+          r   <- exchange.publicTransactions.fork
+          res <- r.join.map(_.runCount)
+        } yield assert(res)(isSubtype[Stream[Nothing, String]](anything)))
+          .provideLayer(layer)
+      } @@ ignore,
+      test("returns websocket data as stream")(assert(1)(anything)) @@ ignore
+    )
 }
