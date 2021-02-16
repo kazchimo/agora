@@ -22,7 +22,7 @@ lazy val rootDeps = Seq(
   zioCats,
   zioLogging,
   zioMagic
-) ++ circeDeps ++ zioDeps ++ sttpDeps ++ testDeps
+) ++ circeDeps ++ zioDeps ++ sttpDeps ++ testDeps ++ monocleDeps ++ enumeratumDeps
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(

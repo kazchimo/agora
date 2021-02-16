@@ -2,10 +2,11 @@ import sbt._
 
 object Dependencies {
   object Versions {
-    val zio     = "1.0.3"
-    val sttp    = "3.0.0-RC7"
-    val circe   = "0.13.0"
-    val monocle = "2.1.0"
+    val zio        = "1.0.3"
+    val sttp       = "3.0.0-RC7"
+    val circe      = "0.13.0"
+    val monocle    = "2.1.0"
+    val enumeratum = "1.6.1"
   }
 
   lazy val monocleDeps = Seq(
@@ -18,7 +19,7 @@ object Dependencies {
     "com.github.julien-truffaut" %% "monocle-law"     % Versions.monocle % "test"
   )
 
-  lazy val circeDeps  = Seq(
+  lazy val circeDeps      = Seq(
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",
     "io.circe" %% "circe-parser",
@@ -27,31 +28,35 @@ object Dependencies {
     "io.circe" %% "circe-refined"
   ).map(_ % Versions.circe)
 
-  lazy val zioDeps    = Seq(
+  lazy val zioDeps        = Seq(
     "dev.zio" %% "zio",
     "dev.zio" %% "zio-streams",
     "dev.zio" %% "zio-macros"
   ).map(_ % Versions.zio)
 
-  lazy val testDeps   = Seq(
+  lazy val testDeps       = Seq(
     "dev.zio" %% "zio-test"          % Versions.zio,
     "dev.zio" %% "zio-test-sbt"      % Versions.zio,
     "dev.zio" %% "zio-test-magnolia" % Versions.zio
   ).map(_ % Test)
 
-  lazy val sttpDeps   = Seq(
+  lazy val sttpDeps       = Seq(
     "com.softwaremill.sttp.client3" %% "core",
     "com.softwaremill.sttp.client3" %% "circe",
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio"
   ).map(_ % Versions.sttp)
 
-  lazy val scalaTest  = "org.scalatest"        %% "scalatest"        % "3.2.2"
-  lazy val zioCats    = "dev.zio"              %% "zio-interop-cats" % "2.2.0.1"
-  lazy val zioLogging = "dev.zio"              %% "zio-logging"      % "0.5.6"
-  lazy val zioMagic   = "io.github.kitlangton" %% "zio-magic"        % "0.1.8"
-  lazy val codec      = "commons-codec"         % "commons-codec"    % "1.15"
-  lazy val newtype    = "io.estatico"          %% "newtype"          % "0.4.4"
-  lazy val refined    = "eu.timepit"           %% "refined"          % "0.9.17"
-  lazy val chimney    = "io.scalaland"         %% "chimney"          % "0.6.0"
-  lazy val cats       = "org.typelevel"        %% "cats-core"        % "2.2.0"
+  lazy val enumeratumDeps =
+    Seq("com.beachape" %% "enumeratum", "com.beachape" %% "enumeratum-circe")
+      .map(_ % Versions.enumeratum)
+
+  lazy val scalaTest      = "org.scalatest"        %% "scalatest"        % "3.2.2"
+  lazy val zioCats        = "dev.zio"              %% "zio-interop-cats" % "2.2.0.1"
+  lazy val zioLogging     = "dev.zio"              %% "zio-logging"      % "0.5.6"
+  lazy val zioMagic       = "io.github.kitlangton" %% "zio-magic"        % "0.1.8"
+  lazy val codec          = "commons-codec"         % "commons-codec"    % "1.15"
+  lazy val newtype        = "io.estatico"          %% "newtype"          % "0.4.4"
+  lazy val refined        = "eu.timepit"           %% "refined"          % "0.9.17"
+  lazy val chimney        = "io.scalaland"         %% "chimney"          % "0.6.0"
+  lazy val cats           = "org.typelevel"        %% "cats-core"        % "2.2.0"
 }
