@@ -20,7 +20,8 @@ lazy val rootDeps = Seq(
   chimney,
   cats,
   zioCats,
-  zioLogging
+  zioLogging,
+  zioMagic
 ) ++ circeDeps ++ zioDeps ++ sttpDeps ++ testDeps
 
 lazy val commonSettings = Seq(
