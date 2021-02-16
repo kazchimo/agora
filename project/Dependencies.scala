@@ -8,7 +8,7 @@ object Dependencies {
 
   }
 
-  lazy val circeDeps = Seq(
+  lazy val circeDeps  = Seq(
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",
     "io.circe" %% "circe-parser",
@@ -17,11 +17,13 @@ object Dependencies {
     "io.circe" %% "circe-refined"
   ).map(_ % Versions.circe)
 
-  lazy val zioDeps   = Seq(
+  lazy val zioDeps    = Seq(
     "dev.zio" %% "zio",
     "dev.zio" %% "zio-streams",
     "dev.zio" %% "zio-macros"
   ).map(_ % Versions.zio)
+
+  lazy val zioLogging = "dev.zio" %% "zio-logging" % "0.5.6"
 
   lazy val testDeps  = Seq(
     "dev.zio" %% "zio-test"          % Versions.zio,
