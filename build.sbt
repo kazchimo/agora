@@ -71,7 +71,8 @@ usefulTasks := Seq(
 
 lazy val root = project
   .in(file("."))
-  .aggregate(domain, infra, apiServer, lib, test)
+  .aggregate(domain, infra, lib, test)
+  .dependsOn(domain, infra, lib, test)
   .settings(name := "agora", commonSettings)
 
 lazy val domain = project
@@ -86,12 +87,6 @@ lazy val infra = project
   .settings(moduleName := "infra", name := "infra")
   .dependsOn(domain, lib)
 
-lazy val apiServer = project
-  .in(file("api-server"))
-  .settings(commonSettings)
-  .settings(moduleName := "apiServer", name := "apiServer")
-  .dependsOn(domain, infra, lib)
-
 lazy val lib = project
   .in(file("lib"))
   .settings(commonSettings)
@@ -101,4 +96,4 @@ lazy val test = project
   .in(file("test"))
   .settings(commonSettings)
   .settings(moduleName := "test", name := "test")
-  .dependsOn(lib, apiServer, infra, domain)
+  .dependsOn(lib, infra, domain)
