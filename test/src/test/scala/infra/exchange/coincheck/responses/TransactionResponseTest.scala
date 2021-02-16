@@ -12,11 +12,11 @@ import helpers.gen.std.StdGen.negativeDoubleGen
 import infra.InfraError
 import io.circe.parser.decode
 import io.scalaland.chimney.dsl._
-import zio.{Has, Task}
 import zio.random.Random
 import zio.test.Assertion._
 import zio.test.environment.TestEnvironment
 import zio.test.{Sized, Spec, TestFailure, TestSuccess, _}
+import zio.{Has, Task}
 
 object TransactionsResponseTest extends DefaultRunnableSpec {
   override def spec: ZSpec[TestEnvironment, Any] =
