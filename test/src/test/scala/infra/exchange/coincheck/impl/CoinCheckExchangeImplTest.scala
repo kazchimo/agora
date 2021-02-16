@@ -1,10 +1,11 @@
 package infra.exchange.coincheck.impl
 
 import domain.conf.{CCEAccessKey, CCESecretKey}
-import zio.test.{DefaultRunnableSpec, suite}
-import zio.{ Has, test }
-import zio.random.Random
-import zio.test.{ Annotations, Spec, TestFailure, TestSuccess }
+import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
+import zio.logging.Logging
+import zio.test.environment.TestEnvironment
+import zio.test.{DefaultRunnableSpec, ZSpec, suite}
+import zio.{ZEnv, ZLayer}
 
 object CoinCheckExchangeImplTest
     extends DefaultRunnableSpec with TransactionsTest with OrdersTest
@@ -13,11 +14,10 @@ object CoinCheckExchangeImplTest
     CCEAccessKey.unsafeFrom("hoge"),
     CCESecretKey.unsafeFrom("hoge")
   )
-  val failJson: String = "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
+  val failJson: String                =
+    "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
 
-  override def spec: Spec[Has[Annotations.Service] with Has[test.package.TestConfig.Service] with Has[Random.Service],TestFailure[Throwable],TestSuccess] = suite("CoinCheckExchangeImpl")(
-    transactionsSuite,
-    ordersSuite,
-    publicTransactionsTest
-  )
+  override def spec: ZSpec[TestEnvironment, Any] = suite(
+    "CoinCheckExchangeImpl"
+  )(transactionsSuite, ordersSuite, publicTransactionsTest)
 }

@@ -12,39 +12,40 @@ import helpers.gen.std.StdGen.negativeDoubleGen
 import infra.InfraError
 import io.circe.parser.decode
 import io.scalaland.chimney.dsl._
-import zio.Task
-import zio.test.Assertion._
-import zio.test._
-import zio.{ Has, test }
+import zio.{Has, Task}
 import zio.random.Random
-import zio.test.{ Sized, Spec, TestFailure, TestSuccess }
+import zio.test.Assertion._
+import zio.test.environment.TestEnvironment
+import zio.test.{Sized, Spec, TestFailure, TestSuccess, _}
 
 object TransactionsResponseTest extends DefaultRunnableSpec {
-  override def spec: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] =
+  override def spec: ZSpec[TestEnvironment, Any] =
     suite("TransactionsResponse")(transformerTest, decoderTest)
 
-  val transformerTest: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("transformer to Task[List[CCTransaction]]")(
-    testM("transform into CCTransactions from SuccessTransactionsResponse")(
-      checkM(transactionsResponseGen)(t =>
-        assertM(t.transformInto[Task[List[CCTransaction]]])(
-          isSubtype[List[CCTransaction]](anything)
+  private val transformerTest =
+    suite("transformer to Task[List[CCTransaction]]")(
+      testM("transform into CCTransactions from SuccessTransactionsResponse")(
+        checkM(transactionsResponseGen)(t =>
+          assertM(t.transformInto[Task[List[CCTransaction]]])(
+            isSubtype[List[CCTransaction]](anything)
+          )
         )
-      )
-    ),
-    testM("transform into a error")(
-      checkM(failedTransactionsResponseGen)(t =>
-        assertM(t.transformInto[Task[List[CCTransaction]]].run)(
-          fails(isSubtype[InfraError](hasMessage(containsString("error"))))
+      ),
+      testM("transform into a error")(
+        checkM(failedTransactionsResponseGen)(t =>
+          assertM(t.transformInto[Task[List[CCTransaction]]].run)(
+            fails(isSubtype[InfraError](hasMessage(containsString("error"))))
+          )
         )
       )
     )
-  )
 
   val successJson: String =
     "{\n  \"success\": true,\n  \"transactions\": [\n    {\n      \"id\": 38,\n      \"order_id\": 49,\n      \"created_at\": \"2015-11-18T07:02:21.000Z\",\n      \"funds\": {\n        \"btc\": \"0.1\",\n        \"jpy\": \"-4096.135\"\n      },\n      \"pair\": \"btc_jpy\",\n      \"rate\": \"40900.0\",\n      \"fee_currency\": \"JPY\",\n      \"fee\": \"6.135\",\n      \"liquidity\": \"T\",\n      \"side\": \"buy\"\n    },\n    {\n      \"id\": 37,\n      \"order_id\": 48,\n      \"created_at\": \"2015-11-18T07:02:21.000Z\",\n      \"funds\": {\n        \"btc\": \"-0.1\",\n        \"jpy\": \"4094.09\"\n      },\n      \"pair\": \"btc_jpy\",\n      \"rate\": \"40900.0\",\n      \"fee_currency\": \"JPY\",\n      \"fee\": \"-4.09\",\n      \"liquidity\": \"M\",\n      \"side\": \"sell\"\n    }\n  ]\n}"
-  val failJson: String    = "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
+  val failJson: String    =
+    "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
 
-  val decoderTest: Spec[Any,TestFailure[Nothing],TestSuccess] = suite("decoder")(
+  private val decoderTest = suite("decoder")(
     test("decode a success json to a SuccessTransactionsResponse")(
       assert(decode[TransactionsResponse](successJson))(
         isRight(isSubtype[SuccessTransactionsResponse](anything))
@@ -59,13 +60,13 @@ object TransactionsResponseTest extends DefaultRunnableSpec {
 }
 
 object TransactionResponseTest extends DefaultRunnableSpec {
-  override def spec: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("TransactionResponse")(
-    sellCurrencySuite,
-    buyCurrencySuite,
-    dRateSuite
-  )
+  override def spec: Spec[Has[TestConfig.Service] with Has[
+    Random.Service
+  ] with Has[Sized.Service], TestFailure[Throwable], TestSuccess] = suite(
+    "TransactionResponse"
+  )(sellCurrencySuite, buyCurrencySuite, dRateSuite)
 
-  val sellCurrencySuite: Spec[Has[test.package.TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("#sellCurrency")(
+  private val sellCurrencySuite = suite("#sellCurrency")(
     testM("fails with invalid side")(
       checkM(transactionResponseGen.map(_.copy(side = "hoge")))(t =>
         assertM(t.sellCurrency.run)(fails(anything))
@@ -99,7 +100,7 @@ object TransactionResponseTest extends DefaultRunnableSpec {
     )
   )
 
-  val buyCurrencySuite: Spec[Has[test.package.TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("#buyCurrency")(
+  private val buyCurrencySuite = suite("#buyCurrency")(
     testM("fails with invalid side")(
       checkM(transactionResponseGen.map(_.copy(side = "hoge")))(t =>
         assertM(t.sellCurrency.run)(fails(anything))
@@ -133,7 +134,7 @@ object TransactionResponseTest extends DefaultRunnableSpec {
     )
   )
 
-  val dRateSuite: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("#dRate")(
+  private val dRateSuite = suite("#dRate")(
     testM("fails with invalid rate string")(
       checkM(transactionResponseGen.map(_.copy(rate = "hoge")))(t =>
         assertM(t.dRate.run)(fails(isSubtype[Throwable](anything)))

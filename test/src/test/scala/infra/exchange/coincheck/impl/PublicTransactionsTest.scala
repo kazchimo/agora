@@ -6,19 +6,21 @@ import sttp.client3.asynchttpclient.zio.stubbing._
 import sttp.model.Method.GET
 import sttp.ws.WebSocketFrame
 import sttp.ws.testing.WebSocketStub
-import zio.ZEnv
 import zio.stream.Stream
 import zio.test.Assertion._
 import zio.test.TestAspect.ignore
 import zio.test._
+import zio.ZEnv
+import zio.logging.Logging
 
 trait PublicTransactionsTest { self: CoinCheckExchangeImplTest.type =>
   private val matchedWhen = whenRequestMatches(r =>
     r.uri.toString() == Endpoints.websocket && r.method == GET
   )
-  private val layer       = AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live
+  private val layer       =
+    AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live ++ Logging.ignore
 
-  val publicTransactionsTest: Spec[Annotations,TestFailure[Throwable],TestSuccess] = suite("#publicTransactions")(
+  protected val publicTransactionsTest = suite("#publicTransactions")(
     testM("fails if websocket closed") {
       val stub = WebSocketStub.noInitialReceive.thenRespond {
         case WebSocketFrame.Text(
