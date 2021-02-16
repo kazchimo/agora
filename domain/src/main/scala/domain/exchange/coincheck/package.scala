@@ -17,7 +17,7 @@ package object coincheck {
       def publicTransactions: ZIO[
         SttpClient with ZEnv with Logging,
         Throwable,
-        Stream[Nothing, String]
+        Stream[Nothing, CCPublicTransaction]
       ]
     }
   }
