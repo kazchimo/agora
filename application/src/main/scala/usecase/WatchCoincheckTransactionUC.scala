@@ -9,7 +9,7 @@ import cats.syntax.show._
 
 object WatchCoincheckTransactionUC {
   implicit private val show: Show[CCPublicTransaction] = Show.show(a => s"""
-      |id: ${a.id.value.value}
+      |id: ${a.id.value.toString}
       |pair: ${a.pair.value.value}
       |rate: ${a.rate.value.toString}
       |quantity: ${a.quantity.value.toString}

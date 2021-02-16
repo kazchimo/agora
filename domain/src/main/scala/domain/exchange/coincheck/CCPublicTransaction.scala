@@ -18,8 +18,8 @@ final case class CCPublicTransaction(
 )
 
 object CCPublicTransaction {
-  @newtype final case class CCPubTraId(value: NonEmptyString)
-  object CCPubTraId extends VOFactory[String, NonEmpty] {
+  @newtype final case class CCPubTraId(value: Refined[Long, Positive])
+  object CCPubTraId extends VOFactory[Long, Positive] {
     override type VO = CCPubTraId
   }
 

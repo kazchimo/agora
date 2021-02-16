@@ -76,7 +76,8 @@ object PublicTransactions {
     for {
       m           <- ZIO.fromOption(regex.findFirstMatchIn(text)).orElseFail(error)
       _           <- log.debug(s"Text: $text Matched object: ${m.toString()}")
-      id          <- parse(m.group(1)).flatMap(CCPubTraId(_))
+      strId       <- parse(m.group(1))
+      id          <- CCPubTraId(strId.toLong)
       pair        <- parse(m.group(2)).flatMap(CCPubTraPair(_))
       strRate     <- parse(m.group(3))
       rate        <- CCPubTraRate(strRate.toDouble)
