@@ -1,8 +1,8 @@
 package helpers.gen.domain.exchange.coincheck
 
-import domain.exchange.coincheck._
 import domain.exchange.coincheck.CCMarketBuy.CCMarketBuyAmount
 import domain.exchange.coincheck.CCOrder.{CCOrderAmount, CCOrderRate}
+import domain.exchange.coincheck._
 import helpers.gen.std.StdGen.{positiveDoubleGen, positiveLongGen}
 import zio.random.Random
 import zio.test.Gen

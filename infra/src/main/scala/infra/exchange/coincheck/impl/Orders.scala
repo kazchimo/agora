@@ -10,9 +10,9 @@ import infra.exchange.coincheck.responses.{
   SuccessOrdersResponse
 }
 import io.circe.syntax._
-import sttp.client3.asynchttpclient.zio.{send, SttpClient}
+import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
-import sttp.client3.{basicRequest, UriContext}
+import sttp.client3.{UriContext, basicRequest}
 import zio.interop.console.cats.putStrLn
 import zio.{RIO, Task, ZEnv, ZIO}
 

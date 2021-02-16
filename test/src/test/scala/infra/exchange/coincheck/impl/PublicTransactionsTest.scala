@@ -18,7 +18,7 @@ trait PublicTransactionsTest { self: CoinCheckExchangeImplTest.type =>
   )
   private val layer       = AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live
 
-  val publicTransactionsTest = suite("#publicTransactions")(
+  val publicTransactionsTest: Spec[Annotations,TestFailure[Throwable],TestSuccess] = suite("#publicTransactions")(
     testM("fails if websocket closed") {
       val stub = WebSocketStub.noInitialReceive.thenRespond {
         case WebSocketFrame.Text(

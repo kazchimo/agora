@@ -15,12 +15,15 @@ import io.scalaland.chimney.dsl._
 import zio.Task
 import zio.test.Assertion._
 import zio.test._
+import zio.{ Has, test }
+import zio.random.Random
+import zio.test.{ Sized, Spec, TestFailure, TestSuccess }
 
 object TransactionsResponseTest extends DefaultRunnableSpec {
-  override def spec =
+  override def spec: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] =
     suite("TransactionsResponse")(transformerTest, decoderTest)
 
-  val transformerTest = suite("transformer to Task[List[CCTransaction]]")(
+  val transformerTest: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("transformer to Task[List[CCTransaction]]")(
     testM("transform into CCTransactions from SuccessTransactionsResponse")(
       checkM(transactionsResponseGen)(t =>
         assertM(t.transformInto[Task[List[CCTransaction]]])(
@@ -37,11 +40,11 @@ object TransactionsResponseTest extends DefaultRunnableSpec {
     )
   )
 
-  val successJson =
+  val successJson: String =
     "{\n  \"success\": true,\n  \"transactions\": [\n    {\n      \"id\": 38,\n      \"order_id\": 49,\n      \"created_at\": \"2015-11-18T07:02:21.000Z\",\n      \"funds\": {\n        \"btc\": \"0.1\",\n        \"jpy\": \"-4096.135\"\n      },\n      \"pair\": \"btc_jpy\",\n      \"rate\": \"40900.0\",\n      \"fee_currency\": \"JPY\",\n      \"fee\": \"6.135\",\n      \"liquidity\": \"T\",\n      \"side\": \"buy\"\n    },\n    {\n      \"id\": 37,\n      \"order_id\": 48,\n      \"created_at\": \"2015-11-18T07:02:21.000Z\",\n      \"funds\": {\n        \"btc\": \"-0.1\",\n        \"jpy\": \"4094.09\"\n      },\n      \"pair\": \"btc_jpy\",\n      \"rate\": \"40900.0\",\n      \"fee_currency\": \"JPY\",\n      \"fee\": \"-4.09\",\n      \"liquidity\": \"M\",\n      \"side\": \"sell\"\n    }\n  ]\n}"
-  val failJson    = "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
+  val failJson: String    = "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
 
-  val decoderTest = suite("decoder")(
+  val decoderTest: Spec[Any,TestFailure[Nothing],TestSuccess] = suite("decoder")(
     test("decode a success json to a SuccessTransactionsResponse")(
       assert(decode[TransactionsResponse](successJson))(
         isRight(isSubtype[SuccessTransactionsResponse](anything))
@@ -56,13 +59,13 @@ object TransactionsResponseTest extends DefaultRunnableSpec {
 }
 
 object TransactionResponseTest extends DefaultRunnableSpec {
-  override def spec = suite("TransactionResponse")(
+  override def spec: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("TransactionResponse")(
     sellCurrencySuite,
     buyCurrencySuite,
     dRateSuite
   )
 
-  val sellCurrencySuite = suite("#sellCurrency")(
+  val sellCurrencySuite: Spec[Has[test.package.TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("#sellCurrency")(
     testM("fails with invalid side")(
       checkM(transactionResponseGen.map(_.copy(side = "hoge")))(t =>
         assertM(t.sellCurrency.run)(fails(anything))
@@ -96,7 +99,7 @@ object TransactionResponseTest extends DefaultRunnableSpec {
     )
   )
 
-  val buyCurrencySuite = suite("#buyCurrency")(
+  val buyCurrencySuite: Spec[Has[test.package.TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("#buyCurrency")(
     testM("fails with invalid side")(
       checkM(transactionResponseGen.map(_.copy(side = "hoge")))(t =>
         assertM(t.sellCurrency.run)(fails(anything))
@@ -130,7 +133,7 @@ object TransactionResponseTest extends DefaultRunnableSpec {
     )
   )
 
-  val dRateSuite = suite("#dRate")(
+  val dRateSuite: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("#dRate")(
     testM("fails with invalid rate string")(
       checkM(transactionResponseGen.map(_.copy(rate = "hoge")))(t =>
         assertM(t.dRate.run)(fails(isSubtype[Throwable](anything)))

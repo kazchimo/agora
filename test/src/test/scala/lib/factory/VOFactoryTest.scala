@@ -6,6 +6,8 @@ import io.estatico.newtype.macros.newtype
 import zio.ZIO
 import zio.test.Assertion._
 import zio.test._
+import zio.Has
+import zio.random.Random
 
 object VOFactoryTest extends DefaultRunnableSpec {
   @newtype case class V(v: NonEmptyString)
@@ -13,12 +15,12 @@ object VOFactoryTest extends DefaultRunnableSpec {
     override type VO = V
   }
 
-  val nonEmptyStringGen = for {
+  val nonEmptyStringGen: Gen[Random with Sized,String] = for {
     s <- Gen.anyString
     c <- Gen.anyChar
   } yield c.toString + s
 
-  val applyTest = suite("apply")(
+  val applyTest: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Throwable],TestSuccess] = suite("apply")(
     testM("invalid value fails with Throwable")(
       assertM(V("").run)(fails(isSubtype[IllegalArgumentException](anything)))
     ),
@@ -29,7 +31,7 @@ object VOFactoryTest extends DefaultRunnableSpec {
     }
   )
 
-  val applySTest = suite("applyS")(
+  val applySTest: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[String],TestSuccess] = suite("applyS")(
     testM("invalid value fails with String")(
       assertM(V.applyS("").run)(fails(isSubtype[String](anything)))
     ),
@@ -40,7 +42,7 @@ object VOFactoryTest extends DefaultRunnableSpec {
     }
   )
 
-  val unsafeFromTest = suite("unsafeFrom")(
+  val unsafeFromTest: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Nothing],TestSuccess] = suite("unsafeFrom")(
     test("invalid value throws Exception") {
       assert(V.unsafeFrom(""))(throwsA[IllegalArgumentException])
     },
@@ -51,7 +53,7 @@ object VOFactoryTest extends DefaultRunnableSpec {
     }
   )
 
-  override def spec = suite("VOFactory")(applyTest, applySTest)
+  override def spec: Spec[Has[TestConfig.Service] with Has[Random.Service] with Has[Sized.Service],TestFailure[Serializable],TestSuccess] = suite("VOFactory")(applyTest, applySTest)
 }
 
 object SumVOFactoryTest extends DefaultRunnableSpec {
@@ -61,12 +63,12 @@ object SumVOFactoryTest extends DefaultRunnableSpec {
     override val sums: Seq[Sum]               = Seq(A, B)
     override def extractValue(v: Sum): String = v.v
   }
-  case object A extends Sum          { val v = "a" }
-  case object B extends Sum          { val v = "b" }
+  case object A extends Sum          { val v: String = "a" }
+  case object B extends Sum          { val v: String = "b" }
 
-  override def spec = suite("SumVOFactory")(applyTest)
+  override def spec: Spec[Any,TestFailure[Throwable],TestSuccess] = suite("SumVOFactory")(applyTest)
 
-  val applyTest = suite("apply")(
+  val applyTest: Spec[Any,TestFailure[Throwable],TestSuccess] = suite("apply")(
     testM("invalid string fails with Throwable") {
       assertM(Sum("c").run)(fails(isSubtype[Throwable](anything)))
     },

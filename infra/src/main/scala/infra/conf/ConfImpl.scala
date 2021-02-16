@@ -1,8 +1,8 @@
 package infra.conf
 
-import domain.conf.{BFAccessKey, BFSecretKey, CCEAccessKey, CCESecretKey, Conf}
+import domain.conf._
 import infra.InfraError
-import zio.{Has, Task, ULayer, ZIO, ZLayer}
+import zio._
 
 object ConfImpl {
   val layer: ULayer[Has[Conf.Service]] = ZLayer.succeed {

@@ -7,7 +7,7 @@ import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.TransactionsResponse
 import io.scalaland.chimney.dsl._
 import sttp.client3._
-import sttp.client3.asynchttpclient.zio.{send, SttpClient}
+import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
 import zio.interop.catz.core._
 import zio.{RIO, Task}

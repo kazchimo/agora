@@ -2,6 +2,16 @@ import Dependencies._
 import sbtwelcome.UsefulTask
 
 ThisBuild / scalaVersion := "2.13.3"
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.4.4"
+
+inThisBuild(
+  Seq(
+    addCompilerPlugin(scalafixSemanticdb),
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision,
+    scalafixScalaBinaryVersion := "2.13"
+  )
+)
 
 lazy val rootDeps = Seq(
   codec,
@@ -66,7 +76,7 @@ usefulTasks := Seq(
   UsefulTask("infra", "project infra", "Move to infra project"),
   UsefulTask("t", "test", "Test"),
   UsefulTask("r", "reload", "Reload projects"),
-  UsefulTask("fmt", "scalafmtAll;", "Format code")
+  UsefulTask("fmt", "scalafmtAll; scalafixAll;", "Format code")
 )
 
 lazy val root = project

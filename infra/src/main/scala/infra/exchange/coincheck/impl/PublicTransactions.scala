@@ -3,7 +3,7 @@ package infra.exchange.coincheck.impl
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
 import sttp.client3._
-import sttp.client3.asynchttpclient.zio.{sendR, SttpClient}
+import sttp.client3.asynchttpclient.zio.{SttpClient, sendR}
 import sttp.ws.WebSocket
 import zio._
 import zio.console.putStrLn

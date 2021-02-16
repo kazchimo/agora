@@ -7,6 +7,7 @@ import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
 import lib.factory.{SumVOFactory, VOFactory}
+
 import CCTransaction._
 
 final case class CCTransaction(

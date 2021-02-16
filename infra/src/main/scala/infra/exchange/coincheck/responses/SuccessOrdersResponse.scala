@@ -1,8 +1,8 @@
 package infra.exchange.coincheck.responses
 
+import cats.syntax.functor._
 import io.circe.Decoder
 import io.circe.generic.auto._
-import cats.syntax.functor._
 
 sealed trait OrdersResponse extends CoincheckResponse
 
