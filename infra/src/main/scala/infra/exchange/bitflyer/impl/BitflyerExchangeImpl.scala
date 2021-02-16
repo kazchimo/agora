@@ -6,6 +6,4 @@ import domain.exchange.bitflyer.BitflyerExchange
 final case class BitflyerExchangeImpl(
   accessKey: BFAccessKey,
   secretKey: BFSecretKey
-) extends BitflyerExchange.Service
-    with AuthStrategy
-    with ChildOrder
+) extends BitflyerExchange.Service with AuthStrategy with ChildOrder

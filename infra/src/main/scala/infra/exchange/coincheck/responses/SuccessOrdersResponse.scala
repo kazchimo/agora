@@ -22,9 +22,7 @@ final case class SuccessOrdersResponse(
   stop_less_rate: Option[String],
   pair: String,
   created_at: String
-) extends OrdersResponse
-    with SuccessCoincheckResponse
+) extends OrdersResponse with SuccessCoincheckResponse
 
 final case class FailedOrdersResponse(error: String)
-    extends OrdersResponse
-    with FailedCoincheckResponse
+    extends OrdersResponse with FailedCoincheckResponse

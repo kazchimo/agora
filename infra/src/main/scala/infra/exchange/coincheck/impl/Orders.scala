@@ -20,14 +20,9 @@ private[coincheck] trait Orders extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
   private def request(order: CCOrder) = for {
     h <- headers(Endpoints.orders, order.asJson.noSpaces)
-  } yield basicRequest
-    .post(uri"${Endpoints.orders}")
-    .contentType("application/json")
-    .body(order.asJson.noSpaces)
-    .headers(h)
-    .response(asJson[OrdersResponse])
+  } yield basicRequest.post(uri"${Endpoints.orders}").contentType("application/json").body(order.asJson.noSpaces).headers(h).response(asJson[OrdersResponse])
 
-  override final def orders(order: CCOrder): RIO[SttpClient with ZEnv, Unit] =
+  final override def orders(order: CCOrder): RIO[SttpClient with ZEnv, Unit] =
     for {
       req  <- request(order)
       _    <- putStrLn(req.body.toString)
@@ -35,8 +30,7 @@ private[coincheck] trait Orders extends AuthStrategy {
       body <- ZIO.fromEither(res.body)
       r    <- body match {
                 case _: SuccessOrdersResponse    => Task.succeed(())
-                case FailedOrdersResponse(error) =>
-                  Task.fail(
+                case FailedOrdersResponse(error) => Task.fail(
                     InfraError(
                       s"failed to order: order=${order.toString} error=$error"
                     )

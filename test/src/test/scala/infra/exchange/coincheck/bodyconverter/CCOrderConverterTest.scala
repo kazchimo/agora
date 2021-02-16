@@ -72,12 +72,11 @@ object CCOrderConverterTest extends DefaultRunnableSpec {
     )
   )
 
-  override def spec =
-    suite("CCOrderConverter")(
-      ccOrderRateEncTet,
-      ccOrderAmountEncTest,
-      ccMarketBuyAmountEncTest,
-      ccBuyEncTest,
-      ccMarketStopBuyEncTest
-    )
+  override def spec = suite("CCOrderConverter")(
+    ccOrderRateEncTet,
+    ccOrderAmountEncTest,
+    ccMarketBuyAmountEncTest,
+    ccBuyEncTest,
+    ccMarketStopBuyEncTest
+  )
 }

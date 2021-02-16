@@ -3,15 +3,14 @@ import sbtwelcome.UsefulTask
 
 ThisBuild / scalaVersion := "2.13.3"
 
-lazy val rootDeps =
-  Seq(
-    codec,
-    newtype,
-    refined,
-    chimney,
-    cats,
-    zioCats
-  ) ++ circeDeps ++ zioDeps ++ sttpDeps ++ testDeps
+lazy val rootDeps = Seq(
+  codec,
+  newtype,
+  refined,
+  chimney,
+  cats,
+  zioCats
+) ++ circeDeps ++ zioDeps ++ sttpDeps ++ testDeps
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
@@ -66,7 +65,8 @@ usefulTasks := Seq(
   UsefulTask("domain", "project domain", "Move to domain project"),
   UsefulTask("infra", "project infra", "Move to infra project"),
   UsefulTask("t", "test", "Test"),
-  UsefulTask("r", "reload", "Reload projects")
+  UsefulTask("r", "reload", "Reload projects"),
+  UsefulTask("fmt", "scalafmtAll;", "Format code")
 )
 
 lazy val root = project

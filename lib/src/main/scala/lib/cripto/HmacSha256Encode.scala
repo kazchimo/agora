@@ -9,16 +9,15 @@ import zio.{Task, ZIO}
 
 object HmacSha256Encode {
   def hmacSHA256Encode(secretKey: String, message: String): Task[String] =
-    ZIO
-      .effect {
-        val keySpec = new SecretKeySpec(
-          secretKey.getBytes(StandardCharsets.US_ASCII),
-          "hmacSHA256"
-        )
-        val mac     = Mac.getInstance("hmacSHA256")
-        mac.init(keySpec)
-        Hex.encodeHexString(
-          mac.doFinal(message.getBytes(StandardCharsets.US_ASCII))
-        )
-      }
+    ZIO.effect {
+      val keySpec = new SecretKeySpec(
+        secretKey.getBytes(StandardCharsets.US_ASCII),
+        "hmacSHA256"
+      )
+      val mac     = Mac.getInstance("hmacSHA256")
+      mac.init(keySpec)
+      Hex.encodeHexString(
+        mac.doFinal(message.getBytes(StandardCharsets.US_ASCII))
+      )
+    }
 }

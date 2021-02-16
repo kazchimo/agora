@@ -56,47 +56,45 @@ object TransactionsResponseTest extends DefaultRunnableSpec {
 }
 
 object TransactionResponseTest extends DefaultRunnableSpec {
-  override def spec =
-    suite("TransactionResponse")(
-      sellCurrencySuite,
-      buyCurrencySuite,
-      dRateSuite
-    )
+  override def spec = suite("TransactionResponse")(
+    sellCurrencySuite,
+    buyCurrencySuite,
+    dRateSuite
+  )
 
-  val sellCurrencySuite =
-    suite("#sellCurrency")(
-      testM("fails with invalid side")(
-        checkM(transactionResponseGen.map(_.copy(side = "hoge")))(t =>
-          assertM(t.sellCurrency.run)(fails(anything))
-        )
-      ),
-      testM("returns BTC Currency if side is Sell")(
-        checkM(transactionResponseGen.map(_.copy(side = "sell")))(t =>
-          assertM(t.sellCurrency)(
-            isSubtype(
-              hasField[Currency, TickerSymbol](
-                "tickerSymbol",
-                (a: Currency) => a.tickerSymbol,
-                equalTo(BitCoin)
-              )
+  val sellCurrencySuite = suite("#sellCurrency")(
+    testM("fails with invalid side")(
+      checkM(transactionResponseGen.map(_.copy(side = "hoge")))(t =>
+        assertM(t.sellCurrency.run)(fails(anything))
+      )
+    ),
+    testM("returns BTC Currency if side is Sell")(
+      checkM(transactionResponseGen.map(_.copy(side = "sell")))(t =>
+        assertM(t.sellCurrency)(
+          isSubtype(
+            hasField[Currency, TickerSymbol](
+              "tickerSymbol",
+              (a: Currency) => a.tickerSymbol,
+              equalTo(BitCoin)
             )
           )
         )
-      ),
-      testM("returns Jpy Currency if side is Buy")(
-        checkM(transactionResponseGen.map(_.copy(side = "buy")))(t =>
-          assertM(t.sellCurrency)(
-            isSubtype(
-              hasField[Currency, TickerSymbol](
-                "tickerSymbol",
-                (a: Currency) => a.tickerSymbol,
-                equalTo(Jpy)
-              )
+      )
+    ),
+    testM("returns Jpy Currency if side is Buy")(
+      checkM(transactionResponseGen.map(_.copy(side = "buy")))(t =>
+        assertM(t.sellCurrency)(
+          isSubtype(
+            hasField[Currency, TickerSymbol](
+              "tickerSymbol",
+              (a: Currency) => a.tickerSymbol,
+              equalTo(Jpy)
             )
           )
         )
       )
     )
+  )
 
   val buyCurrencySuite = suite("#buyCurrency")(
     testM("fails with invalid side")(

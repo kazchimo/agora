@@ -11,16 +11,14 @@ trait AnyValConverter {
     ev: T <:< AnyVal,
     unwrapped: Unwrapped.Aux[T, U],
     decoder: Decoder[U]
-  ): Decoder[T] =
-    Decoder.instance[T] { cursor =>
-      decoder(cursor).map(value => unwrapped.wrap(value))
-    }
+  ): Decoder[T] = Decoder.instance[T] { cursor =>
+    decoder(cursor).map(value => unwrapped.wrap(value))
+  }
 
   implicit final def encodeAnyVal[T, U](implicit
     ev: T <:< AnyVal,
     unwrapped: Unwrapped.Aux[T, U],
     encoder: Encoder[U]
-  ): Encoder[T] =
-    Encoder.instance[T](value => encoder(unwrapped.unwrap(value)))
+  ): Encoder[T] = Encoder.instance[T](value => encoder(unwrapped.unwrap(value)))
 
 }

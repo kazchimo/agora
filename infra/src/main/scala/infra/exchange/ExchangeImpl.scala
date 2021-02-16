@@ -15,7 +15,6 @@ object ExchangeImpl {
 
   val bitflyerExchange: ZLayer[Conf, Throwable, BitflyerExchange] =
     ZLayer.fromFunctionM(conf =>
-      conf.get.BFAccessKey
-        .zipWith(conf.get.BFSecretKey)(BitflyerExchangeImpl)
+      conf.get.BFAccessKey.zipWith(conf.get.BFSecretKey)(BitflyerExchangeImpl)
     )
 }

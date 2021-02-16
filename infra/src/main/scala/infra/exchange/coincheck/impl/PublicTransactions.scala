@@ -14,8 +14,7 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
     val send    =
       ws.sendText("{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}")
     val receive = for {
-      textEither <-
-        ws.receiveTextFrame()
+      textEither <- ws.receiveTextFrame()
       _          <- putStrLn(s"received: ${textEither.toString}")
       text       <-
         ZIO
@@ -34,15 +33,14 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
   }
 
   final override def publicTransactions
-    : ZIO[SttpClient with ZEnv, Throwable, Stream[Nothing, String]] =
-    for {
-      _   <- putStrLn("start public transactions")
-      que <- Queue.unbounded[String]
-      _   <- sendR[Unit, ZEnv](
-               basicRequest
-                 .get(uri"${Endpoints.websocket}")
-                 .response(asWebSocketAlways(useWS(que)))
-             ).fork
-      _   <- putStrLn("send complete")
-    } yield Stream.fromQueueWithShutdown(que).interruptWhen(que.awaitShutdown)
+    : ZIO[SttpClient with ZEnv, Throwable, Stream[Nothing, String]] = for {
+    _   <- putStrLn("start public transactions")
+    que <- Queue.unbounded[String]
+    _   <- sendR[Unit, ZEnv](
+             basicRequest
+               .get(uri"${Endpoints.websocket}")
+               .response(asWebSocketAlways(useWS(que)))
+           ).fork
+    _   <- putStrLn("send complete")
+  } yield Stream.fromQueueWithShutdown(que).interruptWhen(que.awaitShutdown)
 }

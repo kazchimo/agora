@@ -13,9 +13,8 @@ object Main extends zio.App {
     ConfImpl.layer >>> ExchangeImpl.coinCheckExchange ++ AsyncHttpClientZioBackend
       .layer()
 
-  private val app =
-    putStrLn("start") *> CoincheckExchange.transactions.map { s =>
-      println(s)
-    } *> putStrLn("end")
+  private val app = putStrLn("start") *> CoincheckExchange.transactions.map {
+    s => println(s)
+  } *> putStrLn("end")
 
 }

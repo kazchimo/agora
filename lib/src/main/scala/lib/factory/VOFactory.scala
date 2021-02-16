@@ -25,12 +25,12 @@ trait SumVOFactory {
   def extractValue(v: VO): String
 
   final def apply(v: String): Task[VO] = {
-    val fac = sums.foldLeft(PartialFunction.empty[String, VO]) {
-      case (prev, elem) =>
+    val fac =
+      sums.foldLeft(PartialFunction.empty[String, VO]) { case (prev, elem) =>
         prev.orElse {
           case key if key === extractValue(elem) => elem
         }
-    }
+      }
 
     if (fac.isDefinedAt(v)) ZIO.succeed(fac(v))
     else ZIO.fail(new Exception(s"factory is not defined at $v "))

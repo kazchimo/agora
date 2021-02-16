@@ -11,17 +11,16 @@ object CCOrderConverter {
   implicit val codecConfig: Configuration =
     Configuration.default.withSnakeCaseMemberNames
 
-  implicit val encodeOrder: Encoder[CCOrder] = Encoder
-    .instance {
-      case a: CCBuy            => a.asJson
-      case a: CCStopBuy        => a.asJson
-      case a: CCSell           => a.asJson
-      case a: CCStopSell       => a.asJson
-      case a: CCMarketBuy      => a.asJson
-      case a: CCMarketStopBuy  => a.asJson
-      case a: CCMarketSell     => a.asJson
-      case a: CCMarketStopSell => a.asJson
-    }
+  implicit val encodeOrder: Encoder[CCOrder] = Encoder.instance {
+    case a: CCBuy            => a.asJson
+    case a: CCStopBuy        => a.asJson
+    case a: CCSell           => a.asJson
+    case a: CCStopSell       => a.asJson
+    case a: CCMarketBuy      => a.asJson
+    case a: CCMarketStopBuy  => a.asJson
+    case a: CCMarketSell     => a.asJson
+    case a: CCMarketStopSell => a.asJson
+  }
 
   private val orderType       = "order_type"
   private val rate            = "rate"
@@ -41,10 +40,9 @@ object CCOrderConverter {
     Encoder.instance(_.value.value.asJson)
 
   implicit val buyEncoder: Encoder[CCBuy] =
-    Encoder
-      .forProduct4(pair, orderType, rate, amount)(a =>
-        (btcJpy, "buy", a.rate, a.amount)
-      )
+    Encoder.forProduct4(pair, orderType, rate, amount)(a =>
+      (btcJpy, "buy", a.rate, a.amount)
+    )
 
   implicit val stopBuyEncoder: Encoder[CCStopBuy] =
     Encoder.forProduct5(pair, orderType, rate, stopLossRate, amount)(a =>

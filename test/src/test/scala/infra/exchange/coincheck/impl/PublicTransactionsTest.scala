@@ -13,24 +13,20 @@ import zio.test.TestAspect.ignore
 import zio.test._
 
 trait PublicTransactionsTest { self: CoinCheckExchangeImplTest.type =>
-  private val matchedWhen =
-    whenRequestMatches(r =>
-      r.uri.toString() == Endpoints.websocket && r.method == GET
-    )
-  private val layer       =
-    AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live
+  private val matchedWhen = whenRequestMatches(r =>
+    r.uri.toString() == Endpoints.websocket && r.method == GET
+  )
+  private val layer       = AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live
 
   val publicTransactionsTest = suite("#publicTransactions")(
     testM("fails if websocket closed") {
-      val stub = WebSocketStub.noInitialReceive
-        .thenRespond {
-          case WebSocketFrame.Text(
-                "{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}",
-                true,
-                None
-              ) =>
-            List(WebSocketFrame.text("asdf"), WebSocketFrame.text("k"))
-        }
+      val stub = WebSocketStub.noInitialReceive.thenRespond {
+        case WebSocketFrame.Text(
+              "{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}",
+              true,
+              None
+            ) => List(WebSocketFrame.text("asdf"), WebSocketFrame.text("k"))
+      }
 
       (for {
         _   <- matchedWhen.thenRespond(stub)

@@ -34,12 +34,10 @@ object TransactionsResponse {
 
 final case class SuccessTransactionsResponse(
   transactions: List[TransactionResponse]
-) extends TransactionsResponse
-    with SuccessCoincheckResponse
+) extends TransactionsResponse with SuccessCoincheckResponse
 
 final case class FailedTransactionsResponse(error: String)
-    extends TransactionsResponse
-    with FailedCoincheckResponse
+    extends TransactionsResponse with FailedCoincheckResponse
 
 final case class TransactionResponse(
   id: Long,
@@ -56,18 +54,17 @@ final case class TransactionResponse(
 
   private val currencies = pair.split("_")
 
-  def sellCurrency: Task[Currency] =
-    for {
-      s         <- dSide
-      rawTicker <- Task.effect {
-                     s match {
-                       case Buy  => currencies(1)
-                       case Sell => currencies.head
-                     }
+  def sellCurrency: Task[Currency] = for {
+    s         <- dSide
+    rawTicker <- Task.effect {
+                   s match {
+                     case Buy  => currencies(1)
+                     case Sell => currencies.head
                    }
-      qua       <- Task.effect(funds(rawTicker).toDouble)
-      ticker    <- TickerSymbol(rawTicker)
-    } yield Currency(ticker, qua)
+                 }
+    qua       <- Task.effect(funds(rawTicker).toDouble)
+    ticker    <- TickerSymbol(rawTicker)
+  } yield Currency(ticker, qua)
 
   def buyCurrency: Task[Currency] = for {
     s         <- dSide

@@ -22,13 +22,12 @@ private[exchange] trait Transactions extends AuthStrategy {
         .mapRight(_.transformInto[Task[List[CCTransaction]]])
     )
 
-  final def transactions: RIO[SttpClient, Seq[CCTransaction]] =
-    for {
-      hs   <- headers(Endpoints.transactions)
-      req   = request(hs)
-      res  <- send(req)
-      ress <- res.body.sequence.rightOrFailWith((e: Throwable) =>
-                InfraError(s"failed to request: ${e.toString}")
-              )
-    } yield ress
+  final def transactions: RIO[SttpClient, Seq[CCTransaction]] = for {
+    hs   <- headers(Endpoints.transactions)
+    req   = request(hs)
+    res  <- send(req)
+    ress <- res.body.sequence.rightOrFailWith((e: Throwable) =>
+              InfraError(s"failed to request: ${e.toString}")
+            )
+  } yield ress
 }

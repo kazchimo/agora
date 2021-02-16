@@ -39,9 +39,7 @@ object TransactionResponseGen {
     )
 
   val transactionsResponseGen: Gen[Random with Sized, TransactionsResponse] =
-    Gen
-      .listOf(transactionResponseGen)
-      .map(t => SuccessTransactionsResponse(t))
+    Gen.listOf(transactionResponseGen).map(t => SuccessTransactionsResponse(t))
 
   val failedTransactionsResponseGen
     : Gen[Random with Sized, TransactionsResponse] =

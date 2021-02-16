@@ -6,8 +6,5 @@ import domain.exchange.coincheck.CoincheckExchange
 final case class CoinCheckExchangeImpl(
   accessKey: CCEAccessKey,
   secretKey: CCESecretKey
-) extends CoincheckExchange.Service
-    with Transactions
-    with Orders
-    with AuthStrategy
-    with PublicTransactions
+) extends CoincheckExchange.Service with Transactions with Orders
+    with AuthStrategy with PublicTransactions
