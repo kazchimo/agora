@@ -2,11 +2,21 @@ import sbt._
 
 object Dependencies {
   object Versions {
-    val zio   = "1.0.3"
-    val sttp  = "3.0.0-RC7"
-    val circe = "0.13.0"
-
+    val zio     = "1.0.3"
+    val sttp    = "3.0.0-RC7"
+    val circe   = "0.13.0"
+    val monocle = "2.1.0"
   }
+
+  lazy val monocleDeps = Seq(
+    "com.github.julien-truffaut" %% "monocle-core"    % Versions.monocle,
+    "com.github.julien-truffaut" %% "monocle-generic" % Versions.monocle,
+    "com.github.julien-truffaut" %% "monocle-macro"   % Versions.monocle,
+    "com.github.julien-truffaut" %% "monocle-state"   % Versions.monocle,
+    "com.github.julien-truffaut" %% "monocle-refined" % Versions.monocle,
+    "com.github.julien-truffaut" %% "monocle-unsafe"  % Versions.monocle,
+    "com.github.julien-truffaut" %% "monocle-law"     % Versions.monocle % "test"
+  )
 
   lazy val circeDeps  = Seq(
     "io.circe" %% "circe-core",
