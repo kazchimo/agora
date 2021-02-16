@@ -13,7 +13,6 @@ import io.circe.syntax._
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
 import sttp.client3.{UriContext, basicRequest}
-import zio.interop.console.cats.putStrLn
 import zio.{RIO, Task, ZEnv, ZIO}
 
 private[coincheck] trait Orders extends AuthStrategy {
@@ -25,7 +24,6 @@ private[coincheck] trait Orders extends AuthStrategy {
   final override def orders(order: CCOrder): RIO[SttpClient with ZEnv, Unit] =
     for {
       req  <- request(order)
-      _    <- putStrLn(req.body.toString)
       res  <- send(req)
       body <- ZIO.fromEither(res.body)
       r    <- body match {
