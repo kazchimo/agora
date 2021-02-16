@@ -48,7 +48,8 @@ lazy val commonSettings = Seq(
     Wart.DefaultArguments,
     Wart.ToString,
     Wart.TraversableOps,
-    Wart.PublicInference
+    Wart.PublicInference,
+    Wart.Product
   ) ++ ContribWart.allBut(
     ContribWart.Apply,
     ContribWart.MissingOverride,
