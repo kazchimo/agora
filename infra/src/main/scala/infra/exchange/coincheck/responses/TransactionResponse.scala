@@ -51,7 +51,7 @@ final case class TransactionResponse(
   liquidity: String,
   side: String
 ) {
-  def dSide: Task[CCTraSide] = ZIO.fromEither(CCTraSide.withNameEither(side))
+  def dSide: Task[CCTraSide] = CCTraSide.withNameZio(side)
 
   private val currencies = pair.split("_")
 
