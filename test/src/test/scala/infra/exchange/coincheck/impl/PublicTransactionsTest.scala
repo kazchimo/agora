@@ -1,7 +1,8 @@
 package infra.exchange.coincheck.impl
 
 import infra.exchange.coincheck.Endpoints
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
+import sttp.client3.asynchttpclient.zio._
+import sttp.client3.asynchttpclient.zio.SttpClientStubbing._
 import sttp.client3.asynchttpclient.zio.stubbing._
 import sttp.model.Method.GET
 import sttp.ws.WebSocketFrame
@@ -14,10 +15,10 @@ import zio.test.TestAspect.ignore
 import zio.test._
 
 trait PublicTransactionsTest { self: CoinCheckExchangeImplTest.type =>
-  private val matchedWhen = whenRequestMatches(r =>
+  private val matchedWhen: StubbingWhenRequest = whenRequestMatches(r =>
     r.uri.toString() == Endpoints.websocket && r.method == GET
   )
-  private val layer       =
+  private val layer                            =
     AsyncHttpClientZioBackend.stubLayer ++ ZEnv.live ++ Logging.ignore
 
   protected val publicTransactionsTest
