@@ -64,7 +64,7 @@ final case class TransactionResponse(
                    }
                  }
     qua       <- Task.effect(funds(rawTicker).toDouble)
-    ticker    <- ZIO.fromEither(TickerSymbol.withNameEither(rawTicker))
+    ticker    <- TickerSymbol.withNameZio(rawTicker)
   } yield Currency(ticker, qua)
 
   def buyCurrency: Task[Currency] = for {
@@ -76,7 +76,7 @@ final case class TransactionResponse(
                    }
                  }
     qua       <- Task.effect(funds(rawTicker).toDouble)
-    ticker    <- ZIO.fromEither(TickerSymbol.withNameEither(rawTicker))
+    ticker    <- TickerSymbol.withNameZio(rawTicker)
   } yield Currency(ticker, qua)
 
   def dRate: Task[CCTraRate] = ZIO.effect(rate.toDouble).flatMap(CCTraRate(_))
@@ -89,7 +89,7 @@ object TransactionResponse {
       id        <- CCTraId(res.id)
       sellCur   <- res.sellCurrency
       buyCur    <- res.buyCurrency
-      side      <- ZIO.fromEither(CCTraSide.withNameEither(res.side))
+      side      <- CCTraSide.withNameZio(res.side)
       createdAt <- CCTraCreatedAt(res.created_at)
       rate      <- res.dRate
     } yield CCTransaction(id, sellCur, buyCur, side, createdAt, rate)

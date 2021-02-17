@@ -8,6 +8,7 @@ import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
 import lib.factory.VOFactory
 import CCTransaction._
+import domain.lib.EnumZio
 import enumeratum._
 
 final case class CCTransaction(
@@ -40,7 +41,7 @@ object CCTransaction {
   sealed abstract class CCTraSide(override val entryName: String)
       extends Serializable with Product with EnumEntry
 
-  object CCTraSide extends Enum[CCTraSide]  {
+  object CCTraSide extends Enum[CCTraSide] with EnumZio[CCTraSide] {
     val values: IndexedSeq[CCTraSide] = findValues
     
     case object Buy extends CCTraSide("buy")
