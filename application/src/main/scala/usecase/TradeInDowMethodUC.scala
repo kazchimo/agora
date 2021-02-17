@@ -16,6 +16,12 @@ object OHLCBar {
 }
 
 object TradeInDowMethodUC {
+  private def shouldBuy(bars: Seq[OHLCBar]): Boolean =
+    bars.sortBy(_.high) == bars & bars.sortBy(_.low) == bars
+
+  private def shouldSell(bars: Seq[OHLCBar]): Boolean =
+    bars.sortBy(b => -b.high) == bars & bars.sortBy(b => -b.low) == bars
+
   def trade(aggCount: Int, continuous: Int) = for {
     _                  <- log.info("Buying in Dow method start...")
     transactionsStream <- CoincheckExchange.publicTransactions
@@ -37,21 +43,16 @@ object TradeInDowMethodUC {
                                 lastBuyRate  <- lastBuyRateRef.get
                                 tradeSummary <- tradeSummaryRef.get
                                 _            <- {
-                                  val shouldBuy = bars.sortBy(_.high) == bars & bars
-                                    .sortBy(_.low) == bars // high and low are increase
-                                  val shouldSell = bars.sortBy(b => -b.high) == bars & bars
-                                    .sortBy(b => -b.low) == bars // high and low are decrease
-
-                                  val buyIf  = (log.info("Buy!") *> onLongRef.set(
-                                    true
-                                  ) *> lastBuyRateRef.set(bar.close)).when(shouldBuy & !onLong)
+                                  val buyIf  =
+                                    (log.info("Buy!") *> onLongRef.set(true) *> lastBuyRateRef
+                                      .set(bar.close)).when(shouldBuy(bars) & !onLong)
                                   val sellIf = {
                                     val profit  = bar.close - lastBuyRate
                                     val summary = tradeSummary + profit
                                     log.info("Sell!") *> onLongRef.set(false) *> log.info(
                                       s"Profit: ${profit.toString} Summary: ${summary.toString}"
                                     ) *> tradeSummaryRef.set(summary)
-                                  }.when(shouldSell & onLong)
+                                  }.when(shouldSell(bars) & onLong)
 
                                   buyIf *> sellIf
                                 }.when(bars.size >= continuous)
