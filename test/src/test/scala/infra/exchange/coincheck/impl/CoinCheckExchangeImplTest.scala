@@ -1,8 +1,11 @@
 package infra.exchange.coincheck.impl
 
 import domain.conf.{CCEAccessKey, CCESecretKey}
+import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
+import zio.logging.Logging
 import zio.test.environment.TestEnvironment
 import zio.test.{DefaultRunnableSpec, ZSpec, suite}
+import zio._
 
 object CoinCheckExchangeImplTest
     extends DefaultRunnableSpec with TransactionsTest with OrdersTest
@@ -14,7 +17,11 @@ object CoinCheckExchangeImplTest
   val failJson: String                =
     "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
 
+  private val layer =
+    AsyncHttpClientZioBackend.stubLayer.orDie ++ ZEnv.live ++ Logging.ignore
+
   override def spec: ZSpec[TestEnvironment, Any] = suite(
     "CoinCheckExchangeImpl"
   )(transactionsSuite, ordersSuite, publicTransactionsTest)
+    .provideCustomLayer(layer)
 }
