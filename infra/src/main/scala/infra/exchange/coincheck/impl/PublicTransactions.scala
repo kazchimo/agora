@@ -31,7 +31,9 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
           )
       body       <- PublicTransactions
                       .textToModel(text.payload).tapError(e =>
-                        log.error(s"Failed to parse text: ${e.toString}")
+                        log.error(
+                          s"Failed to parse text: ${e.toString} text=${text.payload}"
+                        )
                       )
       _          <- que.offer(body)
     } yield ()
