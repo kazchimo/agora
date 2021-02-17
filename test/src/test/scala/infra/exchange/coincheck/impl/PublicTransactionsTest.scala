@@ -1,5 +1,7 @@
 package infra.exchange.coincheck.impl
 
+import domain.exchange.coincheck.CCPublicTransaction
+import domain.exchange.coincheck.CCPublicTransaction._
 import infra.exchange.coincheck.Endpoints
 import sttp.client3.asynchttpclient.zio.SttpClientStubbing._
 import sttp.client3.asynchttpclient.zio.stubbing._
@@ -26,12 +28,26 @@ trait PublicTransactionsTest { self: CoinCheckExchangeImplTest.type =>
             ) => List(WebSocketFrame.text("asdf"), WebSocketFrame.text("k"))
       }
 
-      (for {
+      for {
         _   <- matchedWhen.thenRespond(stub)
         r   <- exchange.publicTransactions.fork
         res <- r.join.map(_.runCount)
-      } yield assert(res)(isSubtype[Stream[Nothing, String]](anything)))
+      } yield assert(res)(isSubtype[Stream[Nothing, String]](anything))
     } @@ ignore,
-    test("returns websocket data as stream")(assert(1)(anything)) @@ ignore
+    test("returns websocket data as stream")(assert(1)(anything)) @@ ignore,
+    suite("#textToModel")(testM("convert text to transaction model") {
+      val text = "[2357068,\"btc_jpy\",\"148642.0\",\"0.7828\",\"buy\"]"
+      assertM(PublicTransactions.textToModel(text))(
+        equalTo(
+          CCPublicTransaction(
+            CCPubTraId.unsafeFrom(2357068),
+            CCPubTraPair.unsafeFrom("btc_jpy"),
+            CCPubTraRate.unsafeFrom(148642),
+            CCPubTraQuantity.unsafeFrom(0.7828),
+            CCPubTraSide.CCPubTraBuy
+          )
+        )
+      )
+    })
   )
 }
