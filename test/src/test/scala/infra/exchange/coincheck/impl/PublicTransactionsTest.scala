@@ -3,6 +3,7 @@ package infra.exchange.coincheck.impl
 import domain.exchange.coincheck.CCPublicTransaction
 import domain.exchange.coincheck.CCPublicTransaction._
 import infra.exchange.coincheck.Endpoints
+import lib.error.InternalInfraError
 import sttp.client3.asynchttpclient.zio.SttpClientStubbing._
 import sttp.client3.asynchttpclient.zio.stubbing._
 import sttp.model.Method.GET
@@ -35,19 +36,28 @@ trait PublicTransactionsTest { self: CoinCheckExchangeImplTest.type =>
       } yield assert(res)(isSubtype[Stream[Nothing, String]](anything))
     } @@ ignore,
     test("returns websocket data as stream")(assert(1)(anything)) @@ ignore,
-    suite("#textToModel")(testM("convert text to transaction model") {
-      val text = "[2357068,\"btc_jpy\",\"148642.0\",\"0.7828\",\"buy\"]"
-      assertM(PublicTransactions.textToModel(text))(
-        equalTo(
-          CCPublicTransaction(
-            CCPubTraId.unsafeFrom(2357068),
-            CCPubTraPair.unsafeFrom("btc_jpy"),
-            CCPubTraRate.unsafeFrom(148642),
-            CCPubTraQuantity.unsafeFrom(0.7828),
-            CCPubTraSide.CCPubTraBuy
+    suite("#textToModel")(
+      testM("convert text to transaction model") {
+        val text = "[2357068,\"btc_jpy\",\"148642.0\",\"0.7828\",\"buy\"]"
+        assertM(PublicTransactions.textToModel(text))(
+          equalTo(
+            CCPublicTransaction(
+              CCPubTraId.unsafeFrom(2357068),
+              CCPubTraPair.unsafeFrom("btc_jpy"),
+              CCPubTraRate.unsafeFrom(148642),
+              CCPubTraQuantity.unsafeFrom(0.7828),
+              CCPubTraSide.CCPubTraBuy
+            )
           )
         )
-      )
-    })
+      },
+      testM("fail with InfraError if invalid string") {
+        checkM(Gen.anyString)(s =>
+          assertM(PublicTransactions.textToModel(s).run)(
+            fails(isSubtype[InternalInfraError](anything))
+          )
+        )
+      }
+    )
   )
 }
