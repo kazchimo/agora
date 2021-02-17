@@ -2,10 +2,10 @@ package domain.exchange.coincheck
 
 import domain.exchange.coincheck.CCMarketBuy.CCMarketBuyAmount
 import domain.exchange.coincheck.CCOrder.{CCOrderAmount, CCOrderRate}
+import domain.lib.VOFactory
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
-import lib.factory.VOFactory
 
 // about order -> https://coincheck.com/ja/documents/exchange/api#order-new
 // about stop order -> https://faq.coincheck.com/s/article/40203?language=ja

@@ -6,9 +6,8 @@ import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
-import lib.factory.VOFactory
 import CCTransaction._
-import domain.lib.EnumZio
+import domain.lib.{EnumZio, VOFactory}
 import enumeratum._
 
 final case class CCTransaction(
@@ -43,8 +42,8 @@ object CCTransaction {
 
   object CCTraSide extends Enum[CCTraSide] with EnumZio[CCTraSide] {
     val values: IndexedSeq[CCTraSide] = findValues
-    
-    case object Buy extends CCTraSide("buy")
+
+    case object Buy  extends CCTraSide("buy")
     case object Sell extends CCTraSide("sell")
   }
 }

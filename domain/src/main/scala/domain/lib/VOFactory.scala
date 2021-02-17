@@ -1,4 +1,4 @@
-package lib.factory
+package domain.lib
 
 import eu.timepit.refined.api.{Refined, Validate}
 import lib.refined.refineVZE

@@ -1,5 +1,6 @@
 package lib.factory
 
+import domain.lib.VOFactory
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype

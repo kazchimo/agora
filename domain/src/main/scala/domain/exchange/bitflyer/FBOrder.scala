@@ -5,10 +5,10 @@ import domain.exchange.bitflyer.BFChildOrder.{
   BFOrderPrice,
   BFOrderSize
 }
+import domain.lib.VOFactory
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
-import lib.factory.VOFactory
 
 // https://lightning.bitflyer.com/docs?lang=ja#%E6%96%B0%E8%A6%8F%E6%B3%A8%E6%96%87%E3%82%92%E5%87%BA%E3%81%99
 final case class BFChildOrder(
