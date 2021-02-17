@@ -1,7 +1,7 @@
 package usecase
 
 import domain.exchange.coincheck.CoincheckExchange
-import zio.Ref
+import zio.{Ref, ZIO}
 import zio.logging.log
 
 final case class OHLCBar(open: Double, high: Double, low: Double, close: Double)
@@ -32,22 +32,22 @@ object TradeInDowMethodUC {
                                 onLong       <- onLongRef.get
                                 lastBuyRate  <- lastBuyRateRef.get
                                 tradeSummary <- tradeSummaryRef.get
-                                _            <- if (bars.size >= continuous) {
-                                                  val shouldBuy  =
-                                                    bars.sortBy(_.high) == bars & bars.sortBy(_.low) == bars
-                                                  val shouldSell = bars.sortBy(b => -b.high) == bars & bars
-                                                    .sortBy(b => -b.low) == bars
+                                _            <- {
+                                  val shouldBuy  =
+                                    bars.sortBy(_.high) == bars & bars.sortBy(_.low) == bars
+                                  val shouldSell = bars.sortBy(b => -b.high) == bars & bars
+                                    .sortBy(b => -b.low) == bars
 
-                                                  if (shouldBuy & !onLong) log.info("Buy!") *> onLongRef
-                                                    .set(true) *> lastBuyRateRef.set(bar.close)
-                                                  else if (shouldSell & onLong) {
-                                                    val profit  = bar.close - lastBuyRate
-                                                    val summary = tradeSummary + profit
-                                                    log.info("Sell!") *> onLongRef.set(false) *> log.info(
-                                                      s"Profit: ${profit.toString} Summary: ${summary.toString}"
-                                                    ) *> tradeSummaryRef.set(summary)
-                                                  } else log.info("Do nothing")
-                                                } else log.info("Do nothing")
+                                  if (shouldBuy & !onLong) log.info("Buy!") *> onLongRef
+                                    .set(true) *> lastBuyRateRef.set(bar.close)
+                                  else {
+                                    val profit  = bar.close - lastBuyRate
+                                    val summary = tradeSummary + profit
+                                    log.info("Sell!") *> onLongRef.set(false) *> log.info(
+                                      s"Profit: ${profit.toString} Summary: ${summary.toString}"
+                                    ) *> tradeSummaryRef.set(summary)
+                                  }.when(shouldSell & onLong)
+                                }.when(bars.size >= continuous)
                               } yield ()
                             }
   } yield ()
