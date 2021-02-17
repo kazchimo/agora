@@ -38,15 +38,18 @@ object TradeInDowMethodUC {
                                   val shouldSell = bars.sortBy(b => -b.high) == bars & bars
                                     .sortBy(b => -b.low) == bars
 
-                                  if (shouldBuy & !onLong) log.info("Buy!") *> onLongRef
-                                    .set(true) *> lastBuyRateRef.set(bar.close)
-                                  else {
+                                  val buyIf  = (log.info("Buy!") *> onLongRef.set(
+                                    true
+                                  ) *> lastBuyRateRef.set(bar.close)).when(shouldBuy & !onLong)
+                                  val sellIf = {
                                     val profit  = bar.close - lastBuyRate
                                     val summary = tradeSummary + profit
                                     log.info("Sell!") *> onLongRef.set(false) *> log.info(
                                       s"Profit: ${profit.toString} Summary: ${summary.toString}"
                                     ) *> tradeSummaryRef.set(summary)
                                   }.when(shouldSell & onLong)
+
+                                  buyIf *> sellIf
                                 }.when(bars.size >= continuous)
                               } yield ()
                             }
