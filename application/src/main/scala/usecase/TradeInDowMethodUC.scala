@@ -1,10 +1,19 @@
 package usecase
 
-import domain.exchange.coincheck.CoincheckExchange
-import zio.{Ref, ZIO}
+import domain.exchange.coincheck.{CCPublicTransaction, CoincheckExchange}
 import zio.logging.log
+import zio.{Chunk, Ref}
 
 final case class OHLCBar(open: Double, high: Double, low: Double, close: Double)
+
+object OHLCBar {
+  def fromTransactions(ts: Chunk[CCPublicTransaction]): OHLCBar = {
+    val rates = ts.map(_.rate.value.value)
+    val max   = rates.max
+    val min   = rates.min
+    OHLCBar(ts.head.rate.value.value, max, min, ts.last.rate.value.value)
+  }
+}
 
 object TradeInDowMethodUC {
   def trade(aggCount: Int, continuous: Int) = for {
@@ -16,12 +25,7 @@ object TradeInDowMethodUC {
     lastBuyRateRef     <- Ref.make(0d)
     _                  <- transactionsStream
                             .tap(a => log.trace(a.toString))
-                            .grouped(aggCount).map { l =>
-                              val rates = l.map(_.rate.value.value)
-                              val max   = rates.max
-                              val min   = rates.min
-                              OHLCBar(l.head.rate.value.value, max, min, l.last.rate.value.value)
-                            }.tap(a =>
+                            .grouped(aggCount).map(OHLCBar.fromTransactions).tap(a =>
                               log.info(s"High and Low per ${aggCount.toString}: ${a.toString}")
                             ).foreach { bar =>
                               for {
@@ -33,10 +37,10 @@ object TradeInDowMethodUC {
                                 lastBuyRate  <- lastBuyRateRef.get
                                 tradeSummary <- tradeSummaryRef.get
                                 _            <- {
-                                  val shouldBuy  =
-                                    bars.sortBy(_.high) == bars & bars.sortBy(_.low) == bars
+                                  val shouldBuy = bars.sortBy(_.high) == bars & bars
+                                    .sortBy(_.low) == bars // high and low are increase
                                   val shouldSell = bars.sortBy(b => -b.high) == bars & bars
-                                    .sortBy(b => -b.low) == bars
+                                    .sortBy(b => -b.low) == bars // high and low are decrease
 
                                   val buyIf  = (log.info("Buy!") *> onLongRef.set(
                                     true
