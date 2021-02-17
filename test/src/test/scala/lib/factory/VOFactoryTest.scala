@@ -65,29 +65,3 @@ object VOFactoryTest extends DefaultRunnableSpec {
   ] with Has[Sized.Service], TestFailure[Serializable], TestSuccess] =
     suite("VOFactory")(applyTest, applySTest)
 }
-
-object SumVOFactoryTest extends DefaultRunnableSpec {
-  sealed trait Sum { val v: String }
-  object Sum    extends SumVOFactory {
-    override type VO = Sum
-    override val sums: Seq[Sum]               = Seq(A, B)
-    override def extractValue(v: Sum): String = v.v
-  }
-  case object A extends Sum          { val v: String = "a" }
-  case object B extends Sum          { val v: String = "b" }
-
-  override def spec: Spec[Any, TestFailure[Throwable], TestSuccess] =
-    suite("SumVOFactory")(applyTest)
-
-  val applyTest: Spec[Any, TestFailure[Throwable], TestSuccess] =
-    suite("apply")(
-      testM("invalid string fails with Throwable") {
-        assertM(Sum("c").run)(fails(isSubtype[Throwable](anything)))
-      },
-      testM("valid string creates an object") {
-        ZIO.mapN(assertM(Sum("a"))(equalTo(A)), assertM(Sum("b"))(equalTo(B)))(
-          _ && _
-        )
-      }
-    )
-}

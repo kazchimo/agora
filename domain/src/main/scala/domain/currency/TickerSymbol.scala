@@ -1,16 +1,13 @@
 package domain.currency
 
-import lib.factory.SumVOFactory
+import enumeratum._
 
-sealed trait TickerSymbol extends Serializable with Product {
-  val value: String
+sealed abstract class TickerSymbol(override val entryName: String)
+    extends Serializable with Product with EnumEntry
+
+object TickerSymbol extends Enum[TickerSymbol] {
+  val values: IndexedSeq[TickerSymbol] = findValues
+
+  case object BitCoin extends TickerSymbol("btc")
+  case object Jpy     extends TickerSymbol("jpy")
 }
-
-object TickerSymbol extends SumVOFactory {
-  override type VO = TickerSymbol
-  override val sums: Seq[TickerSymbol]               = Seq(BitCoin, Jpy)
-  override def extractValue(v: TickerSymbol): String = v.value
-}
-
-case object BitCoin extends TickerSymbol { override val value: String = "btc" }
-case object Jpy     extends TickerSymbol { override val value: String = "jpy" }

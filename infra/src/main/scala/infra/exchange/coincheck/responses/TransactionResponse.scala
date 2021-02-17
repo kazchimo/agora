@@ -4,6 +4,7 @@ import cats.syntax.functor._
 import cats.syntax.traverse._
 import domain.currency.{Currency, TickerSymbol}
 import domain.exchange.coincheck.CCTransaction
+import domain.exchange.coincheck.CCTransaction.CCTraSide._
 import domain.exchange.coincheck.CCTransaction._
 import infra.InfraError
 import io.circe.Decoder
@@ -50,7 +51,7 @@ final case class TransactionResponse(
   liquidity: String,
   side: String
 ) {
-  def dSide: Task[CCTraSide] = CCTraSide(side)
+  def dSide: Task[CCTraSide] = ZIO.fromEither(CCTraSide.withNameEither(side))
 
   private val currencies = pair.split("_")
 
@@ -63,7 +64,7 @@ final case class TransactionResponse(
                    }
                  }
     qua       <- Task.effect(funds(rawTicker).toDouble)
-    ticker    <- TickerSymbol(rawTicker)
+    ticker    <- ZIO.fromEither(TickerSymbol.withNameEither(rawTicker))
   } yield Currency(ticker, qua)
 
   def buyCurrency: Task[Currency] = for {
@@ -75,7 +76,7 @@ final case class TransactionResponse(
                    }
                  }
     qua       <- Task.effect(funds(rawTicker).toDouble)
-    ticker    <- TickerSymbol(rawTicker)
+    ticker    <- ZIO.fromEither(TickerSymbol.withNameEither(rawTicker))
   } yield Currency(ticker, qua)
 
   def dRate: Task[CCTraRate] = ZIO.effect(rate.toDouble).flatMap(CCTraRate(_))
@@ -88,7 +89,7 @@ object TransactionResponse {
       id        <- CCTraId(res.id)
       sellCur   <- res.sellCurrency
       buyCur    <- res.buyCurrency
-      side      <- CCTraSide(res.side)
+      side      <- ZIO.fromEither(CCTraSide.withNameEither(res.side))
       createdAt <- CCTraCreatedAt(res.created_at)
       rate      <- res.dRate
     } yield CCTransaction(id, sellCur, buyCur, side, createdAt, rate)

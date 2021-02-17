@@ -17,6 +17,6 @@ object Main extends zio.App {
     .exitCode
 
   private val app =
-    log.info("start") *> TradeInDowMethodUC.trade(5, 5) *> log.info("end")
+    log.info("start") *> TradeInDowMethodUC.trade(20, 5) *> log.info("end")
 
 }

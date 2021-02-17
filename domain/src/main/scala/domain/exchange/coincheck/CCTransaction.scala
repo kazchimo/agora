@@ -6,9 +6,9 @@ import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
-import lib.factory.{SumVOFactory, VOFactory}
-
+import lib.factory.VOFactory
 import CCTransaction._
+import enumeratum._
 
 final case class CCTransaction(
   id: CCTraId,
@@ -37,21 +37,13 @@ object CCTransaction {
     override type VO = CCTraRate
   }
 
-  sealed trait CCTraSide extends Serializable with Product {
-    val v: String
-  }
+  sealed abstract class CCTraSide(override val entryName: String)
+      extends Serializable with Product with EnumEntry
 
-  object CCTraSide extends SumVOFactory {
-    override type VO = CCTraSide
-    override val sums: Seq[CCTraSide]        = Seq(Buy, Sell)
-    override def extractValue(v: VO): String = v.v
-  }
-
-  case object Buy extends CCTraSide {
-    override val v: String = "buy"
-  }
-
-  case object Sell extends CCTraSide {
-    override val v: String = "sell"
+  object CCTraSide extends Enum[CCTraSide]  {
+    val values: IndexedSeq[CCTraSide] = findValues
+    
+    case object Buy extends CCTraSide("buy")
+    case object Sell extends CCTraSide("sell")
   }
 }
