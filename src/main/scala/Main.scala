@@ -1,8 +1,8 @@
 import infra.conf.ConfImpl
 import infra.exchange.ExchangeImpl
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import usecase.WatchCoincheckTransactionUC
-import zio.logging.{Logging, log}
+import usecase.TradeInDowMethodUC
+import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv}
 
@@ -12,11 +12,11 @@ object Main extends zio.App {
       ConfImpl.layer,
       ExchangeImpl.coinCheckExchange,
       AsyncHttpClientZioBackend.layer(),
-      Logging.console()
+      Logging.console(logLevel = LogLevel.Info)
     )
     .exitCode
 
   private val app =
-    log.info("start") *> WatchCoincheckTransactionUC.watch *> log.info("end")
+    log.info("start") *> TradeInDowMethodUC.trade(5, 5) *> log.info("end")
 
 }

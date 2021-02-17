@@ -1,20 +1,13 @@
 package usecase
 
 import domain.exchange.coincheck.CoincheckExchange
-import sttp.client3.asynchttpclient.zio.SttpClient
-import zio.{Has, Queue, Ref, ZEnv, ZIO}
-import zio.stream.Stream
-import zio.logging.{Logging, log}
-import zio.duration._
+import zio.Ref
+import zio.logging.log
 
 final case class OHLCBar(open: Double, high: Double, low: Double, close: Double)
 
 object TradeInDowMethodUC {
-  def trade(aggCount: Int, continuous: Int): ZIO[
-    CoincheckExchange with ZEnv with Logging with SttpClient,
-    Throwable,
-    Unit
-  ] = for {
+  def trade(aggCount: Int, continuous: Int) = for {
     _                  <- log.info("Buying in Dow method start...")
     transactionsStream <- CoincheckExchange.publicTransactions
     barsRef            <- Ref.make(Seq.empty[OHLCBar])
