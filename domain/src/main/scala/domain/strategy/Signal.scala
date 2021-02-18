@@ -1,12 +1,15 @@
 package domain.strategy
 
-import enumeratum._
+sealed abstract class Signal(val at: Double) {
+  def shouldBuy: Boolean
 
-sealed trait Signal extends EnumEntry
+  final def shouldSell: Boolean = !shouldBuy
+}
 
-object Signal extends Enum[Signal] {
-  val values: IndexedSeq[Signal] = findValues
+final case class Buy(override val at: Double) extends Signal(at) {
+  override def shouldBuy: Boolean = true
+}
 
-  case object Buy  extends Signal
-  case object Sell extends Signal
+final case class Sell(override val at: Double) extends Signal(at) {
+  override def shouldBuy: Boolean = false
 }
