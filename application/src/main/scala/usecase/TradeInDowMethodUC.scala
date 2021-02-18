@@ -26,7 +26,8 @@ final case class TradingState(
 
   def buyAt(rate: Double): TradingState = this.copy(lastBuyRate = rate)
 
-  def addSummary(d: Double): TradingState = this.copy(tradeSummary = d)
+  def addSummary(d: Double): TradingState =
+    this.copy(tradeSummary = d + this.tradeSummary)
 }
 
 object TradeInDowMethodUC {
