@@ -5,7 +5,7 @@ import domain.lib.VOFactory
 import enumeratum._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
-import eu.timepit.refined.numeric.Positive
+import eu.timepit.refined.numeric.{NonNegative, Positive}
 import eu.timepit.refined.types.all.NonEmptyString
 import io.estatico.newtype.macros.newtype
 
@@ -33,8 +33,10 @@ object CCPublicTransaction {
     override type VO = CCPubTraRate
   }
 
-  @newtype final case class CCPubTraQuantity(value: Refined[Double, Positive])
-  object CCPubTraQuantity extends VOFactory[Double, Positive] {
+  @newtype final case class CCPubTraQuantity(
+    value: Refined[Double, NonNegative]
+  )
+  object CCPubTraQuantity extends VOFactory[Double, NonNegative] {
     override type VO = CCPubTraQuantity
   }
 
