@@ -1,19 +1,9 @@
 package usecase
 
+import domain.chart.OHLCBar
 import domain.exchange.coincheck.{CCPublicTransaction, CoincheckExchange}
 import zio.logging.log
 import zio.{Chunk, Ref}
-
-final case class OHLCBar(open: Double, high: Double, low: Double, close: Double)
-
-object OHLCBar {
-  def fromTransactions(ts: Chunk[CCPublicTransaction]): OHLCBar = {
-    val rates = ts.map(_.rate.value.value)
-    val max   = rates.max
-    val min   = rates.min
-    OHLCBar(ts.head.rate.value.value, max, min, ts.last.rate.value.value)
-  }
-}
 
 final case class TradingState(
   onLong: Boolean,
