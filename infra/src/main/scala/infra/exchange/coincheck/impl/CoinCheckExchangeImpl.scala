@@ -7,4 +7,4 @@ final case class CoinCheckExchangeImpl(
   accessKey: CCEAccessKey,
   secretKey: CCESecretKey
 ) extends CoincheckExchange.Service with Transactions with Orders
-    with AuthStrategy with PublicTransactions
+    with AuthStrategy with PublicTransactions with OpenOrders

@@ -5,5 +5,6 @@ private[coincheck] object Endpoints {
 
   val transactions: String = url("exchange/orders/transactions")
   val orders: String       = url("exchange/orders")
+  val openOrders: String   = url("exchange/orders/opens")
   val websocket: String    = "wss://ws-api.coincheck.com/"
 }
