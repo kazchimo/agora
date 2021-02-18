@@ -9,7 +9,7 @@ import zio.test._
 
 import CCOrderConverter._
 
-object CCOrderRequestConverterTest$ extends DefaultRunnableSpec {
+object CCOrderRequestConverterTest extends DefaultRunnableSpec {
   val ccOrderRateEncTet
     : Spec[TestConfig with Random, TestFailure[Nothing], TestSuccess] = suite(
     "ccOrderRateEncoder"
