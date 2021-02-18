@@ -3,7 +3,14 @@ package domain.chart
 import domain.exchange.coincheck.CCPublicTransaction
 import zio.Chunk
 
-final case class OHLCBar(open: Double, high: Double, low: Double, close: Double)
+final case class OHLCBar(
+  open: Double,
+  high: Double,
+  low: Double,
+  close: Double
+) {
+  def range: Double = high - low
+}
 
 object OHLCBar {
   def fromTransactions(ts: Chunk[CCPublicTransaction]): OHLCBar = {
