@@ -62,12 +62,17 @@ object TradeInDowMethodUC {
                                     _.toLongPosition.buyAt(bar.close)
                                   )).when(shouldBuy(barsForBuy) & !tradingState.onLong)
                                   val sellIf = {
-                                    val profit = bar.close - tradingState.lastBuyRate
-                                    log.info("Sell!") *> tradingStateRef.update(
-                                      _.toNeutralPosition.addSummary(profit)
-                                    ) *> log.info(
-                                      s"Profit: ${profit.toString} Summary: ${(tradingState.tradeSummary + profit).toString}"
-                                    )
+                                    for {
+                                      _       <- log.info("Sell!")
+                                      profit   = bar.close - tradingState.lastBuyRate
+                                      summary <- tradingStateRef.updateAndGet(
+                                                   _.toNeutralPosition.addSummary(profit)
+                                                 )
+                                      _       <-
+                                        log.info(
+                                          s"Profit: ${profit.toString} Summary: ${summary.tradeSummary.toString}"
+                                        )
+                                    } yield ()
                                   }.when(shouldSell(barsForSell) & tradingState.onLong)
 
                                   buyIf *> sellIf
