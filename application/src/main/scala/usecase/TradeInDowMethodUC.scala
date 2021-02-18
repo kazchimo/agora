@@ -15,6 +15,20 @@ object OHLCBar {
   }
 }
 
+final case class TradingState(
+  onLong: Boolean,
+  tradeSummary: Double,
+  lastBuyRate: Double
+) {
+  def toLongPosition: TradingState = this.copy(true)
+
+  def toNeutralPosition: TradingState = this.copy(false)
+
+  def buyAt(rate: Double): TradingState = this.copy(lastBuyRate = rate)
+
+  def addSummary(d: Double): TradingState = this.copy(tradeSummary = d)
+}
+
 object TradeInDowMethodUC {
   private def shouldBuy(bars: Seq[OHLCBar]): Boolean =
     bars.sortBy(_.high) == bars & bars.sortBy(_.low) == bars
@@ -26,9 +40,7 @@ object TradeInDowMethodUC {
     _                  <- log.info("Buying in Dow method start...")
     transactionsStream <- CoincheckExchange.publicTransactions
     barsRef            <- Ref.make(Seq.empty[OHLCBar])
-    onLongRef          <- Ref.make(false)
-    tradeSummaryRef    <- Ref.make(0d)
-    lastBuyRateRef     <- Ref.make(0d)
+    tradingStateRef    <- Ref.make(TradingState(false, 0, 0))
     _                  <- transactionsStream
                             .tap(a => log.trace(a.toString))
                             .grouped(aggCount).map(OHLCBar.fromTransactions).tap(a =>
@@ -39,20 +51,19 @@ object TradeInDowMethodUC {
                                                   if (old.size >= continuous) old.:+(bar).tail
                                                   else old.:+(bar)
                                                 )
-                                onLong       <- onLongRef.get
-                                lastBuyRate  <- lastBuyRateRef.get
-                                tradeSummary <- tradeSummaryRef.get
+                                tradingState <- tradingStateRef.get
                                 _            <- {
-                                  val buyIf  =
-                                    (log.info("Buy!") *> onLongRef.set(true) *> lastBuyRateRef
-                                      .set(bar.close)).when(shouldBuy(bars) & !onLong)
+                                  val buyIf  = (log.info("Buy!") *> tradingStateRef.update(
+                                    _.toLongPosition.buyAt(bar.close)
+                                  )).when(shouldBuy(bars) & !tradingState.onLong)
                                   val sellIf = {
-                                    val profit  = bar.close - lastBuyRate
-                                    val summary = tradeSummary + profit
-                                    log.info("Sell!") *> onLongRef.set(false) *> log.info(
-                                      s"Profit: ${profit.toString} Summary: ${summary.toString}"
-                                    ) *> tradeSummaryRef.set(summary)
-                                  }.when(shouldSell(bars) & onLong)
+                                    val profit = bar.close - tradingState.lastBuyRate
+                                    log.info("Sell!") *> tradingStateRef.update(
+                                      _.toNeutralPosition.addSummary(profit)
+                                    ) *> log.info(
+                                      s"Profit: ${profit.toString} Summary: ${(tradingState.tradeSummary + profit).toString}"
+                                    )
+                                  }.when(shouldSell(bars) & tradingState.onLong)
 
                                   buyIf *> sellIf
                                 }.when(bars.size >= continuous)
