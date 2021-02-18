@@ -36,10 +36,11 @@ object TradeInDowMethodUC {
   private def shouldSell(bars: Seq[OHLCBar]): Boolean =
     bars.sortBy(b => -b.high) == bars & bars.sortBy(b => -b.low) == bars
 
-  def trade(aggCount: Int, continuous: Int) = for {
+  def trade(aggCount: Int, buyContinuous: Int, sellContinuous: Int) = for {
     _                  <- log.info("Buying in Dow method start...")
     transactionsStream <- CoincheckExchange.publicTransactions
-    barsRef            <- Ref.make(Seq.empty[OHLCBar])
+    barsForBuyRef      <- Ref.make(Seq.empty[OHLCBar])
+    barsForSellRef     <- Ref.make(Seq.empty[OHLCBar])
     tradingStateRef    <- Ref.make(TradingState(false, 0, 0))
     _                  <- transactionsStream
                             .tap(a => log.trace(a.toString))
@@ -47,15 +48,19 @@ object TradeInDowMethodUC {
                               log.info(s"High and Low per ${aggCount.toString}: ${a.toString}")
                             ).foreach { bar =>
                               for {
-                                bars         <- barsRef.updateAndGet(old =>
-                                                  if (old.size >= continuous) old.:+(bar).tail
+                                barsForBuy   <- barsForBuyRef.updateAndGet(old =>
+                                                  if (old.size >= buyContinuous) old.:+(bar).tail
+                                                  else old.:+(bar)
+                                                )
+                                barsForSell  <- barsForSellRef.updateAndGet(old =>
+                                                  if (old.size >= sellContinuous) old.:+(bar).tail
                                                   else old.:+(bar)
                                                 )
                                 tradingState <- tradingStateRef.get
                                 _            <- {
                                   val buyIf  = (log.info("Buy!") *> tradingStateRef.update(
                                     _.toLongPosition.buyAt(bar.close)
-                                  )).when(shouldBuy(bars) & !tradingState.onLong)
+                                  )).when(shouldBuy(barsForBuy) & !tradingState.onLong)
                                   val sellIf = {
                                     val profit = bar.close - tradingState.lastBuyRate
                                     log.info("Sell!") *> tradingStateRef.update(
@@ -63,10 +68,12 @@ object TradeInDowMethodUC {
                                     ) *> log.info(
                                       s"Profit: ${profit.toString} Summary: ${(tradingState.tradeSummary + profit).toString}"
                                     )
-                                  }.when(shouldSell(bars) & tradingState.onLong)
+                                  }.when(shouldSell(barsForSell) & tradingState.onLong)
 
                                   buyIf *> sellIf
-                                }.when(bars.size >= continuous)
+                                }.when(
+                                  barsForBuy.size >= buyContinuous & barsForSell.size >= sellContinuous
+                                )
                               } yield ()
                             }
   } yield ()
