@@ -1,5 +1,6 @@
 package infra.exchange.coincheck.impl
 
+import domain.exchange.coincheck.CCOrder
 import helpers.gen.domain.exchange.coincheck.CCOrderGen.ccOrderGen
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
@@ -34,7 +35,7 @@ trait OrdersTest { self: CoinCheckExchangeImplTest.type =>
       val testEffect =
         matchedWhen.thenRespond(successJson) *> exchange.orders(o)
 
-      assertM(testEffect)(isSubtype[Unit](anything))
+      assertM(testEffect)(isSubtype[CCOrder](anything))
     })
   )
 }

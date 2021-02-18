@@ -2,10 +2,9 @@ package infra.exchange.coincheck.impl
 
 import domain.conf.{CCEAccessKey, CCESecretKey}
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import zio.logging.Logging
-import zio.test.environment.TestEnvironment
-import zio.test.{DefaultRunnableSpec, ZSpec, suite}
 import zio._
+import zio.logging.Logging
+import zio.test.{DefaultRunnableSpec, suite}
 
 object CoinCheckExchangeImplTest
     extends DefaultRunnableSpec with TransactionsTest with OrdersTest
@@ -20,8 +19,9 @@ object CoinCheckExchangeImplTest
   private val layer =
     AsyncHttpClientZioBackend.stubLayer.orDie ++ ZEnv.live ++ Logging.ignore
 
-  override def spec: ZSpec[TestEnvironment, Any] = suite(
-    "CoinCheckExchangeImpl"
-  )(transactionsSuite, ordersSuite, publicTransactionsTest)
-    .provideCustomLayer(layer)
+  override def spec = suite("CoinCheckExchangeImpl")(
+    transactionsSuite,
+    ordersSuite,
+    publicTransactionsTest
+  ).provideCustomLayer(layer)
 }
