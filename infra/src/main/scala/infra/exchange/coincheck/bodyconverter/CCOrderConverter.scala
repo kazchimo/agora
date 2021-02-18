@@ -1,7 +1,10 @@
 package infra.exchange.coincheck.bodyconverter
 
-import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyAmount
-import domain.exchange.coincheck.CCOrderRequest.{CCOrderAmount, CCOrderRate}
+import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
+import domain.exchange.coincheck.CCOrderRequest.{
+  CCOrderRequestAmount,
+  CCOrderRequestRate
+}
 import domain.exchange.coincheck._
 import io.circe.Encoder
 import io.circe.generic.extras.Configuration
@@ -30,13 +33,13 @@ object CCOrderConverter {
   private val pair            = "pair"
   private val btcJpy          = "btc_jpy"
 
-  implicit val orderRateEncoder: Encoder[CCOrderRate] =
+  implicit val orderRateEncoder: Encoder[CCOrderRequestRate] =
     Encoder.instance(_.value.value.asJson)
 
-  implicit val orderAmountEncoder: Encoder[CCOrderAmount] =
+  implicit val orderAmountEncoder: Encoder[CCOrderRequestAmount] =
     Encoder.instance(_.value.value.asJson)
 
-  implicit val marketBuyAmountEncoder: Encoder[CCMarketBuyAmount] =
+  implicit val marketBuyAmountEncoder: Encoder[CCMarketBuyRequestAmount] =
     Encoder.instance(_.value.value.asJson)
 
   implicit val buyEncoder: Encoder[CCBuyRequest] =

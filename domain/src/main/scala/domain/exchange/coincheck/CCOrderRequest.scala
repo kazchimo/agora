@@ -1,7 +1,10 @@
 package domain.exchange.coincheck
 
-import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyAmount
-import domain.exchange.coincheck.CCOrderRequest.{CCOrderAmount, CCOrderRate}
+import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
+import domain.exchange.coincheck.CCOrderRequest.{
+  CCOrderRequestAmount,
+  CCOrderRequestRate
+}
 import domain.lib.VOFactory
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
@@ -12,54 +15,58 @@ import io.estatico.newtype.macros.newtype
 
 sealed trait CCOrderRequest
 object CCOrderRequest {
-  @newtype case class CCOrderRate(value: Long Refined Positive)
-  object CCOrderRate extends VOFactory[Long, Positive] {
-    override type VO = CCOrderRate
+  @newtype case class CCOrderRequestRate(value: Long Refined Positive)
+  object CCOrderRequestRate extends VOFactory[Long, Positive] {
+    override type VO = CCOrderRequestRate
   }
 
-  @newtype case class CCOrderAmount(value: Double Refined Positive)
-  object CCOrderAmount extends VOFactory[Double, Positive] {
-    override type VO = CCOrderAmount
+  @newtype case class CCOrderRequestAmount(value: Double Refined Positive)
+  object CCOrderRequestAmount extends VOFactory[Double, Positive] {
+    override type VO = CCOrderRequestAmount
   }
 }
 
-final case class CCBuyRequest(rate: CCOrderRate, amount: CCOrderAmount)
-    extends CCOrderRequest
+final case class CCBuyRequest(
+  rate: CCOrderRequestRate,
+  amount: CCOrderRequestAmount
+) extends CCOrderRequest
 
 final case class CCStopBuyRequest(
-  rate: CCOrderRate,
-  stopLossRate: CCOrderRate,
-  amount: CCOrderAmount
+  rate: CCOrderRequestRate,
+  stopLossRate: CCOrderRequestRate,
+  amount: CCOrderRequestAmount
 ) extends CCOrderRequest
 
-final case class CCSellRequest(rate: CCOrderRate, amount: CCOrderAmount)
-    extends CCOrderRequest
+final case class CCSellRequest(
+  rate: CCOrderRequestRate,
+  amount: CCOrderRequestAmount
+) extends CCOrderRequest
 
 final case class CCStopSellRequest(
-  rate: CCOrderRate,
-  stopLossRate: CCOrderRate,
-  amount: CCOrderAmount
+  rate: CCOrderRequestRate,
+  stopLossRate: CCOrderRequestRate,
+  amount: CCOrderRequestAmount
 ) extends CCOrderRequest
 
-final case class CCMarketBuyRequest(marketBuyAmount: CCMarketBuyAmount)
+final case class CCMarketBuyRequest(marketBuyAmount: CCMarketBuyRequestAmount)
     extends CCOrderRequest
 
 final case class CCMarketStopBuyRequest(
-  stopLossRate: CCOrderRate,
-  marketBuyAmount: CCMarketBuyAmount
+  stopLossRate: CCOrderRequestRate,
+  marketBuyAmount: CCMarketBuyRequestAmount
 ) extends CCOrderRequest
 
 object CCMarketBuyRequest {
-  @newtype case class CCMarketBuyAmount(value: Double Refined Positive)
-  object CCMarketBuyAmount extends VOFactory[Double, Positive] {
-    override type VO = CCMarketBuyAmount
+  @newtype case class CCMarketBuyRequestAmount(value: Double Refined Positive)
+  object CCMarketBuyRequestAmount extends VOFactory[Double, Positive] {
+    override type VO = CCMarketBuyRequestAmount
   }
 }
 
-final case class CCMarketSellRequest(amount: CCOrderAmount)
+final case class CCMarketSellRequest(amount: CCOrderRequestAmount)
     extends CCOrderRequest
 
 final case class CCMarketStopSellRequest(
-  stopLossRate: CCOrderRate,
-  amount: CCOrderAmount
+  stopLossRate: CCOrderRequestRate,
+  amount: CCOrderRequestAmount
 ) extends CCOrderRequest
