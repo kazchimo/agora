@@ -1,6 +1,7 @@
 package infra.exchange.coincheck.impl
 
-import domain.exchange.coincheck.CCOrder
+import domain.exchange.coincheck.CCOrder.CCOrderId
+import domain.exchange.coincheck.{CCOrder, CCOrderRequest}
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.bodyconverter.CCOrderConverter._
@@ -17,23 +18,24 @@ import zio.{RIO, Task, ZEnv, ZIO}
 
 private[coincheck] trait Orders extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
-  private def request(order: CCOrder) = for {
+  private def request(order: CCOrderRequest) = for {
     h <- headers(Endpoints.orders, order.asJson.noSpaces)
   } yield basicRequest.post(uri"${Endpoints.orders}").contentType("application/json").body(order.asJson.noSpaces).headers(h).response(asJson[OrdersResponse])
 
-  final override def orders(order: CCOrder): RIO[SttpClient with ZEnv, Unit] =
-    for {
-      req  <- request(order)
-      res  <- send(req)
-      body <- ZIO.fromEither(res.body)
-      r    <- body match {
-                case _: SuccessOrdersResponse    => Task.succeed(())
-                case FailedOrdersResponse(error) => Task.fail(
-                    InfraError(
-                      s"failed to order: order=${order.toString} error=$error"
-                    )
+  final override def orders(
+    order: CCOrderRequest
+  ): RIO[SttpClient with ZEnv, CCOrder] = for {
+    req  <- request(order)
+    res  <- send(req)
+    body <- ZIO.fromEither(res.body)
+    r    <- body match {
+              case r: SuccessOrdersResponse    => CCOrderId(r.id).map(CCOrder(_))
+              case FailedOrdersResponse(error) => Task.fail(
+                  InfraError(
+                    s"failed to order: order=${order.toString} error=$error"
                   )
-              }
-    } yield r
+                )
+            }
+  } yield r
 
 }

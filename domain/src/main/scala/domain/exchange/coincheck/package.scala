@@ -13,7 +13,7 @@ package object coincheck {
   object CoincheckExchange {
     trait Service {
       def transactions: RIO[SttpClient, Seq[CCTransaction]]
-      def orders(order: CCOrder): RIO[SttpClient with ZEnv, Unit]
+      def orders(order: CCOrderRequest): RIO[SttpClient with ZEnv, CCOrder]
       // Get unsettled orders
       def openOrders: RIO[SttpClient, Unit]
       def publicTransactions: ZIO[
