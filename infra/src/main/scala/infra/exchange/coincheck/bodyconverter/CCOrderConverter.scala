@@ -1,10 +1,10 @@
 package infra.exchange.coincheck.bodyconverter
 
-import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
 import domain.exchange.coincheck.CCLimitOrderRequest.{
   CCOrderRequestAmount,
   CCOrderRequestRate
 }
+import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
 import domain.exchange.coincheck._
 import io.circe.Encoder
 import io.circe.generic.extras.Configuration
@@ -14,16 +14,26 @@ object CCOrderConverter {
   implicit val codecConfig: Configuration =
     Configuration.default.withSnakeCaseMemberNames
 
-  implicit val encodeOrder: Encoder[CCLimitOrderRequest] = Encoder.instance {
-    case a: CCLimitBuyRequest       => a.asJson
-    case a: CCLimitStopBuyRequest   => a.asJson
-    case a: CCLimitSellRequest      => a.asJson
-    case a: CCLimitStopSellRequest  => a.asJson
-    case a: CCMarketBuyRequest      => a.asJson
-    case a: CCMarketStopBuyRequest  => a.asJson
-    case a: CCMarketSellRequest     => a.asJson
-    case a: CCMarketStopSellRequest => a.asJson
+  implicit val encodeOrder: Encoder[CCOrderRequest] = Encoder.instance {
+    case a: CCLimitOrderRequest => a.asJson
+    case a: CCMarketBuyRequest  => a.asJson
   }
+
+  implicit val encodeLimitOrderRequest: Encoder[CCLimitOrderRequest] =
+    Encoder.instance {
+      case a: CCLimitBuyRequest      => a.asJson
+      case a: CCLimitStopBuyRequest  => a.asJson
+      case a: CCLimitSellRequest     => a.asJson
+      case a: CCLimitStopSellRequest => a.asJson
+    }
+
+  implicit val encodeMarketOrderRequest: Encoder[CCMarketOrderRequest] =
+    Encoder.instance {
+      case a: CCMarketBuyRequest      => a.asJson
+      case a: CCMarketStopBuyRequest  => a.asJson
+      case a: CCMarketSellRequest     => a.asJson
+      case a: CCMarketStopSellRequest => a.asJson
+    }
 
   private val orderType       = "order_type"
   private val rate            = "rate"
