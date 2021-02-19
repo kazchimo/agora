@@ -3,34 +3,14 @@ import domain.chart.OHLCBar
 import domain.exchange.coincheck.CCPublicTransaction
 import zio.logging.{Logging, log}
 import zio.stream._
-import zio.{Chunk, Queue, Ref, ZIO}
+import zio._
+import DowMethod._
 
 final case class DowMethod(
   aggCount: Int,
   buyContinuous: Int,
   sellContinuous: Int
 ) {
-  private def updateBars[A](
-    barsRef: Ref[Chunk[A]],
-    continuous: Int,
-    newBar: A
-  ) = barsRef.updateAndGet(old =>
-    if (old.size >= continuous) old.:+(newBar).tail
-    else old.:+(newBar)
-  )
-
-  private def shouldBuy(bars: Chunk[OHLCBar]): Boolean =
-    bars.zipWithIndex.foldLeft(true) { case (should, (bar, idx)) =>
-      if (idx == 0) true
-      else should & bars(idx - 1).high < bar.high & bars(idx - 1).low < bar.low
-    }
-
-  private def shouldSell(bars: Seq[OHLCBar]): Boolean =
-    bars.zipWithIndex.foldLeft(true) { case (should, (bar, idx)) =>
-      if (idx == 0) true
-      else should & bars(idx - 1).high > bar.high & bars(idx - 1).low > bar.low
-    }
-
   def signal(
     tras: UStream[CCPublicTransaction]
   ): ZIO[Logging, Nothing, UStream[Signal]] = for {
@@ -58,4 +38,27 @@ final case class DowMethod(
                           } yield ()
                         }.fork
   } yield Stream.fromQueueWithShutdown(signalQueue).interruptWhen(signalQueue.awaitShutdown)
+}
+
+object DowMethod {
+  def updateBars[A](
+    barsRef: Ref[Chunk[A]],
+    continuous: Int,
+    newBar: A
+  ): UIO[Chunk[A]] = barsRef.updateAndGet(old =>
+    if (old.size >= continuous) old.:+(newBar).tail
+    else old.:+(newBar)
+  )
+
+  def shouldBuy(bars: Chunk[OHLCBar]): Boolean =
+    bars.zipWithIndex.foldLeft(true) { case (should, (bar, idx)) =>
+      if (idx == 0) true
+      else should & bars(idx - 1).high < bar.high & bars(idx - 1).low < bar.low
+    }
+
+  def shouldSell(bars: Seq[OHLCBar]): Boolean =
+    bars.zipWithIndex.foldLeft(true) { case (should, (bar, idx)) =>
+      if (idx == 0) true
+      else should & bars(idx - 1).high > bar.high & bars(idx - 1).low > bar.low
+    }
 }
