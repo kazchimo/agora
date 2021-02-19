@@ -20,10 +20,16 @@ final case class DowMethod(
   )
 
   private def shouldBuy(bars: Chunk[OHLCBar]): Boolean =
-    bars.sortBy(_.high) == bars & bars.sortBy(_.low) == bars
+    bars.zipWithIndex.foldLeft(true) { case (should, (bar, idx)) =>
+      if (idx == 0) true
+      else should & bars(idx - 1).high < bar.high & bars(idx - 1).low < bar.low
+    }
 
   private def shouldSell(bars: Seq[OHLCBar]): Boolean =
-    bars.sortBy(b => -b.high) == bars & bars.sortBy(b => -b.low) == bars
+    bars.zipWithIndex.foldLeft(true) { case (should, (bar, idx)) =>
+      if (idx == 0) true
+      else should & bars(idx - 1).high > bar.high & bars(idx - 1).low > bar.low
+    }
 
   def signal(tras: UStream[CCPublicTransaction]) = for {
     barsForBuyRef  <- Ref.make(Chunk[OHLCBar]())
