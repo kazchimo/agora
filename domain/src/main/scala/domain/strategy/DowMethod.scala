@@ -50,12 +50,14 @@ object DowMethod {
     else old.:+(newBar)
   )
 
+  /** Return true if chart is increasing. */
   def shouldBuy(bars: Chunk[OHLCBar]): Boolean =
     bars.zipWithIndex.foldLeft(true) { case (should, (bar, idx)) =>
       if (idx == 0) true
       else should & bars(idx - 1).high < bar.high & bars(idx - 1).low < bar.low
     }
 
+  /** Return true if chart is decreasing. */
   def shouldSell(bars: Seq[OHLCBar]): Boolean =
     bars.zipWithIndex.foldLeft(true) { case (should, (bar, idx)) =>
       if (idx == 0) true
