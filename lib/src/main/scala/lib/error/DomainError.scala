@@ -8,10 +8,10 @@ sealed abstract class DomainError(
 
 final case class ClientDomainError(
   override val msg: String,
-  override val cause: Option[Throwable]
+  override val cause: Option[Throwable] = None
 ) extends DomainError(msg, cause, ClientErr)
 
 final case class InternalDomainError(
   override val msg: String,
-  override val cause: Option[Throwable]
+  override val cause: Option[Throwable] = None
 ) extends DomainError(msg, cause, InternalErr)
