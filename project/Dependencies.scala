@@ -2,8 +2,8 @@ import sbt._
 
 object Dependencies {
   object Versions {
-    val zio        = "1.0.3"
-    val sttp       = "3.0.0-RC7"
+    val zio        = "1.0.4-2"
+    val sttp       = "3.0.0"
     val circe      = "0.13.0"
     val monocle    = "2.1.0"
     val enumeratum = "1.6.1"
@@ -51,12 +51,12 @@ object Dependencies {
       .map(_ % Versions.enumeratum)
 
   lazy val scalaTest      = "org.scalatest"        %% "scalatest"        % "3.2.2"
-  lazy val zioCats        = "dev.zio"              %% "zio-interop-cats" % "2.2.0.1"
+  lazy val zioCats        = "dev.zio"              %% "zio-interop-cats" % "2.3.1.0"
   lazy val zioLogging     = "dev.zio"              %% "zio-logging"      % "0.5.6"
-  lazy val zioMagic       = "io.github.kitlangton" %% "zio-magic"        % "0.1.8"
+  lazy val zioMagic       = "io.github.kitlangton" %% "zio-magic"        % "0.1.9"
   lazy val codec          = "commons-codec"         % "commons-codec"    % "1.15"
   lazy val newtype        = "io.estatico"          %% "newtype"          % "0.4.4"
-  lazy val refined        = "eu.timepit"           %% "refined"          % "0.9.17"
-  lazy val chimney        = "io.scalaland"         %% "chimney"          % "0.6.0"
-  lazy val cats           = "org.typelevel"        %% "cats-core"        % "2.2.0"
+  lazy val refined        = "eu.timepit"           %% "refined"          % "0.9.21"
+  lazy val chimney        = "io.scalaland"         %% "chimney"          % "0.6.1"
+  lazy val cats           = "org.typelevel"        %% "cats-core"        % "2.4.2"
 }
