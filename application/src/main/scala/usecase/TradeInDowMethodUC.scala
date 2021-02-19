@@ -1,13 +1,14 @@
 package usecase
 
+import domain.broker.coincheck.CoincheckBroker
 import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.exchange.coincheck.CCOrderRequest.{
+import domain.exchange.coincheck.CCLimitOrderRequest.{
   CCOrderRequestAmount,
   CCOrderRequestRate
 }
 import domain.exchange.coincheck.{
-  CCBuyRequest,
-  CCSellRequest,
+  CCLimitBuyRequest,
+  CCLimitSellRequest,
   CoincheckExchange
 }
 import domain.strategy.DowMethod
@@ -32,15 +33,13 @@ final case class TradingState(
 object TradeInDowMethodUC {
   val jpy = 100000
 
-  private def waitOrderSettled(id: CCOrderId) =
-    CoincheckExchange.openOrders.repeatWhile(_.map(_.id).contains(id))
-
   def trade(aggCount: Int, buyContinuous: Int, sellContinuous: Int) = for {
     _                  <- log.info("Buying in Dow method start...")
     transactionsStream <- CoincheckExchange.publicTransactions
     tradingStateRef    <- Ref.make(TradingState(false, 0, 0))
     signalStream       <- DowMethod(aggCount, buyContinuous, sellContinuous)
                             .signal(transactionsStream)
+    broker              = CoincheckBroker(transactionsStream)
     _                  <- signalStream.foreach { signal =>
                             for {
                               tradingState <- tradingStateRef.get
@@ -49,8 +48,8 @@ object TradeInDowMethodUC {
                                   _      <- log.info("Buy!")
                                   rate   <- CCOrderRequestRate(signal.at.toLong)
                                   amount <- CCOrderRequestAmount(jpy / signal.at)
-                                  order  <- CoincheckExchange.orders(CCBuyRequest(rate, amount))
-                                  _      <- waitOrderSettled(order.id)
+                                  _      <- broker
+                                              .priceAdjustingOrder(CCLimitBuyRequest(rate, amount), 5)
                                   _      <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at))
                                 } yield ()
                               }.when(signal.shouldBuy & !tradingState.onLong)
@@ -59,8 +58,10 @@ object TradeInDowMethodUC {
                                   _            <- log.info("Sell!")
                                   rate         <- CCOrderRequestRate(signal.at.toLong)
                                   amount       <- CCOrderRequestAmount(jpy / tradingState.lastBuyRate)
-                                  order        <- CoincheckExchange.orders(CCSellRequest(rate, amount))
-                                  _            <- waitOrderSettled(order.id)
+                                  _            <- broker.priceAdjustingOrder(
+                                                    CCLimitSellRequest(rate, amount),
+                                                    5
+                                                  )
                                   tradingState <- tradingStateRef.get
                                   profit        =
                                     amount.value.value * (signal.at - tradingState.lastBuyRate)
