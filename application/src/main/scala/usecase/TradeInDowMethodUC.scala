@@ -58,7 +58,7 @@ object TradeInDowMethodUC {
                                 for {
                                   _            <- log.info("Sell!")
                                   rate         <- CCOrderRequestRate(signal.at.toLong)
-                                  amount       <- CCOrderRequestAmount(jpy / signal.at)
+                                  amount       <- CCOrderRequestAmount(jpy / tradingState.lastBuyRate)
                                   order        <- CoincheckExchange.orders(CCSellRequest(rate, amount))
                                   _            <- waitOrderSettled(order.id)
                                   tradingState <- tradingStateRef.get
