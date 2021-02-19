@@ -2,7 +2,7 @@ import Dependencies._
 import sbtwelcome.UsefulTask
 
 ThisBuild / scalaVersion := "2.13.3"
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.4.4"
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 
 inThisBuild(
   Seq(
