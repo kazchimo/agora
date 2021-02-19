@@ -1,18 +1,18 @@
 package helpers.gen.domain.exchange.coincheck
 
-import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
 import domain.exchange.coincheck.CCLimitOrderRequest.{
   CCOrderRequestAmount,
   CCOrderRequestRate
 }
+import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
 import domain.exchange.coincheck._
-import helpers.gen.std.StdGen.{positiveDoubleGen, positiveLongGen}
+import helpers.gen.std.StdGen.positiveDoubleGen
 import zio.random.Random
 import zio.test.Gen
 
 object CCOrderGen {
   val ccOrderRateGen: Gen[Random, CCOrderRequestRate] =
-    positiveLongGen.map(CCOrderRequestRate.unsafeFrom)
+    positiveDoubleGen.map(CCOrderRequestRate.unsafeFrom)
 
   val ccOrderAmountGen: Gen[Random, CCOrderRequestAmount] =
     positiveDoubleGen.map(CCOrderRequestAmount.unsafeFrom)
@@ -48,7 +48,7 @@ object CCOrderGen {
   val ccMarketStopSellGen: Gen[Random, CCMarketStopSellRequest] =
     ccOrderRateGen.crossWith(ccOrderAmountGen)(CCMarketStopSellRequest)
 
-  val ccOrderGen: Gen[Random, CCLimitOrderRequest] = Gen.oneOf(
+  val ccOrderGen: Gen[Random, CCOrderRequest] = Gen.oneOf(
     ccBuyGen,
     ccStopBuyGen,
     ccSellGen,
