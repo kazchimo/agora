@@ -3,7 +3,7 @@ import sbt._
 object Dependencies {
   object Versions {
     val zio        = "1.0.4-2"
-    val sttp       = "3.0.0-RC7"
+    val sttp       = "3.0.0"
     val circe      = "0.13.0"
     val monocle    = "2.1.0"
     val enumeratum = "1.6.1"
