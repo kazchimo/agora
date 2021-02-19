@@ -1,6 +1,6 @@
 package infra.exchange.coincheck.bodyconverter
 
-import helpers.gen.domain.exchange.coincheck.CCOrderGen._
+import helpers.gen.domain.exchange.coincheck.CCOrderRequestGen._
 import io.circe.Json
 import io.circe.syntax._
 import zio.random.Random

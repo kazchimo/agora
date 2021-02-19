@@ -10,7 +10,7 @@ import helpers.gen.std.StdGen.positiveDoubleGen
 import zio.random.Random
 import zio.test.Gen
 
-object CCOrderGen {
+object CCOrderRequestGen {
   val ccOrderRateGen: Gen[Random, CCOrderRequestRate] =
     positiveDoubleGen.map(CCOrderRequestRate.unsafeFrom)
 
