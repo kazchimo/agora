@@ -38,7 +38,7 @@ final case class DowMethod(
                                              )
                           } yield ()
                         }.fork
-  } yield Stream.fromQueueWithShutdown(signalQueue).interruptWhen(signalQueue.awaitShutdown)
+  } yield Stream.fromQueueWithShutdown(signalQueue).haltWhen(signalQueue.awaitShutdown)
 }
 
 object DowMethod {

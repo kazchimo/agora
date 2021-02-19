@@ -54,7 +54,7 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
                .get(uri"${Endpoints.websocket}")
                .response(asWebSocketAlways(useWS(que)))
            ).fork
-  } yield Stream.fromQueueWithShutdown(que).interruptWhen(que.awaitShutdown)
+  } yield Stream.fromQueueWithShutdown(que).haltWhen(que.awaitShutdown)
 }
 
 object PublicTransactions {
