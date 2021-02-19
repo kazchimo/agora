@@ -1,7 +1,7 @@
 package infra.exchange.coincheck.responses
 
-import io.circe.Decoder
 import cats.syntax.functor._
+import io.circe.Decoder
 import io.circe.generic.auto._
 
 sealed trait CancelOrderResponse extends CoincheckResponse

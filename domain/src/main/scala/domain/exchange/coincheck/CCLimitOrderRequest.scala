@@ -1,16 +1,16 @@
 package domain.exchange.coincheck
 
-import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
 import domain.exchange.coincheck.CCLimitOrderRequest.{
   CCOrderRequestAmount,
   CCOrderRequestRate
 }
+import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
 import domain.lib.VOFactory
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
 import lib.error.ClientDomainError
-import zio.{IO, ZIO}
+import zio.IO
 
 // about order -> https://coincheck.com/ja/documents/exchange/api#order-new
 // about stop order -> https://faq.coincheck.com/s/article/40203?language=ja
