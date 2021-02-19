@@ -20,11 +20,13 @@ sealed abstract class CCLimitOrderRequest(
   val amount: CCOrderRequestAmount
 ) extends CCOrderRequest {
   def changeAmount(amount: CCOrderRequestAmount): CCLimitOrderRequest
+
+  def changeRate(rate: CCOrderRequestRate): CCLimitOrderRequest
 }
 
 object CCLimitOrderRequest {
-  @newtype case class CCOrderRequestRate(value: Long Refined Positive)
-  object CCOrderRequestRate extends VOFactory[Long, Positive] {
+  @newtype case class CCOrderRequestRate(value: Double Refined Positive)
+  object CCOrderRequestRate extends VOFactory[Double, Positive] {
     override type VO = CCOrderRequestRate
   }
 
@@ -40,6 +42,9 @@ final case class CCLimitBuyRequest(
 ) extends CCLimitOrderRequest(rate, amount) {
   override def changeAmount(amount: CCOrderRequestAmount): CCLimitOrderRequest =
     this.copy(amount = amount)
+
+  override def changeRate(rate: CCOrderRequestRate): CCLimitOrderRequest =
+    this.copy(rate = rate)
 }
 
 final case class CCLimitStopBuyRequest(
@@ -49,6 +54,9 @@ final case class CCLimitStopBuyRequest(
 ) extends CCLimitOrderRequest(rate, amount) {
   override def changeAmount(amount: CCOrderRequestAmount): CCLimitOrderRequest =
     this.copy(amount = amount)
+
+  override def changeRate(rate: CCOrderRequestRate): CCLimitOrderRequest =
+    this.copy(rate = rate)
 }
 
 final case class CCLimitSellRequest(
@@ -57,6 +65,9 @@ final case class CCLimitSellRequest(
 ) extends CCLimitOrderRequest(rate, amount) {
   override def changeAmount(amount: CCOrderRequestAmount): CCLimitOrderRequest =
     this.copy(amount = amount)
+
+  override def changeRate(rate: CCOrderRequestRate): CCLimitOrderRequest =
+    this.copy(rate = rate)
 }
 
 final case class CCLimitStopSellRequest(
@@ -66,6 +77,9 @@ final case class CCLimitStopSellRequest(
 ) extends CCLimitOrderRequest(rate, amount) {
   override def changeAmount(amount: CCOrderRequestAmount): CCLimitOrderRequest =
     this.copy(amount = amount)
+
+  override def changeRate(rate: CCOrderRequestRate): CCLimitOrderRequest =
+    this.copy(rate = rate)
 }
 
 sealed trait CCMarketOrderRequest extends CCOrderRequest
