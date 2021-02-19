@@ -40,11 +40,11 @@ final case class DowMethod(
                             barsAreFull  =
                               barsForBuy.size == buyContinuous & barsForSell.size == sellContinuous
                             _           <- signalQueue
-                                             .offer(Buy(bar.close + bar.range / 2)).when(
+                                             .offer(Buy(bar.close + bar.range)).when(
                                                shouldBuy(barsForBuy) & barsAreFull
                                              )
                             _           <- signalQueue
-                                             .offer(Sell(bar.close - bar.range / 2)).when(
+                                             .offer(Sell(bar.close - bar.range)).when(
                                                shouldSell(barsForSell) & barsAreFull
                                              )
                           } yield ()
