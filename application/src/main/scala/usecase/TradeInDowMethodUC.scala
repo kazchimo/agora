@@ -69,7 +69,7 @@ object TradeInDowMethodUC {
                                                   )
                                   _            <-
                                     log.info(
-                                      s"Profit: ${profit.toString} Summary: ${summary.tradeSummary.toString}"
+                                      s"Profit: ${profit.toString} Total: ${summary.tradeSummary.toString}"
                                     )
                                 } yield ()
                               }.when(signal.shouldSell & tradingState.onLong)
