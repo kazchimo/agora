@@ -1,9 +1,9 @@
 package domain.strategy
 import domain.chart.OHLCBar
 import domain.exchange.coincheck.CCPublicTransaction
-import zio.logging.log
+import zio.logging.{Logging, log}
 import zio.stream._
-import zio.{Chunk, Queue, Ref}
+import zio.{Chunk, Queue, Ref, ZIO}
 
 final case class DowMethod(
   aggCount: Int,
@@ -31,7 +31,9 @@ final case class DowMethod(
       else should & bars(idx - 1).high > bar.high & bars(idx - 1).low > bar.low
     }
 
-  def signal(tras: UStream[CCPublicTransaction]) = for {
+  def signal(
+    tras: UStream[CCPublicTransaction]
+  ): ZIO[Logging, Nothing, UStream[Signal]] = for {
     barsForBuyRef  <- Ref.make(Chunk[OHLCBar]())
     barsForSellRef <- Ref.make(Chunk[OHLCBar]())
     signalQueue    <- Queue.unbounded[Signal]
