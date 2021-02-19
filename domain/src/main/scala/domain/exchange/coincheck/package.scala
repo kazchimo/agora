@@ -18,6 +18,7 @@ package object coincheck {
       // Get unsettled orders
       def openOrders: RIO[SttpClient, Seq[CCOrder]]
       def cancelOrder(id: CCOrderId): RIO[SttpClient, CCOrderId]
+      def cancelStatus(id: CCOrderId): RIO[SttpClient, Boolean]
       def publicTransactions: ZIO[
         SttpClient with ZEnv with Logging,
         Throwable,
