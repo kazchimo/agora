@@ -1,9 +1,10 @@
 package domain.strategy
 import domain.chart.OHLCBar
 import domain.exchange.coincheck.CCPublicTransaction
+import zio._
 import zio.logging.{Logging, log}
 import zio.stream._
-import zio._
+
 import DowMethod._
 
 final case class DowMethod(

@@ -1,7 +1,7 @@
 package infra.exchange.coincheck.responses
 
-import domain.currency.{Currency, TickerSymbol}
 import domain.currency.TickerSymbol._
+import domain.currency.{Currency, TickerSymbol}
 import domain.exchange.coincheck.CCTransaction
 import domain.exchange.coincheck.CCTransaction.CCTraRate
 import helpers.gen.infra.exchange.coincheck.responses.TransactionResponseGen.{

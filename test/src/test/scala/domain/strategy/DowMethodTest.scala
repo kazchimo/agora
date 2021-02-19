@@ -1,9 +1,9 @@
 package domain.strategy
 
 import domain.chart.OHLCBar
-import zio.{Chunk, Ref}
-import zio.test._
 import zio.test.Assertion._
+import zio.test._
+import zio.{Chunk, Ref}
 
 object DowMethodTest extends DefaultRunnableSpec {
   override def spec = suite("DowMethod")(

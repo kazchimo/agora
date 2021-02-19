@@ -11,7 +11,7 @@ import domain.exchange.coincheck.{
   CoincheckExchange
 }
 import domain.strategy.DowMethod
-import zio.{Ref, ZIO}
+import zio.Ref
 import zio.logging.log
 
 final case class TradingState(
