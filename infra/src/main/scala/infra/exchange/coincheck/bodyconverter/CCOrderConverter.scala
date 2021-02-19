@@ -15,8 +15,8 @@ object CCOrderConverter {
     Configuration.default.withSnakeCaseMemberNames
 
   implicit val encodeOrder: Encoder[CCOrderRequest] = Encoder.instance {
-    case a: CCLimitOrderRequest => a.asJson
-    case a: CCMarketBuyRequest  => a.asJson
+    case a: CCLimitOrderRequest  => a.asJson
+    case a: CCMarketOrderRequest => a.asJson
   }
 
   implicit val encodeLimitOrderRequest: Encoder[CCLimitOrderRequest] =

@@ -16,7 +16,7 @@ object CCOrderRequestConverterTest extends DefaultRunnableSpec {
   )(
     testM("encode to an inner value")(
       check(ccOrderRateGen)(r =>
-        assert(r.asJson)(equalTo(Json.fromLong(r.value.value)))
+        assert(r.asJson)(equalTo(Json.fromDoubleOrNull(r.value.value)))
       )
     )
   )

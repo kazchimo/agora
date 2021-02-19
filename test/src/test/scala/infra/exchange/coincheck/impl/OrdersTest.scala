@@ -31,7 +31,7 @@ trait OrdersTest { self: CoinCheckExchangeImplTest.type =>
         )
       }
     },
-    testM("returns () if order succeed")(checkM(ccOrderGen) { o =>
+    testM("returns order if order succeed")(checkM(ccOrderGen) { o =>
       val testEffect =
         matchedWhen.thenRespond(successJson) *> exchange.orders(o)
 
