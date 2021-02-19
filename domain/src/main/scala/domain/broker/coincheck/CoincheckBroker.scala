@@ -13,6 +13,7 @@ import domain.exchange.coincheck.{
 }
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.duration._
+import zio.logging.{Logging, log}
 import zio.stream.UStream
 import zio.{RIO, Ref, ZEnv, ZIO}
 
@@ -29,36 +30,40 @@ final case class CoincheckBroker(tras: UStream[CCPublicTransaction]) {
   def priceAdjustingOrder(
     orderRequest: CCLimitOrderRequest,
     intervalSec: Int
-  ): ZIO[SttpClient with CoincheckExchange with ZEnv, Throwable, CCOrder] =
-    for {
-      latestRateRef <- Ref.make(orderRequest.rate)
-      _             <- tras
-                         .foreach(t =>
-                           latestRateRef.set(CCOrderRequestRate(t.rate.value))
-                         ).fork
-      order         <- CoincheckExchange.orders(orderRequest)
-      shouldCancel  <- ZIO
-                         .effectTotal(Should).delay(intervalSec.seconds).race(
-                           waitOrderSettled(order.id).as(ShouldNot)
-                         )
-      result        <- shouldCancel match {
-                         case Should => for {
-                             _          <- CoincheckExchange.cancelOrder(order.id)
-                             _          <- CoincheckExchange
-                                             .cancelStatus(order.id).repeatUntil(identity)
-                             latestRate <- latestRateRef.get
-                             amount     <-
-                               CCOrderRequestAmount(
-                                 orderRequest.rate.value.value * orderRequest.amount.value.value /
-                                   latestRate.value.value
-                               )
-                             r          <- priceAdjustingOrder(
-                                             orderRequest
-                                               .changeRate(latestRate).changeAmount(amount),
-                                             intervalSec
-                                           )
-                           } yield r
-                         case _      => ZIO.succeed(order)
-                       }
-    } yield result
+  ): ZIO[
+    SttpClient with CoincheckExchange with ZEnv with Logging,
+    Throwable,
+    CCOrder
+  ] = for {
+    latestRateRef <- Ref.make(orderRequest.rate)
+    _             <-
+      tras
+        .foreach(t => latestRateRef.set(CCOrderRequestRate(t.rate.value))).fork
+    order         <- CoincheckExchange.orders(orderRequest)
+    shouldCancel  <-
+      ZIO
+        .effectTotal(Should).delay(intervalSec.seconds).race(
+          waitOrderSettled(order.id).as(ShouldNot) *> log.info("Order settled!")
+        )
+    result        <- shouldCancel match {
+                       case Should => for {
+                           _          <- log.info("Cancel order! Reordering...")
+                           _          <- CoincheckExchange.cancelOrder(order.id)
+                           _          <- CoincheckExchange
+                                           .cancelStatus(order.id).repeatUntil(identity)
+                           latestRate <- latestRateRef.get
+                           amount     <-
+                             CCOrderRequestAmount(
+                               orderRequest.rate.value.value * orderRequest.amount.value.value /
+                                 latestRate.value.value
+                             )
+                           r          <- priceAdjustingOrder(
+                                           orderRequest
+                                             .changeRate(latestRate).changeAmount(amount),
+                                           intervalSec
+                                         )
+                         } yield r
+                       case _      => ZIO.succeed(order)
+                     }
+  } yield result
 }
