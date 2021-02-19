@@ -9,6 +9,8 @@ import domain.lib.VOFactory
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
+import lib.error.ClientDomainError
+import zio.{IO, ZIO}
 
 // about order -> https://coincheck.com/ja/documents/exchange/api#order-new
 // about stop order -> https://faq.coincheck.com/s/article/40203?language=ja
@@ -47,6 +49,16 @@ final case class CCLimitBuyRequest(
     this.copy(rate = rate)
 }
 
+object CCLimitBuyRequest {
+  def fromRaw(
+    rate: Double,
+    amount: Double
+  ): IO[ClientDomainError, CCLimitBuyRequest] = for {
+    r <- CCOrderRequestRate(rate)
+    a <- CCOrderRequestAmount(amount)
+  } yield CCLimitBuyRequest(r, a)
+}
+
 final case class CCLimitStopBuyRequest(
   override val rate: CCOrderRequestRate,
   stopLossRate: CCOrderRequestRate,
@@ -68,6 +80,16 @@ final case class CCLimitSellRequest(
 
   override def changeRate(rate: CCOrderRequestRate): CCLimitOrderRequest =
     this.copy(rate = rate)
+}
+
+object CCLimitSellRequest {
+  def fromRaw(
+    rate: Double,
+    amount: Double
+  ): IO[ClientDomainError, CCLimitSellRequest] = for {
+    r <- CCOrderRequestRate(rate)
+    a <- CCOrderRequestAmount(amount)
+  } yield CCLimitSellRequest(r, a)
 }
 
 final case class CCLimitStopSellRequest(
