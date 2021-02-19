@@ -53,7 +53,7 @@ object Dependencies {
   lazy val scalaTest      = "org.scalatest"        %% "scalatest"        % "3.2.2"
   lazy val zioCats        = "dev.zio"              %% "zio-interop-cats" % "2.3.1.0"
   lazy val zioLogging     = "dev.zio"              %% "zio-logging"      % "0.5.6"
-  lazy val zioMagic       = "io.github.kitlangton" %% "zio-magic"        % "0.1.8"
+  lazy val zioMagic       = "io.github.kitlangton" %% "zio-magic"        % "0.1.9"
   lazy val codec          = "commons-codec"         % "commons-codec"    % "1.15"
   lazy val newtype        = "io.estatico"          %% "newtype"          % "0.4.4"
   lazy val refined        = "eu.timepit"           %% "refined"          % "0.9.21"
