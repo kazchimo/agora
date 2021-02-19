@@ -17,5 +17,5 @@ private[coincheck] trait AuthStrategy { self: CoinCheckExchangeImpl =>
       "ACCESS-SIGNATURE" -> sig
     )
 
-  private def createNonce = (System.currentTimeMillis() / 1000).toString
+  private def createNonce = System.currentTimeMillis().toString
 }
