@@ -21,7 +21,7 @@ object CCOrderGen {
     positiveDoubleGen.map(CCMarketBuyRequestAmount.unsafeFrom)
 
   val ccBuyGen: Gen[Random, CCLimitBuyRequest] =
-    ccOrderRateGen.crossWith(ccOrderAmountGen)(CCLimitBuyRequest)
+    ccOrderRateGen.crossWith(ccOrderAmountGen)(CCLimitBuyRequest(_, _))
 
   val ccStopBuyGen: Gen[Random, CCLimitStopBuyRequest] =
     Gen.zipN(ccOrderRateGen, ccOrderRateGen, ccOrderAmountGen)(
@@ -29,7 +29,7 @@ object CCOrderGen {
     )
 
   val ccSellGen: Gen[Random, CCLimitSellRequest] =
-    ccOrderRateGen.crossWith(ccOrderAmountGen)(CCLimitSellRequest)
+    ccOrderRateGen.crossWith(ccOrderAmountGen)(CCLimitSellRequest(_, _))
 
   val ccStopSellGen: Gen[Random, CCLimitStopSellRequest] =
     Gen.zipN(ccOrderRateGen, ccOrderRateGen, ccOrderAmountGen)(
