@@ -24,7 +24,7 @@ private[coincheck] trait Orders extends AuthStrategy {
 
   final override def orders(
     order: CCOrderRequest
-  ): RIO[SttpClient with ZEnv, CCOrder] = for {
+  ): RIO[SttpClient with ZEnv, CCOrder] = (for {
     req  <- request(order)
     res  <- send(req)
     body <- ZIO.fromEither(res.body)
@@ -36,6 +36,6 @@ private[coincheck] trait Orders extends AuthStrategy {
                   )
                 )
             }
-  } yield r
+  } yield r).retryN(3)
 
 }

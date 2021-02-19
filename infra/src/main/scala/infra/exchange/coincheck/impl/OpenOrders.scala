@@ -16,7 +16,7 @@ import zio.{RIO, ZIO}
 
 private[coincheck] trait OpenOrders extends AuthStrategy {
   self: CoinCheckExchangeImpl =>
-  final override def openOrders: RIO[SttpClient, Seq[CCOrder]] = for {
+  final override def openOrders: RIO[SttpClient, Seq[CCOrder]] = (for {
     h      <- headers(Endpoints.openOrders)
     req     = basicRequest
                 .get(uri"${Endpoints.openOrders}").contentType(
@@ -30,5 +30,5 @@ private[coincheck] trait OpenOrders extends AuthStrategy {
                 case FailedOpenOrdersResponse(err) =>
                   ZIO.fail(ClientInfraError(s"Request failed: $err"))
               }
-  } yield orders
+  } yield orders).retryN(3)
 }
