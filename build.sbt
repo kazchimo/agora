@@ -52,7 +52,8 @@ lazy val commonSettings = Seq(
     Wart.Product,
     Wart.Null,
     Wart.Equals,
-    Wart.ToString
+    Wart.ToString,
+    Wart.Recursion
   ) ++ ContribWart.allBut(
     ContribWart.Apply,
     ContribWart.MissingOverride,
