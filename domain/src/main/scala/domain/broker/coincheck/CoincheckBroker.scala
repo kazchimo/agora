@@ -40,11 +40,10 @@ final case class CoincheckBroker(tras: UStream[CCPublicTransaction]) {
       tras
         .foreach(t => latestRateRef.set(CCOrderRequestRate(t.rate.value))).fork
     order         <- CoincheckExchange.orders(orderRequest)
-    shouldCancel  <-
-      ZIO
-        .effectTotal(Should).delay(intervalSec.seconds).race(
-          waitOrderSettled(order.id).as(ShouldNot) *> log.info("Order settled!")
-        )
+    shouldCancel  <- ZIO
+                       .effectTotal(Should).delay(intervalSec.seconds).race(
+                         waitOrderSettled(order.id).as(ShouldNot)
+                       )
     result        <- shouldCancel match {
                        case Should => for {
                            _          <- log.info("Cancel order! Reordering...")
@@ -63,7 +62,7 @@ final case class CoincheckBroker(tras: UStream[CCPublicTransaction]) {
                                            intervalSec
                                          )
                          } yield r
-                       case _      => ZIO.succeed(order)
+                       case _      => log.info("Order settled!").as(order)
                      }
   } yield result
 }
