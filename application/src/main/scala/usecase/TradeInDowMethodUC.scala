@@ -1,8 +1,17 @@
 package usecase
 
-import domain.exchange.coincheck.CoincheckExchange
+import domain.exchange.coincheck.CCOrder.CCOrderId
+import domain.exchange.coincheck.CCOrderRequest.{
+  CCOrderRequestAmount,
+  CCOrderRequestRate
+}
+import domain.exchange.coincheck.{
+  CCBuyRequest,
+  CCSellRequest,
+  CoincheckExchange
+}
 import domain.strategy.DowMethod
-import zio.Ref
+import zio.{Ref, ZIO}
 import zio.logging.log
 
 final case class TradingState(
@@ -21,6 +30,11 @@ final case class TradingState(
 }
 
 object TradeInDowMethodUC {
+  val jpy = 100000
+
+  private def waitOrderSettled(id: CCOrderId) =
+    CoincheckExchange.openOrders.repeatWhile(_.map(_.id).contains(id))
+
   def trade(aggCount: Int, buyContinuous: Int, sellContinuous: Int) = for {
     _                  <- log.info("Buying in Dow method start...")
     transactionsStream <- CoincheckExchange.publicTransactions
@@ -30,14 +44,26 @@ object TradeInDowMethodUC {
     _                  <- signalStream.foreach { signal =>
                             for {
                               tradingState <- tradingStateRef.get
-                              _            <- (log.info("Buy!") *> tradingStateRef.update(
-                                                _.toLongPosition.buyAt(signal.at)
-                                              )).when(signal.shouldBuy & !tradingState.onLong)
+                              _            <- {
+                                for {
+                                  _      <- log.info("Buy!")
+                                  rate   <- CCOrderRequestRate(signal.at.toLong)
+                                  amount <- CCOrderRequestAmount(jpy / signal.at)
+                                  order  <- CoincheckExchange.orders(CCBuyRequest(rate, amount))
+                                  _      <- waitOrderSettled(order.id)
+                                  _      <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at))
+                                } yield ()
+                              }.when(signal.shouldBuy & !tradingState.onLong)
                               _            <- {
                                 for {
                                   _            <- log.info("Sell!")
+                                  rate         <- CCOrderRequestRate(signal.at.toLong)
+                                  amount       <- CCOrderRequestAmount(jpy / signal.at)
+                                  order        <- CoincheckExchange.orders(CCSellRequest(rate, amount))
+                                  _            <- waitOrderSettled(order.id)
                                   tradingState <- tradingStateRef.get
-                                  profit        = signal.at - tradingState.lastBuyRate
+                                  profit        =
+                                    amount.value.value * (signal.at - tradingState.lastBuyRate)
                                   summary      <- tradingStateRef.updateAndGet(
                                                     _.toNeutralPosition.addSummary(profit)
                                                   )
