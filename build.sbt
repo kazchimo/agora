@@ -2,7 +2,7 @@ import Dependencies._
 import sbtwelcome.UsefulTask
 
 ThisBuild / scalaVersion := "2.13.3"
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.4.4"
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 
 inThisBuild(
   Seq(
@@ -61,7 +61,7 @@ lazy val commonSettings = Seq(
     ContribWart.SomeApply
   ),
   addCompilerPlugin(
-    ("org.typelevel" %% "kind-projector" % "0.11.0").cross(CrossVersion.full)
+    ("org.typelevel" %% "kind-projector" % "0.11.3").cross(CrossVersion.full)
   )
 )
 
