@@ -1,7 +1,7 @@
 package helpers.gen.domain.exchange.coincheck
 
 import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
-import domain.exchange.coincheck.CCOrderRequest.{
+import domain.exchange.coincheck.CCLimitOrderRequest.{
   CCOrderRequestAmount,
   CCOrderRequestRate
 }
@@ -20,18 +20,20 @@ object CCOrderGen {
   val ccMarketBuyAmountGen: Gen[Random, CCMarketBuyRequestAmount] =
     positiveDoubleGen.map(CCMarketBuyRequestAmount.unsafeFrom)
 
-  val ccBuyGen: Gen[Random, CCBuyRequest] =
-    ccOrderRateGen.crossWith(ccOrderAmountGen)(CCBuyRequest)
+  val ccBuyGen: Gen[Random, CCLimitBuyRequest] =
+    ccOrderRateGen.crossWith(ccOrderAmountGen)(CCLimitBuyRequest)
 
-  val ccStopBuyGen: Gen[Random, CCStopBuyRequest] =
-    Gen.zipN(ccOrderRateGen, ccOrderRateGen, ccOrderAmountGen)(CCStopBuyRequest)
-
-  val ccSellGen: Gen[Random, CCSellRequest] =
-    ccOrderRateGen.crossWith(ccOrderAmountGen)(CCSellRequest)
-
-  val ccStopSellGen: Gen[Random, CCStopSellRequest] =
+  val ccStopBuyGen: Gen[Random, CCLimitStopBuyRequest] =
     Gen.zipN(ccOrderRateGen, ccOrderRateGen, ccOrderAmountGen)(
-      CCStopSellRequest
+      CCLimitStopBuyRequest
+    )
+
+  val ccSellGen: Gen[Random, CCLimitSellRequest] =
+    ccOrderRateGen.crossWith(ccOrderAmountGen)(CCLimitSellRequest)
+
+  val ccStopSellGen: Gen[Random, CCLimitStopSellRequest] =
+    Gen.zipN(ccOrderRateGen, ccOrderRateGen, ccOrderAmountGen)(
+      CCLimitStopSellRequest
     )
 
   val ccMarketBuyGen: Gen[Random, CCMarketBuyRequest] =
@@ -46,7 +48,7 @@ object CCOrderGen {
   val ccMarketStopSellGen: Gen[Random, CCMarketStopSellRequest] =
     ccOrderRateGen.crossWith(ccOrderAmountGen)(CCMarketStopSellRequest)
 
-  val ccOrderGen: Gen[Random, CCOrderRequest] = Gen.oneOf(
+  val ccOrderGen: Gen[Random, CCLimitOrderRequest] = Gen.oneOf(
     ccBuyGen,
     ccStopBuyGen,
     ccSellGen,

@@ -1,7 +1,7 @@
 package infra.exchange.coincheck.bodyconverter
 
 import domain.exchange.coincheck.CCMarketBuyRequest.CCMarketBuyRequestAmount
-import domain.exchange.coincheck.CCOrderRequest.{
+import domain.exchange.coincheck.CCLimitOrderRequest.{
   CCOrderRequestAmount,
   CCOrderRequestRate
 }
@@ -14,11 +14,11 @@ object CCOrderConverter {
   implicit val codecConfig: Configuration =
     Configuration.default.withSnakeCaseMemberNames
 
-  implicit val encodeOrder: Encoder[CCOrderRequest] = Encoder.instance {
-    case a: CCBuyRequest            => a.asJson
-    case a: CCStopBuyRequest        => a.asJson
-    case a: CCSellRequest           => a.asJson
-    case a: CCStopSellRequest       => a.asJson
+  implicit val encodeOrder: Encoder[CCLimitOrderRequest] = Encoder.instance {
+    case a: CCLimitBuyRequest       => a.asJson
+    case a: CCLimitStopBuyRequest   => a.asJson
+    case a: CCLimitSellRequest      => a.asJson
+    case a: CCLimitStopSellRequest  => a.asJson
     case a: CCMarketBuyRequest      => a.asJson
     case a: CCMarketStopBuyRequest  => a.asJson
     case a: CCMarketSellRequest     => a.asJson
@@ -42,22 +42,22 @@ object CCOrderConverter {
   implicit val marketBuyAmountEncoder: Encoder[CCMarketBuyRequestAmount] =
     Encoder.instance(_.value.value.asJson)
 
-  implicit val buyEncoder: Encoder[CCBuyRequest] =
+  implicit val buyEncoder: Encoder[CCLimitBuyRequest] =
     Encoder.forProduct4(pair, orderType, rate, amount)(a =>
       (btcJpy, "buy", a.rate, a.amount)
     )
 
-  implicit val stopBuyEncoder: Encoder[CCStopBuyRequest] =
+  implicit val stopBuyEncoder: Encoder[CCLimitStopBuyRequest] =
     Encoder.forProduct5(pair, orderType, rate, stopLossRate, amount)(a =>
       (btcJpy, "buy", a.rate, a.stopLossRate, a.amount)
     )
 
-  implicit val sellEncoder: Encoder[CCSellRequest] =
+  implicit val sellEncoder: Encoder[CCLimitSellRequest] =
     Encoder.forProduct4(pair, orderType, rate, amount)(a =>
       (btcJpy, "sell", a.rate, a.amount)
     )
 
-  implicit val stopSellEncoder: Encoder[CCStopSellRequest] =
+  implicit val stopSellEncoder: Encoder[CCLimitStopSellRequest] =
     Encoder.forProduct5(pair, orderType, rate, stopLossRate, amount)(a =>
       (btcJpy, "buy", a.rate, a.stopLossRate, a.amount)
     )

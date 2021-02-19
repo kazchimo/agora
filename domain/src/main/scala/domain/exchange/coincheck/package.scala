@@ -14,7 +14,7 @@ package object coincheck {
   object CoincheckExchange {
     trait Service {
       def transactions: RIO[SttpClient, Seq[CCTransaction]]
-      def orders(order: CCOrderRequest): RIO[SttpClient with ZEnv, CCOrder]
+      def orders(order: CCLimitOrderRequest): RIO[SttpClient with ZEnv, CCOrder]
       // Get unsettled orders
       def openOrders: RIO[SttpClient, Seq[CCOrder]]
       def cancelOrder(id: CCOrderId): RIO[SttpClient, CCOrderId]
