@@ -18,7 +18,7 @@ private[coincheck] trait CancelOrder extends AuthStrategy {
     for {
       h    <- headers(Endpoints.cancelOrder(id))
       req   = basicRequest
-                .get(uri"${Endpoints.cancelOrder(id)}").contentType(
+                .delete(uri"${Endpoints.cancelOrder(id)}").contentType(
                   "application/json"
                 ).headers(h).response(asJson[CancelOrderResponse])
       res  <- send(req)
