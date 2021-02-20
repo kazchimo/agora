@@ -10,11 +10,11 @@ import zio.ZLayer
 object ExchangeImpl {
   val coinCheckExchange: ZLayer[Conf, Throwable, CoincheckExchange] =
     ZLayer.fromFunctionM(conf =>
-      conf.get.CCAccessKey.zipWith(conf.get.CCSecretKey)(CoinCheckExchangeImpl)
+      conf.get.ccAccessKey.zipWith(conf.get.ccSecretKey)(CoinCheckExchangeImpl)
     )
 
   val bitflyerExchange: ZLayer[Conf, Throwable, BitflyerExchange] =
     ZLayer.fromFunctionM(conf =>
-      conf.get.BFAccessKey.zipWith(conf.get.BFSecretKey)(BitflyerExchangeImpl)
+      conf.get.bfAccessKey.zipWith(conf.get.bfSecretKey)(BitflyerExchangeImpl)
     )
 }

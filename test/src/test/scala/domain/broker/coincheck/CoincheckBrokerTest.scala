@@ -1,7 +1,9 @@
 package domain.broker.coincheck
 
+import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder.CCOrderId
 import domain.exchange.coincheck.{CCOrder, CoincheckExchange}
+import infra.conf.ConfImpl
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 import zio.ZIO
 import zio.stream.UStream
@@ -20,6 +22,9 @@ object CoincheckBrokerTest extends DefaultRunnableSpec {
       failFiber    <- CoincheckBroker(UStream.empty).waitOrderSettled(id).fork
       _            <- successFiber.join
       done         <- failFiber.status.map(_.isDone)
-    } yield assert(done)(isFalse)).provideSomeLayer[SttpClient](exchange)
-  }).provideCustomLayer(AsyncHttpClientZioBackend.stubLayer.orDie)
+    } yield assert(done)(isFalse))
+      .provideSomeLayer[SttpClient with Conf](exchange)
+  }).provideCustomLayer(
+    AsyncHttpClientZioBackend.stubLayer.orDie ++ ConfImpl.stubLayer
+  )
 }

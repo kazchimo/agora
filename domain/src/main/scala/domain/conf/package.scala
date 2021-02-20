@@ -13,10 +13,10 @@ package object conf {
   @accessible
   object Conf {
     trait Service {
-      val CCAccessKey: Task[CCEAccessKey]
-      val CCSecretKey: Task[CCESecretKey]
-      val BFAccessKey: Task[BFAccessKey]
-      val BFSecretKey: Task[BFSecretKey]
+      val ccAccessKey: Task[CCEAccessKey]
+      val ccSecretKey: Task[CCESecretKey]
+      val bfAccessKey: Task[BFAccessKey]
+      val bfSecretKey: Task[BFSecretKey]
     }
   }
 

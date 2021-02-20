@@ -13,9 +13,9 @@ private[coincheck] trait AuthStrategy {
   ): RIO[Conf, Header]    = for {
     nonce <- ZIO.effectTotal(createNonce)
     conf  <- ZIO.service[Conf.Service]
-    sec   <- conf.CCSecretKey
+    sec   <- conf.ccSecretKey
     sig   <- hmacSHA256Encode(sec.value.value, nonce + url + body)
-    acc   <- conf.CCAccessKey
+    acc   <- conf.ccAccessKey
   } yield Map("ACCESS-KEY" -> acc.value.value, "ACCESS-NONCE" -> nonce, "ACCESS-SIGNATURE" -> sig)
 
   private def createNonce = System.currentTimeMillis().toString
