@@ -1,8 +1,8 @@
 package infra.exchange.coincheck.responses
 
-import zio.test.Assertion.{equalTo, hasField, hasSize, isRight, isSubtype}
-import zio.test._
 import io.circe.parser.decode
+import zio.test.Assertion.{equalTo, isRight}
+import zio.test._
 
 object OrdersResponseTest extends DefaultRunnableSpec {
   override def spec = suite("OrdersResponse")(test("decoder") {
