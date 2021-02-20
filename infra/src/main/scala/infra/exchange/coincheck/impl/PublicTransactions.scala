@@ -1,6 +1,6 @@
 package infra.exchange.coincheck.impl
 
-import domain.exchange.coincheck.CCPublicTransaction
+import domain.exchange.coincheck.{CCPublicTransaction, CoincheckExchange}
 import domain.exchange.coincheck.CCPublicTransaction._
 import infra.exchange.coincheck.Endpoints
 import lib.error.InternalInfraError
@@ -11,7 +11,7 @@ import zio._
 import zio.logging.{Logging, log}
 import zio.stream.Stream
 
-private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
+private[exchange] trait PublicTransactions { self: CoincheckExchange.Service =>
   private def useWS(
     que: Queue[CCPublicTransaction]
   )(ws: WebSocket[RIO[ZEnv with Logging, *]]) = {

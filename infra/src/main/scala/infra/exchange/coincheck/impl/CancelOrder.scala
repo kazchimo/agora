@@ -1,5 +1,7 @@
 package infra.exchange.coincheck.impl
+import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder.CCOrderId
+import domain.exchange.coincheck.CoincheckExchange
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.{
   CancelOrderResponse,
@@ -13,11 +15,11 @@ import zio.logging.{Logging, log}
 import zio.{RIO, ZIO}
 
 private[coincheck] trait CancelOrder extends AuthStrategy {
-  self: CoinCheckExchangeImpl =>
+  self: CoincheckExchange.Service =>
 
   final override def cancelOrder(
     id: CCOrderId
-  ): RIO[SttpClient with Logging, CCOrderId] = for {
+  ): RIO[SttpClient with Logging with Conf, CCOrderId] = for {
     h    <- headers(Endpoints.cancelOrder(id))
     req   = basicRequest
               .delete(uri"${Endpoints.cancelOrder(id)}").contentType(

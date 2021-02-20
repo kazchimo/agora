@@ -1,5 +1,6 @@
 package domain.exchange
 
+import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder.CCOrderId
 import lib.error.ClientDomainError
 import sttp.client3.asynchttpclient.zio.SttpClient
@@ -14,14 +15,18 @@ package object coincheck {
   @accessible
   object CoincheckExchange {
     trait Service {
-      def transactions: RIO[SttpClient, Seq[CCTransaction]]
-      def orders(order: CCOrderRequest): RIO[SttpClient with ZEnv, CCOrder]
+      def transactions: RIO[SttpClient with Conf, Seq[CCTransaction]]
+      def orders(
+        order: CCOrderRequest
+      ): RIO[SttpClient with ZEnv with Conf, CCOrder]
       // Get unsettled orders
-      def openOrders: RIO[SttpClient, Seq[CCOrder]]
-      def cancelOrder(id: CCOrderId): RIO[SttpClient with Logging, CCOrderId]
-      def cancelStatus(id: CCOrderId): RIO[SttpClient, Boolean]
+      def openOrders: RIO[SttpClient with Conf, Seq[CCOrder]]
+      def cancelOrder(
+        id: CCOrderId
+      ): RIO[SttpClient with Logging with Conf, CCOrderId]
+      def cancelStatus(id: CCOrderId): RIO[SttpClient with Conf, Boolean]
       def publicTransactions: ZIO[
-        SttpClient with ZEnv with Logging,
+        SttpClient with ZEnv with Logging with Conf,
         Throwable,
         Stream[Nothing, CCPublicTransaction]
       ]

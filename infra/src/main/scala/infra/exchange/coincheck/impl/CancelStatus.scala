@@ -1,5 +1,7 @@
 package infra.exchange.coincheck.impl
+import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder.CCOrderId
+import domain.exchange.coincheck.CoincheckExchange
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.{
   CancelStatusResponse,
@@ -13,22 +15,23 @@ import sttp.client3.{UriContext, basicRequest}
 import zio.{RIO, ZIO}
 
 private[coincheck] trait CancelStatus extends AuthStrategy {
-  self: CoinCheckExchangeImpl =>
+  self: CoincheckExchange.Service =>
 
-  final override def cancelStatus(id: CCOrderId): RIO[SttpClient, Boolean] =
-    for {
-      h      <- headers(Endpoints.cancelStatus(id))
-      req     = basicRequest
-                  .get(uri"${Endpoints.cancelStatus(id)}").contentType(
-                    "application/json"
-                  ).headers(h).response(asJson[CancelStatusResponse])
-      res    <- send(req)
-      body   <- ZIO.fromEither(res.body)
-      status <- body match {
-                  case SuccessCancelStatusResponse(_, cancel, _) =>
-                    ZIO.succeed(cancel)
-                  case FailedCancelStatusResponse(error)         =>
-                    ZIO.fail(ClientInfraError(s"Cancel order failed: $error"))
-                }
-    } yield status
+  final override def cancelStatus(
+    id: CCOrderId
+  ): RIO[SttpClient with Conf, Boolean] = for {
+    h      <- headers(Endpoints.cancelStatus(id))
+    req     = basicRequest
+                .get(uri"${Endpoints.cancelStatus(id)}").contentType(
+                  "application/json"
+                ).headers(h).response(asJson[CancelStatusResponse])
+    res    <- send(req)
+    body   <- ZIO.fromEither(res.body)
+    status <- body match {
+                case SuccessCancelStatusResponse(_, cancel, _) =>
+                  ZIO.succeed(cancel)
+                case FailedCancelStatusResponse(error)         =>
+                  ZIO.fail(ClientInfraError(s"Cancel order failed: $error"))
+              }
+  } yield status
 }

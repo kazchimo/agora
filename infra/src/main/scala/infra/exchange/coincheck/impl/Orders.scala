@@ -1,7 +1,8 @@
 package infra.exchange.coincheck.impl
 
+import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.exchange.coincheck.{CCOrder, CCOrderRequest}
+import domain.exchange.coincheck.{CCOrder, CCOrderRequest, CoincheckExchange}
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.bodyconverter.CCOrderConverter._
@@ -17,14 +18,14 @@ import sttp.client3.{UriContext, basicRequest}
 import zio.{RIO, Task, ZEnv, ZIO}
 
 private[coincheck] trait Orders extends AuthStrategy {
-  self: CoinCheckExchangeImpl =>
+  self: CoincheckExchange.Service =>
   private def request(order: CCOrderRequest) = for {
     h <- headers(Endpoints.orders, order.asJson.noSpaces)
   } yield basicRequest.post(uri"${Endpoints.orders}").contentType("application/json").body(order.asJson.noSpaces).headers(h).response(asJson[OrdersResponse])
 
   final override def orders(
     order: CCOrderRequest
-  ): RIO[SttpClient with ZEnv, CCOrder] = (for {
+  ): RIO[SttpClient with ZEnv with Conf, CCOrder] = (for {
     req  <- request(order)
     res  <- send(req)
     body <- ZIO.fromEither(res.body)

@@ -1,7 +1,8 @@
 package infra.exchange.coincheck.impl
 
 import cats.syntax.traverse._
-import domain.exchange.coincheck.CCTransaction
+import domain.conf.Conf
+import domain.exchange.coincheck.{CCTransaction, CoincheckExchange}
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.TransactionsResponse
@@ -13,7 +14,7 @@ import zio.interop.catz.core._
 import zio.{RIO, Task}
 
 private[exchange] trait Transactions extends AuthStrategy {
-  self: CoinCheckExchangeImpl =>
+  self: CoincheckExchange.Service =>
   private def request(header: Header) = basicRequest
     .get(uri"${Endpoints.transactions}")
     .headers(header)
@@ -22,7 +23,7 @@ private[exchange] trait Transactions extends AuthStrategy {
         .mapRight(_.transformInto[Task[List[CCTransaction]]])
     )
 
-  final def transactions: RIO[SttpClient, Seq[CCTransaction]] = (for {
+  final def transactions: RIO[SttpClient with Conf, Seq[CCTransaction]] = (for {
     hs   <- headers(Endpoints.transactions)
     req   = request(hs)
     res  <- send(req)
