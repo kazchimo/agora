@@ -35,7 +35,7 @@ object TradeInDowMethodUC {
     tradingStateRef    <- Ref.make(TradingState(false, 0, 0))
     signalStream       <- DowMethod(aggCount, buyContinuous, sellContinuous)
                             .signal(transactionsStream)
-    broker              = CoincheckBroker(transactionsStream)
+    broker              = CoincheckBroker()
     _                  <- signalStream.foreach { signal =>
                             for {
                               tradingState <- tradingStateRef.get

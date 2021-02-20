@@ -6,7 +6,6 @@ import domain.exchange.coincheck.{CCOrder, CoincheckExchange}
 import infra.conf.ConfImpl
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 import zio.ZIO
-import zio.stream.UStream
 import zio.test.Assertion.isFalse
 import zio.test._
 
@@ -18,8 +17,8 @@ object CoincheckBrokerTest extends DefaultRunnableSpec {
       CoincheckExchange.stubLayer(openOrdersRes = ZIO.succeed(Seq(CCOrder(id))))
 
     (for {
-      successFiber <- CoincheckBroker(UStream.empty).waitOrderSettled(id2).fork
-      failFiber    <- CoincheckBroker(UStream.empty).waitOrderSettled(id).fork
+      successFiber <- CoincheckBroker().waitOrderSettled(id2).fork
+      failFiber    <- CoincheckBroker().waitOrderSettled(id).fork
       _            <- successFiber.join
       done         <- failFiber.status.map(_.isDone)
     } yield assert(done)(isFalse))
