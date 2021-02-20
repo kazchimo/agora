@@ -2,7 +2,6 @@ package infra.exchange.coincheck.impl
 
 import domain.exchange.coincheck.CCPublicTransaction
 import domain.exchange.coincheck.CCPublicTransaction._
-import infra.InfraError
 import infra.exchange.coincheck.Endpoints
 import lib.error.InternalInfraError
 import sttp.client3._
@@ -19,23 +18,14 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
     val send    =
       ws.sendText("{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}")
     val receive = for {
-      textEither <- ws.receiveTextFrame()
-      text       <-
-        ZIO
-          .fromEither(textEither)
-          .onError(_ => log.error("shutdown") *> que.shutdown)
-          .mapError(c =>
-            InfraError(
-              s"close websocket connection: statusCode=${c.statusCode.toString} reason=${c.reasonText}"
-            )
-          )
-      body       <- PublicTransactions
-                      .textToModel(text.payload).tapError(e =>
-                        log.error(
-                          s"Failed to parse text: ${e.toString} text=${text.payload}"
-                        )
-                      )
-      _          <- que.offer(body)
+      text <- ws.receiveTextFrame()
+      body <- PublicTransactions
+                .textToModel(text.payload).tapError(e =>
+                  log.error(
+                    s"Failed to parse text: ${e.toString} text=${text.payload}"
+                  )
+                )
+      _    <- que.offer(body)
     } yield ()
 
     log.debug("websocket connection start") *> send *> receive.forever *> log
