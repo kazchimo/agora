@@ -19,7 +19,7 @@ final case class SuccessOpenOrdersResponse(orders: Seq[OrderContent])
 
 final case class OrderContent(
   id: Long,
-  rate: Option[String],
+  rate: Option[Double],
   pending_amount: Option[Double],
   pending_market_buy_amount: Option[Double],
   order_type: String,
