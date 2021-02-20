@@ -16,8 +16,8 @@ object OrdersResponse {
 
 final case class SuccessOrdersResponse(
   id: Long,
-  rate: String,
-  amount: String,
+  rate: Double,
+  amount: Double,
   order_type: String,
   stop_less_rate: Option[String],
   pair: String,
