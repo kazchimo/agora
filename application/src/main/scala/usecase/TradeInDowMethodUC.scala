@@ -26,7 +26,8 @@ final case class TradingState(
 }
 
 object TradeInDowMethodUC {
-  val jpy = 50000
+  val jpy      = 50000
+  val interval = 10
 
   def trade(aggCount: Int, buyContinuous: Int, sellContinuous: Int) = for {
     _                  <- log.info("Buying in Dow method start...")
@@ -43,7 +44,7 @@ object TradeInDowMethodUC {
                                   _       <- log.info("Buy!")
                                   request <-
                                     CCLimitBuyRequest.fromRaw(signal.at, jpy / signal.at)
-                                  _       <- broker.priceAdjustingOrder(request, 5)
+                                  _       <- broker.priceAdjustingOrder(request, interval)
                                   _       <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at))
                                 } yield ()
                               }.when(signal.shouldBuy & !tradingState.onLong)
@@ -54,7 +55,7 @@ object TradeInDowMethodUC {
                                                     signal.at,
                                                     jpy / tradingState.lastBuyRate
                                                   )
-                                  _            <- broker.priceAdjustingOrder(request, 5)
+                                  _            <- broker.priceAdjustingOrder(request, interval)
                                   tradingState <- tradingStateRef.get
                                   profit        =
                                     request.amount.value.value * (signal.at - tradingState.lastBuyRate)

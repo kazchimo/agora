@@ -14,7 +14,7 @@ object CancelOrderResponse {
     ).reduceLeft(_ or _)
 }
 
-final case class SuccessCancelOrderResponse(id: String)
+final case class SuccessCancelOrderResponse(id: Long)
     extends CancelOrderResponse with SuccessCoincheckResponse
 
 final case class FailedCancelOrderResponse(error: String)

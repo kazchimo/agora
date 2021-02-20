@@ -18,7 +18,7 @@ package object coincheck {
       def orders(order: CCOrderRequest): RIO[SttpClient with ZEnv, CCOrder]
       // Get unsettled orders
       def openOrders: RIO[SttpClient, Seq[CCOrder]]
-      def cancelOrder(id: CCOrderId): RIO[SttpClient, CCOrderId]
+      def cancelOrder(id: CCOrderId): RIO[SttpClient with Logging, CCOrderId]
       def cancelStatus(id: CCOrderId): RIO[SttpClient, Boolean]
       def publicTransactions: ZIO[
         SttpClient with ZEnv with Logging,
@@ -35,7 +35,7 @@ package object coincheck {
       transactionsRes: RIO[SttpClient, Seq[CCTransaction]] = notStubbed,
       ordersRes: RIO[SttpClient with zio.ZEnv, CCOrder] = notStubbed,
       openOrdersRes: RIO[SttpClient, Seq[CCOrder]] = notStubbed,
-      cancelOrderRes: RIO[SttpClient, CCOrderId] = notStubbed,
+      cancelOrderRes: RIO[SttpClient with Logging, CCOrderId] = notStubbed,
       cancelStatusRes: RIO[SttpClient, Boolean] = notStubbed,
       publicTransactionsRes: ZIO[
         SttpClient with zio.ZEnv with Logging,
@@ -52,8 +52,9 @@ package object coincheck {
 
       override def openOrders: RIO[SttpClient, Seq[CCOrder]] = openOrdersRes
 
-      override def cancelOrder(id: CCOrderId): RIO[SttpClient, CCOrderId] =
-        cancelOrderRes
+      override def cancelOrder(
+        id: CCOrderId
+      ): RIO[SttpClient with Logging, CCOrderId] = cancelOrderRes
 
       override def cancelStatus(id: CCOrderId): RIO[SttpClient, Boolean] =
         cancelStatusRes
