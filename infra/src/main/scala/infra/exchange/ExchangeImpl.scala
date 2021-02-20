@@ -11,10 +11,8 @@ import infra.exchange.coincheck.impl.{
 import zio.{ULayer, ZLayer}
 
 object ExchangeImpl {
-  val coinCheckExchange: ZLayer[Conf, Throwable, CoincheckExchange] =
-    ZLayer.fromFunctionM(conf =>
-      conf.get.ccAccessKey.zipWith(conf.get.ccSecretKey)(CoinCheckExchangeImpl)
-    )
+  val coinCheckExchange: ZLayer[Any, Throwable, CoincheckExchange] =
+    ZLayer.succeed(CoinCheckExchangeImpl())
 
   def dryWriteCoinCheckExchange(
     orderSettledInterval: Int
