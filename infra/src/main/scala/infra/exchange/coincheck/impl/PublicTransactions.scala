@@ -18,6 +18,7 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
     val send    =
       ws.sendText("{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}")
     val receive = for {
+      _    <- log.debug("Recceive websocket packet!")
       text <- ws.receiveTextFrame()
       body <- PublicTransactions
                 .textToModel(text.payload).tapError(e =>
@@ -37,7 +38,7 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
     Throwable,
     Stream[Nothing, CCPublicTransaction]
   ] = for {
-    _   <- log.debug("Querying coincheck public transactions...")
+    _   <- log.info("Querying coincheck public transactions...")
     que <- Queue.unbounded[CCPublicTransaction]
     _   <- sendR[Unit, ZEnv with Logging](
              basicRequest
@@ -67,7 +68,7 @@ object PublicTransactions {
 
     for {
       m           <- ZIO.fromOption(regex.findFirstMatchIn(text)).orElseFail(error)
-      _           <- log.debug(s"Text: $text Matched object: ${m.toString()}")
+      _           <- log.trace(s"Text: $text Matched object: ${m.toString()}")
       strId       <- parse(m.group(1))
       id          <- CCPubTraId(strId.toLong)
       pair        <- parse(m.group(2)).flatMap(CCPubTraPair(_))
