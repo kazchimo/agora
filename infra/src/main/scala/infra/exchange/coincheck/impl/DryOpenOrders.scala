@@ -9,5 +9,5 @@ private[coincheck] trait DryOpenOrders {
   self: DryCoincheckExchangeImpl =>
 
   final override def openOrders: RIO[SttpClient with Conf, Seq[CCOrder]] =
-    ZIO.succeed(cache.openOrders.toSeq)
+    ZIO.succeed(cache.openOrders)
 }

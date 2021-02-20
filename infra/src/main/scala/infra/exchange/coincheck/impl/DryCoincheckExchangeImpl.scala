@@ -20,6 +20,8 @@ final private[coincheck] case class OrderCache() {
     ids = ids.filterNot(_ == orderId)
   }
 
+  def closeOrder(orderId: CCOrderId): Unit = cancelOrder(orderId)
+
   def hasId(id: CCOrderId): Boolean = ids.contains(id)
 }
 

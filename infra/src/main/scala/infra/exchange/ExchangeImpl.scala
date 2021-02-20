@@ -16,8 +16,10 @@ object ExchangeImpl {
       conf.get.ccAccessKey.zipWith(conf.get.ccSecretKey)(CoinCheckExchangeImpl)
     )
 
-  val dryWriteCoinCheckExchange: ULayer[CoincheckExchange] =
-    ZLayer.succeed(DryWriteCoincheckExchangeImpl)
+  def dryWriteCoinCheckExchange(
+    orderSettledInterval: Int
+  ): ULayer[CoincheckExchange] =
+    ZLayer.succeed(DryWriteCoincheckExchangeImpl(orderSettledInterval))
 
   val bitflyerExchange: ZLayer[Conf, Throwable, BitflyerExchange] =
     ZLayer.fromFunctionM(conf =>
