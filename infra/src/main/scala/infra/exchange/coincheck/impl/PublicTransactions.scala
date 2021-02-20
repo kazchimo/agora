@@ -6,7 +6,7 @@ import infra.exchange.coincheck.Endpoints
 import lib.error.InternalInfraError
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio.{SttpClient, sendR}
-import sttp.ws.WebSocket
+import sttp.ws.{WebSocket, WebSocketClosed}
 import zio._
 import zio.logging.{Logging, log}
 import zio.stream.Stream
@@ -43,7 +43,7 @@ private[exchange] trait PublicTransactions { self: CoinCheckExchangeImpl =>
              basicRequest
                .get(uri"${Endpoints.websocket}")
                .response(asWebSocketAlways(useWS(que)))
-           ).fork
+           ).retryWhile(_.isInstanceOf[WebSocketClosed]).fork
   } yield Stream.fromQueueWithShutdown(que).haltWhen(que.awaitShutdown)
 }
 
