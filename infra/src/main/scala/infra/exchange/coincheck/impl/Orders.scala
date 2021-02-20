@@ -19,9 +19,13 @@ import zio.{RIO, Task, ZEnv, ZIO}
 
 private[coincheck] trait Orders extends AuthStrategy {
   self: CoincheckExchange.Service =>
-  private def request(order: CCOrderRequest) = for {
-    h <- headers(Endpoints.orders, order.asJson.noSpaces)
-  } yield basicRequest.post(uri"${Endpoints.orders}").contentType("application/json").body(order.asJson.noSpaces).headers(h).response(asJson[OrdersResponse])
+  private def request(order: CCOrderRequest) =
+    headers(Endpoints.orders, order.asJson.noSpaces).map(h =>
+      basicRequest
+        .post(uri"${Endpoints.orders}").contentType("application/json").body(
+          order.asJson.noSpaces
+        ).headers(h).response(asJson[OrdersResponse])
+    )
 
   final override def orders(
     order: CCOrderRequest
