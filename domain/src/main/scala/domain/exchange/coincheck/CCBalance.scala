@@ -12,10 +12,7 @@ final case class CCBalance(jpy: JpyAmount, btc: BtcAmount)
 
 object CCBalance {
   def fromRaw(jpy: Double, btc: Double): IO[ClientDomainError, CCBalance] =
-    for {
-      jpy <- JpyAmount(jpy)
-      btc <- BtcAmount(btc)
-    } yield CCBalance(jpy, btc)
+    JpyAmount(jpy).zip(BtcAmount(btc)).map((CCBalance.apply _).tupled)
 
   @newtype case class JpyAmount(value: NonNegativeDouble)
   object JpyAmount extends VOFactory[Double, NonNegative] {
