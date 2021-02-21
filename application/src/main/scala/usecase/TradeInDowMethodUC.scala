@@ -5,6 +5,7 @@ import domain.exchange.coincheck.{CCOrderRequest, CoincheckExchange}
 import domain.strategy.DowMethod
 import zio.Ref
 import zio.logging.log
+import lib.syntax.all._
 
 final case class TradingState(
   onLong: Boolean,
@@ -59,7 +60,7 @@ object TradeInDowMethodUC {
                                   _            <- broker.priceAdjustingOrder(request, interval)
                                   tradingState <- tradingStateRef.get
                                   profit        =
-                                    request.limitAmount.value.value * (signal.at - tradingState.lastBuyRate)
+                                    request.limitAmount.deepInnerV * (signal.at - tradingState.lastBuyRate)
                                   summary      <- tradingStateRef.updateAndGet(
                                                     _.toNeutralPosition.addSummary(profit)
                                                   )

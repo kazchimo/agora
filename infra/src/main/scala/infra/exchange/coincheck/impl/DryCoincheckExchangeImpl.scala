@@ -2,6 +2,7 @@ package infra.exchange.coincheck.impl
 
 import domain.exchange.coincheck.CCOrder.CCOrderId
 import domain.exchange.coincheck.CCOrderRequest.CCOrderType._
+import lib.syntax.all._
 import domain.exchange.coincheck.CCOrderRequest.{
   CCOrderRequestRate,
   CCOrderType,
@@ -46,20 +47,20 @@ final private[impl] case class FakeExchange(marketRate: CCOrderRequestRate) {
     _       <- ZIO.effect {
                  request.orderType match {
                    case Buy        => rebalanceWithDiff(
-                       request.amount.get.value.value,
+                       request.amount.get.deepInnerV,
                        -request.asInstanceOf[CCOrderRequest[LimitOrder]].jpy
                      )
                    case MarketBuy  => rebalanceWithDiff(
-                       request.marketBuyAmount.get.value.value / marketRate.value.value,
-                       -request.marketBuyAmount.get.value.value
+                       request.marketBuyAmount.get.deepInnerV / marketRate.deepInnerV,
+                       -request.marketBuyAmount.get.deepInnerV
                      )
                    case Sell       => rebalanceWithDiff(
-                       -request.amount.get.value.value,
+                       -request.amount.get.deepInnerV,
                        request.asInstanceOf[CCOrderRequest[LimitOrder]].jpy
                      )
                    case MarketSell => rebalanceWithDiff(
-                       -request.amount.get.value.value,
-                       marketRate.value.value * request.amount.get.value.value
+                       -request.amount.get.deepInnerV,
+                       marketRate.deepInnerV * request.amount.get.deepInnerV
                      )
                  }
                }

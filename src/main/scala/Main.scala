@@ -28,6 +28,5 @@ object Main extends zio.App {
   val tradeInDow = TradeInDowMethodUC.trade(5, 3, 3)
   val sellAll    = SellAllCoinInCoincheckUC.sell(10)
 
-  private val app = log.info("start") *> sellAll *> log.info("end")
-
+  private val app = log.info("start") *> tradeInDow *> log.info("end")
 }

@@ -5,6 +5,7 @@ import domain.exchange.coincheck._
 import io.circe.generic.extras.Configuration
 import io.circe.syntax._
 import io.circe.{Encoder, Json}
+import lib.syntax.all._
 
 object CCOrderConverter {
   implicit val codecConfig: Configuration =
@@ -27,8 +28,8 @@ object CCOrderConverter {
     Encoder.instance(_.entryName.asJson)
 
   implicit val ccOrderRequestRateEncoder: Encoder[CCOrderRequestRate] =
-    Encoder.instance(_.value.value.asJson)
+    Encoder.instance(_.deepInnerV.asJson)
 
   implicit val ccOrderRequestAmountEncoder: Encoder[CCOrderRequestAmount] =
-    Encoder.instance(_.value.value.asJson)
+    Encoder.instance(_.deepInnerV.asJson)
 }

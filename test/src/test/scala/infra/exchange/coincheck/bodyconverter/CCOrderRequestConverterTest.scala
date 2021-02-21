@@ -7,6 +7,7 @@ import io.circe.{Json, JsonObject}
 import zio.random.Random
 import zio.test.Assertion._
 import zio.test._
+import lib.syntax.all._
 
 object CCOrderRequestConverterTest extends DefaultRunnableSpec {
   val ccOrderRateEncTet
@@ -15,7 +16,7 @@ object CCOrderRequestConverterTest extends DefaultRunnableSpec {
   )(
     testM("encode to an inner value")(
       check(ccOrderRateGen)(r =>
-        assert(r.asJson)(equalTo(Json.fromDoubleOrNull(r.value.value)))
+        assert(r.asJson)(equalTo(Json.fromDoubleOrNull(r.deepInnerV)))
       )
     )
   )
@@ -26,7 +27,7 @@ object CCOrderRequestConverterTest extends DefaultRunnableSpec {
   )(
     testM("encode to an inner value")(
       check(ccOrderAmountGen)(r =>
-        assert(r.asJson)(equalTo(Json.fromDoubleOrNull(r.value.value)))
+        assert(r.asJson)(equalTo(Json.fromDoubleOrNull(r.deepInnerV)))
       )
     )
   )

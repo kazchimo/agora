@@ -5,6 +5,7 @@ import domain.exchange.coincheck.{CCOrderRequest, CoincheckExchange}
 import lib.error.AdaptorInternalError
 import zio.ZIO
 import zio.logging.log
+import lib.syntax.all._
 
 object SellAllCoinInCoincheckUC {
   def sell(updatePriceIntervalSec: Int) = for {
@@ -16,7 +17,7 @@ object SellAllCoinInCoincheckUC {
                                    AdaptorInternalError("Could not find latest price!")
                                  )
     req                     <- CCOrderRequest
-                                 .limitSell(transaction.rate.value.value, balance.btc.value.value)
+                                 .limitSell(transaction.rate.deepInnerV, balance.btc.deepInnerV)
     _                       <- log.info(s"Sell All btc at ${req.toString}!")
     _                       <- CoincheckBroker().priceAdjustingOrder(req, updatePriceIntervalSec)
   } yield ()

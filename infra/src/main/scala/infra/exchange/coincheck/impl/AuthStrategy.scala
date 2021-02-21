@@ -4,6 +4,7 @@ import domain.conf.Conf
 import lib.cripto.HmacSha256Encode.hmacSHA256Encode
 import zio.clock.nanoTime
 import zio.{RIO, ZEnv, ZIO}
+import lib.syntax.all._
 
 private[coincheck] trait AuthStrategy {
   type Header = Map[String, String]
@@ -15,7 +16,7 @@ private[coincheck] trait AuthStrategy {
     nonce <- nanoTime.map(_.toString)
     conf  <- ZIO.service[Conf.Service]
     sec   <- conf.ccSecretKey
-    sig   <- hmacSHA256Encode(sec.value.value, nonce + url + body)
+    sig   <- hmacSHA256Encode(sec.deepInnerV, nonce + url + body)
     acc   <- conf.ccAccessKey
-  } yield Map("ACCESS-KEY" -> acc.value.value, "ACCESS-NONCE" -> nonce, "ACCESS-SIGNATURE" -> sig)
+  } yield Map("ACCESS-KEY" -> acc.deepInnerV, "ACCESS-NONCE" -> nonce, "ACCESS-SIGNATURE" -> sig)
 }

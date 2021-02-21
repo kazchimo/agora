@@ -4,19 +4,20 @@ import domain.exchange.bitflyer.BFChildOrder.{
   BFOrderPrice,
   BFOrderSize
 }
+import lib.syntax.all._
 import domain.exchange.bitflyer._
 import io.circe.Encoder
 import io.circe.syntax._
 
 object BFChildOrderConverter {
   implicit val bfOrderPriceEncoder: Encoder[BFOrderPrice] =
-    Encoder.instance(_.v.value.asJson)
+    Encoder.instance(_.deepInnerV.asJson)
 
   implicit val bfOrderSizeEncoder: Encoder[BFOrderSize] =
-    Encoder.instance(_.v.value.asJson)
+    Encoder.instance(_.deepInnerV.asJson)
 
   implicit val BFOrderMinuteToExpireEncoder: Encoder[BFOrderMinuteToExpire] =
-    Encoder.instance(_.v.value.asJson)
+    Encoder.instance(_.deepInnerV.asJson)
 
   implicit val BFOrderSideEncoder: Encoder[BFOrderSide] =
     Encoder.instance(_.v.asJson)

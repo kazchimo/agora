@@ -16,6 +16,7 @@ import io.estatico.newtype.macros.newtype
 import lib.error.ClientDomainError
 import lib.refined.PositiveDouble
 import zio.{IO, ZIO}
+import lib.syntax.all._
 
 // about order -> https://coincheck.com/ja/documents/exchange/api#order-new
 // about stop order -> https://faq.coincheck.com/s/article/40203?language=ja
@@ -45,7 +46,7 @@ final case class CCOrderRequest[+T <: CCOrderType] private (
     this.copy(amount = Some(amount), orderType = ev(orderType))
 
   def jpy[S >: T: =:=[*, LimitOrder]]: Double =
-    limitAmount.value.value * limitRate.value.value
+    limitAmount.deepInnerV * limitRate.deepInnerV
 }
 
 private[coincheck] trait OrderFactory {

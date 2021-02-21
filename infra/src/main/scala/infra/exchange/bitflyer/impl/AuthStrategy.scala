@@ -2,6 +2,7 @@ package infra.exchange.bitflyer.impl
 
 import lib.cripto.HmacSha256Encode.hmacSHA256Encode
 import zio.{Task, ZIO}
+import lib.syntax.all._
 
 private[bitflyer] trait AuthStrategy { self: BitflyerExchangeImpl =>
   type Header = Map[String, String]
@@ -9,9 +10,9 @@ private[bitflyer] trait AuthStrategy { self: BitflyerExchangeImpl =>
   final def headers(method: String, path: String, body: String): Task[Header] =
     for {
       ts   <- ZIO.effectTotal(timestamp)
-      sign <- hmacSHA256Encode(secretKey.value.value, ts + method + path + body)
+      sign <- hmacSHA256Encode(secretKey.deepInnerV, ts + method + path + body)
     } yield Map(
-      "ACCESS-KEY"       -> accessKey.value.value,
+      "ACCESS-KEY"       -> accessKey.deepInnerV,
       "ACCESS-TIMESTAMP" -> ts,
       "ACCESS-SIGN"      -> sign
     )
