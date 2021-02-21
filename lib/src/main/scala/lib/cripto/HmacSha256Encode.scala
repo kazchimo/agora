@@ -1,11 +1,11 @@
 package lib.cripto
 
+import org.apache.commons.codec.binary.Hex
+import zio.{Task, ZIO}
+
 import java.nio.charset.StandardCharsets
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-
-import org.apache.commons.codec.binary.Hex
-import zio.{Task, ZIO}
 
 object HmacSha256Encode {
   def hmacSHA256Encode(secretKey: String, message: String): Task[String] =

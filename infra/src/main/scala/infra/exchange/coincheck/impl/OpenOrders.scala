@@ -1,8 +1,8 @@
 package infra.exchange.coincheck.impl
 
 import domain.conf.Conf
-import domain.exchange.coincheck.{CCOrder, CoincheckExchange}
 import domain.exchange.coincheck.CCOrder.CCOrderId
+import domain.exchange.coincheck.{CCOrder, CoincheckExchange}
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.{
   FailedOpenOrdersResponse,

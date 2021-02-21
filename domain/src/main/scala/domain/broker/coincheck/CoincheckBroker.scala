@@ -6,16 +6,10 @@ import domain.exchange.coincheck.CCLimitOrderRequest.{
   CCOrderRequestRate
 }
 import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.exchange.coincheck.{
-  CCLimitOrderRequest,
-  CCOrder,
-  CCPublicTransaction,
-  CoincheckExchange
-}
+import domain.exchange.coincheck.{CCLimitOrderRequest, CCOrder, CoincheckExchange}
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.duration._
 import zio.logging.{Logging, log}
-import zio.stream.UStream
 import zio.{RIO, Ref, ZEnv, ZIO}
 
 sealed private[coincheck] trait ShouldCancel extends Product with Serializable

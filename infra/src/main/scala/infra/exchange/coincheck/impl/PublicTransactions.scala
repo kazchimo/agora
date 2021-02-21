@@ -1,7 +1,7 @@
 package infra.exchange.coincheck.impl
 
-import domain.exchange.coincheck.{CCPublicTransaction, CoincheckExchange}
 import domain.exchange.coincheck.CCPublicTransaction._
+import domain.exchange.coincheck.{CCPublicTransaction, CoincheckExchange}
 import infra.exchange.coincheck.Endpoints
 import lib.error.InternalInfraError
 import sttp.client3._

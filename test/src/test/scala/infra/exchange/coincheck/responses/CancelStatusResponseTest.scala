@@ -1,8 +1,8 @@
 package infra.exchange.coincheck.responses
 
+import io.circe.parser.decode
 import zio.test.Assertion.{equalTo, isRight}
 import zio.test._
-import io.circe.parser.decode
 
 object CancelStatusResponseTest extends DefaultRunnableSpec {
   override def spec = suite("CancelStatusResponse")(test("decoder") {

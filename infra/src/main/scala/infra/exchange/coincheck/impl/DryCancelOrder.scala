@@ -3,8 +3,8 @@ package infra.exchange.coincheck.impl
 import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder
 import sttp.client3.asynchttpclient.zio.SttpClient
-import zio.{RIO, ZIO}
 import zio.logging.Logging
+import zio.{RIO, ZIO}
 
 private[coincheck] trait DryCancelOrder {
   self: DryCoincheckExchangeImpl =>

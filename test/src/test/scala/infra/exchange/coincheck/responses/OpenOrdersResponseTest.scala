@@ -1,8 +1,8 @@
 package infra.exchange.coincheck.responses
 
+import io.circe.parser.decode
 import zio.test.Assertion._
 import zio.test._
-import io.circe.parser.decode
 
 object OpenOrdersResponseTest extends DefaultRunnableSpec {
   override def spec = suite("OpenOrdersResponse")(test("decoder") {

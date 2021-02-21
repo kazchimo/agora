@@ -1,9 +1,9 @@
 package helpers.mockModule.zio
 
-import java.io.IOException
-
 import zio.console.Console
 import zio.{IO, UIO, ULayer, ZLayer}
+
+import java.io.IOException
 
 object console {
   val devNull: ULayer[Console] = ZLayer.succeed(new Console.Service {
