@@ -1,7 +1,7 @@
 package infra.exchange.coincheck.impl
 
 import domain.exchange.coincheck.CCOrder
-import helpers.gen.domain.exchange.coincheck.CCOrderRequestGen.ccOrderGen
+import helpers.gen.domain.exchange.coincheck.CCOrderRequestGen.ccOrderRequestGen
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
 import sttp.client3.asynchttpclient.zio.SttpClientStubbing._
@@ -19,7 +19,7 @@ trait OrdersTest { self: CoinCheckExchangeImplTest.type =>
 
   val ordersSuite = suite("#orders")(
     testM("fails if failed json returned") {
-      checkM(ccOrderGen) { o =>
+      checkM(ccOrderRequestGen) { o =>
         val testEffect = matchedWhen.thenRespond(failJson) *> exchange.orders(o)
 
         assertM(testEffect.run)(
@@ -31,7 +31,7 @@ trait OrdersTest { self: CoinCheckExchangeImplTest.type =>
         )
       }
     },
-    testM("returns order if order succeed")(checkM(ccOrderGen) { o =>
+    testM("returns order if order succeed")(checkM(ccOrderRequestGen) { o =>
       val testEffect =
         matchedWhen.thenRespond(successJson) *> exchange.orders(o)
 

@@ -1,13 +1,12 @@
 package infra.exchange.coincheck.bodyconverter
 
 import helpers.gen.domain.exchange.coincheck.CCOrderRequestGen._
-import io.circe.Json
+import infra.exchange.coincheck.bodyconverter.CCOrderConverter._
 import io.circe.syntax._
+import io.circe.{Json, JsonObject}
 import zio.random.Random
 import zio.test.Assertion._
 import zio.test._
-
-import CCOrderConverter._
 
 object CCOrderRequestConverterTest extends DefaultRunnableSpec {
   val ccOrderRateEncTet
@@ -32,62 +31,67 @@ object CCOrderRequestConverterTest extends DefaultRunnableSpec {
     )
   )
 
-  val ccMarketBuyAmountEncTest
-    : Spec[TestConfig with Random, TestFailure[Nothing], TestSuccess] = suite(
-    "ccMarketBuyAmountEncoder"
-  )(
-    testM("encode to an inner value")(
-      check(ccMarketBuyAmountGen)(r =>
-        assert(r.asJson)(equalTo(Json.fromDoubleOrNull(r.value.value)))
-      )
-    )
-  )
-
-  val ccBuyEncTest
-    : Spec[TestConfig with Random, TestFailure[Nothing], TestSuccess] = suite(
-    "ccBuyEncoder"
-  )(
-    testM("encode to a corresponding json")(
-      check(ccBuyGen)(r =>
-        assert(r.asJson)(
+  val ccOrderRequestEncTest = suite("ccOrderRequestEncoder")(
+    testM("buy") {
+      check(ccLimitBuyOrderRequestGen) { req =>
+        assert(req.asJson)(
           equalTo(
-            Json.obj(
+            JsonObject(
+              "pair"       -> "btc_jpy".asJson,
               "order_type" -> "buy".asJson,
-              "rate"       -> r.rate.asJson,
-              "amount"     -> r.amount.asJson,
-              "pair"       -> "btc_jpy".asJson
-            )
+              "rate"       -> req.rate.get.asJson,
+              "amount"     -> req.amount.get.asJson
+            ).asJson
           )
         )
-      )
-    )
-  )
+      }
 
-  val ccMarketStopBuyEncTest
-    : Spec[TestConfig with Random, TestFailure[Nothing], TestSuccess] = suite(
-    "ccmarketStopBuyEncoder"
-  )(
-    testM("encode to a corresponding json")(
-      check(ccMarketStopBuyGen)(r =>
-        assert(r.asJson)(
+    },
+    testM("sell") {
+      check(ccLimitSellOrderRequestGen) { req =>
+        assert(req.asJson)(
           equalTo(
-            Json.obj(
-              "order_type"        -> "market_buy".asJson,
-              "stop_loss_rate"    -> r.stopLossRate.asJson,
-              "market_buy_amount" -> r.marketBuyAmount.asJson,
-              "pair"              -> "btc_jpy".asJson
-            )
+            JsonObject(
+              "pair"       -> "btc_jpy".asJson,
+              "order_type" -> "sell".asJson,
+              "rate"       -> req.rate.get.asJson,
+              "amount"     -> req.amount.get.asJson
+            ).asJson
           )
         )
-      )
-    )
+      }
+    },
+    testM("marketBuy") {
+      check(ccMarketBuyOrderRequestGen) { req =>
+        assert(req.asJson)(
+          equalTo(
+            JsonObject(
+              "pair"              -> "btc_jpy".asJson,
+              "order_type"        -> "market_buy".asJson,
+              "market_buy_amount" -> req.marketBuyAmount.get.asJson
+            ).asJson
+          )
+        )
+      }
+    },
+    testM("marketSell") {
+      check(ccMarketSellOrderRequestGen) { req =>
+        assert(req.asJson)(
+          equalTo(
+            JsonObject(
+              "pair"       -> "btc_jpy".asJson,
+              "order_type" -> "market_sell".asJson,
+              "amount"     -> req.amount.get.asJson
+            ).asJson
+          )
+        )
+      }
+    }
   )
 
   override def spec: ZSpec[Environment, Failure] = suite("CCOrderConverter")(
     ccOrderRateEncTet,
     ccOrderAmountEncTest,
-    ccMarketBuyAmountEncTest,
-    ccBuyEncTest,
-    ccMarketStopBuyEncTest
+    ccOrderRequestEncTest
   )
 }
