@@ -17,10 +17,11 @@ import sttp.client3.UriContext
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
 import zio.{RIO, Task, ZEnv, ZIO}
+import domain.exchange.coincheck.CCOrderRequest._
 
 private[coincheck] trait Orders extends AuthStrategy {
   self: CoincheckExchange.Service =>
-  private def request(order: CCOrderRequest[_]) =
+  private def request(order: CCOrderRequest[_ <: CCOrderType]) =
     headers(Endpoints.orders, order.asJson.noSpaces).map(h =>
       jsonRequest
         .post(uri"${Endpoints.orders}").body(order.asJson.noSpaces).headers(
@@ -29,7 +30,7 @@ private[coincheck] trait Orders extends AuthStrategy {
     )
 
   final override def orders(
-    order: CCOrderRequest[_]
+    order: CCOrderRequest[_ <: CCOrderType]
   ): RIO[SttpClient with ZEnv with Conf, CCOrder] = (for {
     req  <- request(order)
     res  <- send(req)
