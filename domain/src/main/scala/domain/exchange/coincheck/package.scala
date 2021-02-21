@@ -7,7 +7,7 @@ import sttp.client3.asynchttpclient.zio.SttpClient
 import zio._
 import zio.logging.Logging
 import zio.macros.accessible
-import zio.stream.Stream
+import zio.stream.{Stream, UStream}
 
 package object coincheck {
   type CoincheckExchange = Has[CoincheckExchange.Service]
@@ -25,11 +25,11 @@ package object coincheck {
         id: CCOrderId
       ): RIO[SttpClient with Logging with Conf, CCOrderId]
       def cancelStatus(id: CCOrderId): RIO[SttpClient with Conf, Boolean]
-      def publicTransactions: ZIO[
-        SttpClient with ZEnv with Logging with Conf,
-        Throwable,
-        Stream[Nothing, CCPublicTransaction]
-      ]
+      def publicTransactions
+        : ZIO[SttpClient with ZEnv with Logging with Conf, Throwable, UStream[
+          CCPublicTransaction
+        ]]
+      def balance: RIO[SttpClient with Conf with Logging, UStream[CCBalance]]
     }
 
     val notStubbed: ZIO[Any, Throwable, Nothing] = ZIO.fail(
@@ -46,7 +46,8 @@ package object coincheck {
         SttpClient with zio.ZEnv with Logging,
         Throwable,
         Stream[Nothing, CCPublicTransaction]
-      ] = notStubbed
+      ] = notStubbed,
+      balanceRes: RIO[SttpClient with Conf with Logging, UStream[CCBalance]]
     ): ULayer[CoincheckExchange] = ZLayer.succeed(new Service {
       override def transactions: RIO[SttpClient, Seq[CCTransaction]] =
         transactionsRes
@@ -69,6 +70,10 @@ package object coincheck {
         Throwable,
         Stream[Nothing, CCPublicTransaction]
       ] = publicTransactionsRes
+
+      override def balance
+        : RIO[SttpClient with Conf with Logging, UStream[CCBalance]] =
+        balanceRes
     })
   }
 }
