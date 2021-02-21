@@ -1,12 +1,13 @@
 package domain.exchange.coincheck
 
-import domain.exchange.coincheck.CCOrderRequest.CCOrderPair.BtcJpy
-import domain.exchange.coincheck.CCOrderRequest.CCOrderType.{
+import domain.exchange.coincheck.CCOrder.{CCOrderType, LimitOrder}
+import domain.exchange.coincheck.CCOrder.CCOrderType.{
   Buy,
   MarketBuy,
   MarketSell,
   Sell
 }
+import domain.exchange.coincheck.CCOrderRequest.CCOrderPair.BtcJpy
 import domain.exchange.coincheck.CCOrderRequest._
 import domain.lib.VOFactory
 import enumeratum.EnumEntry.Snakecase
@@ -113,24 +114,6 @@ object CCOrderRequest extends OrderFactory {
     case object EtcJpy  extends CCOrderPair
     case object FctJpy  extends CCOrderPair
     case object MonaJpy extends CCOrderPair
-  }
-
-  sealed trait CCOrderType extends Snakecase
-  sealed trait LimitOrder  extends CCOrderType
-  sealed trait MarketOrder extends CCOrderType
-
-  object CCOrderType extends Enum[CCOrderType] with CirceEnum[CCOrderType] {
-    val values: IndexedSeq[CCOrderType] = findValues
-
-    case object Buy        extends LimitOrder
-    case object Sell       extends LimitOrder
-    case object MarketBuy  extends MarketOrder
-    case object MarketSell extends MarketOrder
-
-    type Buy        = Buy.type
-    type Sell       = Sell.type
-    type MarketBuy  = MarketBuy.type
-    type MarketSell = MarketSell.type
   }
 
   @newtype case class CCOrderRequestRate(value: PositiveDouble)

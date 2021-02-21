@@ -1,8 +1,7 @@
 package infra.exchange.coincheck.impl
 
 import domain.conf.Conf
-import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.exchange.coincheck.CCOrderRequest._
+import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderType}
 import domain.exchange.coincheck.{CCOrder, CCOrderRequest, CoincheckExchange}
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints

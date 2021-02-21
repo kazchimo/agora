@@ -1,12 +1,13 @@
 package infra.exchange.coincheck.impl
 
-import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.exchange.coincheck.CCOrderRequest.CCOrderType._
-import domain.exchange.coincheck.CCOrderRequest.{
-  CCOrderRequestRate,
-  CCOrderType,
-  LimitOrder
+import domain.exchange.coincheck.CCOrder.CCOrderType.{
+  Buy,
+  MarketBuy,
+  MarketSell,
+  Sell
 }
+import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderType, LimitOrder}
+import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
 import domain.exchange.coincheck._
 import lib.syntax.all._
 import zio.{Task, ZIO}

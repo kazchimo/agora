@@ -1,6 +1,7 @@
 package helpers.gen.domain.exchange.coincheck
 
-import domain.exchange.coincheck.CCOrderRequest.CCOrderType.{
+import domain.exchange.coincheck.CCOrder.CCOrderType
+import domain.exchange.coincheck.CCOrder.CCOrderType.{
   Buy,
   MarketBuy,
   MarketSell,
