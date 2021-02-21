@@ -10,9 +10,10 @@ import domain.exchange.coincheck.{
   Env
 }
 import sttp.client3.asynchttpclient.zio.SttpClient
+import zio.clock.sleep
 import zio.duration._
 import zio.logging.{Logging, log}
-import zio.{RIO, Ref, ZEnv, ZIO}
+import zio.{RIO, Ref, ZEnv, ZIO, ZRef}
 
 sealed private[coincheck] trait ShouldCancel extends Product with Serializable
 private[coincheck] case object Should        extends ShouldCancel
@@ -29,6 +30,27 @@ final case class CoincheckBroker() {
   ): ZIO[CoincheckExchange with Env, Throwable, Boolean] = CoincheckExchange
     .cancelOrder(id) *> CoincheckExchange.cancelStatus(id).repeatUntil(identity)
 
+  def latestRateRef(initialRate: CCOrderRequestRate): ZIO[
+    CoincheckExchange with Env,
+    Throwable,
+    (
+      ZRef[Nothing, Nothing, Nothing, CCOrderRequestRate],
+      ZRef[Nothing, Unit, Boolean, Nothing]
+    )
+  ] = for {
+    latestRateRef      <- Ref.make(initialRate)
+    updateCancelRef    <- Ref.make(false)
+    canceledRef        <- Ref.make(false)
+    transactionsStream <- CoincheckExchange.publicTransactions
+    streamFiber        <-
+      transactionsStream
+        .foreach(t => latestRateRef.set(CCOrderRequestRate(t.rate.value))).fork
+    _                  <- (streamFiber.interruptFork *> canceledRef.set(true))
+                            .whenM(updateCancelRef.get).repeatUntilM(_ =>
+                              sleep(1.seconds) *> canceledRef.get
+                            ).fork
+  } yield (latestRateRef.readOnly, updateCancelRef.writeOnly)
+
   def priceAdjustingOrder(
     orderRequest: CCOrderRequest[LimitOrder],
     intervalSec: Int
@@ -37,32 +59,28 @@ final case class CoincheckBroker() {
     Throwable,
     CCOrder
   ] = for {
-    latestRateRef      <- Ref.make(orderRequest.limitRate)
-    transactionsStream <- CoincheckExchange.publicTransactions
-    transactionFiber   <-
-      transactionsStream
-        .foreach(t => latestRateRef.set(CCOrderRequestRate(t.rate.value))).fork
-    order              <- CoincheckExchange.orders(orderRequest)
-    shouldCancel       <- ZIO
-                            .effectTotal(Should).delay(intervalSec.seconds).race(
-                              waitOrderSettled(order.id).as(ShouldNot)
-                            )
-    result             <- shouldCancel match {
-                            case Should => for {
-                                _          <- transactionFiber.interruptFork
-                                latestRate <- latestRateRef.get
-                                _          <-
-                                  log.info(
-                                    s"Cancel order! Reordering... at=${latestRate.toString}"
-                                  )
-                                _          <- cancelWithWait(order.id)
-                                r          <- priceAdjustingOrder(
-                                                orderRequest.changeRate(latestRate),
-                                                intervalSec
-                                              )
-                              } yield r
-                            case _      => transactionFiber.interruptFork *>
-                                log.info("Order settled!").as(order)
-                          }
+    (latestRateRef, updateCancelRef) <- latestRateRef(orderRequest.limitRate)
+    order                            <- CoincheckExchange.orders(orderRequest)
+    shouldCancel                     <- ZIO
+                                          .effectTotal(Should).delay(intervalSec.seconds).race(
+                                            waitOrderSettled(order.id).as(ShouldNot)
+                                          )
+    result                           <- shouldCancel match {
+                                          case Should => for {
+                                              _          <- updateCancelRef.set(true)
+                                              latestRate <- latestRateRef.get
+                                              _          <-
+                                                log.info(
+                                                  s"Cancel order! Reordering... at=${latestRate.toString}"
+                                                )
+                                              _          <- cancelWithWait(order.id)
+                                              r          <- priceAdjustingOrder(
+                                                              orderRequest.changeRate(latestRate),
+                                                              intervalSec
+                                                            )
+                                            } yield r
+                                          case _      => updateCancelRef
+                                              .set(true) *> log.info("Order settled!").as(order)
+                                        }
   } yield result
 }
