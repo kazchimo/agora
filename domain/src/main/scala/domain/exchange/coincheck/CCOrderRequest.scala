@@ -15,7 +15,7 @@ import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
 import lib.error.ClientDomainError
 import lib.refined.PositiveDouble
-import zio.IO
+import zio.{IO, ZIO}
 
 // about order -> https://coincheck.com/ja/documents/exchange/api#order-new
 // about stop order -> https://faq.coincheck.com/s/article/40203?language=ja
@@ -83,9 +83,19 @@ private[coincheck] trait OrderFactory {
     CCOrderRequest(BtcJpy, Sell, Some(rate), Some(amount))
 
   final def marketBuy(
+    marketBuyAmount: Double
+  ): IO[ClientDomainError, CCOrderRequest[MarketBuy]] =
+    CCOrderRequestAmount(marketBuyAmount).map(marketBuy)
+
+  final def marketBuy(
     marketBuyAmount: CCOrderRequestAmount
   ): CCOrderRequest[MarketBuy] =
     CCOrderRequest(BtcJpy, MarketBuy, marketBuyAmount = Some(marketBuyAmount))
+
+  final def marketSell(
+    amount: Double
+  ): IO[ClientDomainError, CCOrderRequest[MarketSell]] =
+    CCOrderRequestAmount(amount).map(marketSell)
 
   final def marketSell(
     amount: CCOrderRequestAmount
