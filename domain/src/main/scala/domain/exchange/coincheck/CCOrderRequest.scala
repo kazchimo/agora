@@ -40,7 +40,7 @@ final case class CCOrderRequest[+T <: CCOrderType] private (
   )(implicit ev: <:<[S, LimitOrder]): CCOrderRequest[LimitOrder] =
     this.copy(rate = Some(rate), orderType = ev(orderType))
 
-  def changeAmount[S >: T: =:=[*, LimitOrder]](
+  def changeAmount[S >: T](
     amount: CCOrderRequestAmount
   )(implicit ev: <:<[S, LimitOrder]): CCOrderRequest[LimitOrder] =
     this.copy(amount = Some(amount), orderType = ev(orderType))
