@@ -2,32 +2,43 @@ package infra.exchange.coincheck.impl
 
 import domain.exchange.coincheck.CCOrder.CCOrderId
 import domain.exchange.coincheck.CCOrderRequest.CCOrderType._
-import domain.exchange.coincheck.CCOrderRequest.{CCOrderType, LimitOrder}
+import domain.exchange.coincheck.CCOrderRequest.{
+  CCOrderRequestRate,
+  CCOrderType,
+  LimitOrder
+}
 import domain.exchange.coincheck._
 import zio.{Task, ZIO}
 
-import scala.util.Random
+final private[impl] case class FakeBalance(jpy: Double, btc: Double) {
+  def rebalanceWithDiff(jpy: Double, btc: Double): FakeBalance =
+    FakeBalance(this.jpy + jpy, this.btc + btc)
+}
 
-final private[coincheck] case class OrderCache() {
-  private var ids: Seq[CCOrderId]                                             = Seq.empty[CCOrderId]
+final private[impl] case class OrderCache(marketRate: CCOrderRequestRate) {
   private var pendingOrders: Map[CCOrderId, CCOrderRequest[_ <: CCOrderType]] =
     Map.empty
-  private var balance: Map[String, Double]                                    = Map("jpy" -> 0, "btc" -> 0)
+  private var balance                                                         = FakeBalance(0, 0)
   private var maxId                                                           = 1
 
   def submitOrder(limitOrder: CCOrderRequest[_ <: CCOrderType]): CCOrder = {
     maxId = maxId + 1
     val id = CCOrderId.unsafeFrom(maxId)
-    ids = id +: ids
     pendingOrders = pendingOrders.+(id -> limitOrder)
     CCOrder(id)
   }
 
-  def openOrders: Seq[CCOrder] = ids.map(CCOrder(_))
+  def btc: Double = balance.btc
 
-  def cancelOrder(orderId: CCOrderId): Unit = {
-    ids = ids.filterNot(_ == orderId)
+  def jpy: Double = balance.jpy
+
+  def openOrders: Seq[CCOrder] = pendingOrders.keys.map(CCOrder(_)).toSeq
+
+  def removeOrder(orderId: CCOrderId): Unit = {
+    pendingOrders = pendingOrders.-(orderId)
   }
+
+  def cancelOrder(orderId: CCOrderId): Unit = removeOrder(orderId)
 
   @SuppressWarnings(Array("org.wartremover.warts.All"))
   def closeOrder(orderId: CCOrderId): Task[Unit] = for {
@@ -39,7 +50,7 @@ final private[coincheck] case class OrderCache() {
                        -request.asInstanceOf[CCOrderRequest[LimitOrder]].jpy
                      )
                    case MarketBuy  => rebalanceWithDiff(
-                       Random.between(0, Double.MaxValue),
+                       request.marketBuyAmount.get.value.value / marketRate.value.value,
                        -request.marketBuyAmount.get.value.value
                      )
                    case Sell       => rebalanceWithDiff(
@@ -47,27 +58,22 @@ final private[coincheck] case class OrderCache() {
                        request.asInstanceOf[CCOrderRequest[LimitOrder]].jpy
                      )
                    case MarketSell => rebalanceWithDiff(
-                       -Random.between(
-                         0,
-                         Double.MaxValue
-                       ) * request.amount.get.value.value,
-                       request.amount.get.value.value
+                       -request.amount.get.value.value,
+                       marketRate.value.value * request.amount.get.value.value
                      )
                  }
                }
-    _       <- ZIO.effect {
-                 ids = ids.filterNot(_ == orderId)
-               }
+    _       <- ZIO.effect(removeOrder(orderId))
   } yield ()
 
-  def hasId(id: CCOrderId): Boolean = ids.contains(id)
+  def hasId(id: CCOrderId): Boolean = pendingOrders.keys.toSeq.contains(id)
 
   private def rebalanceWithDiff(btc: Double, jpy: Double): Unit =
-    balance = balance
-      .updated("btc", balance("btc") + btc).updated("jpy", balance("jpy") + jpy)
+    balance = balance.rebalanceWithDiff(jpy, btc)
 }
 
-private[coincheck] trait DryCoincheckExchangeImpl
-    extends CoincheckExchange.Service {
-  protected val cache: OrderCache = OrderCache()
+abstract private[coincheck] class DryCoincheckExchangeImpl(
+  marketRate: CCOrderRequestRate
+) extends CoincheckExchange.Service {
+  protected val cache: OrderCache = OrderCache(marketRate)
 }
