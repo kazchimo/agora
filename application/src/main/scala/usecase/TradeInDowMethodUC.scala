@@ -41,7 +41,7 @@ object TradeInDowMethodUC {
                               tradingState <- tradingStateRef.get
                               _            <- {
                                 for {
-                                  _       <- log.info(s"Buy at ${signal.at}!")
+                                  _       <- log.info(s"Buy at ${signal.at.toString}!")
                                   request <-
                                     CCLimitBuyRequest.fromRaw(signal.at, jpy / signal.at)
                                   _       <- broker.priceAdjustingOrder(request, interval)
@@ -50,7 +50,7 @@ object TradeInDowMethodUC {
                               }.when(signal.shouldBuy & !tradingState.onLong)
                               _            <- {
                                 for {
-                                  _            <- log.info(s"Sell at ${signal.at}!")
+                                  _            <- log.info(s"Sell at ${signal.at.toString}!")
                                   request      <- CCLimitSellRequest.fromRaw(
                                                     signal.at,
                                                     jpy / tradingState.lastBuyRate
