@@ -10,5 +10,6 @@ private[coincheck] trait DryCancelStatus {
 
   final override def cancelStatus(
     id: CCOrder.CCOrderId
-  ): RIO[SttpClient with Conf, Boolean] = ZIO.succeed(!cache.submitted(id))
+  ): RIO[SttpClient with Conf, Boolean] =
+    ZIO.succeed(!fakeExchange.submitted(id))
 }

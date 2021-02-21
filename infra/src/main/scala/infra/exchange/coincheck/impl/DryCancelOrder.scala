@@ -12,7 +12,7 @@ private[coincheck] trait DryCancelOrder {
   final override def cancelOrder(
     id: CCOrder.CCOrderId
   ): RIO[SttpClient with Logging with Conf, CCOrder.CCOrderId] = ZIO.succeed {
-    cache.cancelOrder(id)
+    fakeExchange.cancelOrder(id)
     id
   }
 }

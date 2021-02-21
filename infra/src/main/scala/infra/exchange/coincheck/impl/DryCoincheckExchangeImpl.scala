@@ -15,7 +15,7 @@ final private[impl] case class FakeBalance(jpy: Double, btc: Double) {
     FakeBalance(this.jpy + jpy, this.btc + btc)
 }
 
-final private[impl] case class OrderCache(marketRate: CCOrderRequestRate) {
+final private[impl] case class FakeExchange(marketRate: CCOrderRequestRate) {
   private var pendingOrders: Map[CCOrderId, CCOrderRequest[_ <: CCOrderType]] =
     Map.empty
   private var balance                                                         = FakeBalance(0, 0)
@@ -75,5 +75,5 @@ final private[impl] case class OrderCache(marketRate: CCOrderRequestRate) {
 abstract private[coincheck] class DryCoincheckExchangeImpl(
   marketRate: CCOrderRequestRate
 ) extends CoincheckExchange.Service {
-  protected val cache: OrderCache = OrderCache(marketRate)
+  protected val fakeExchange: FakeExchange = FakeExchange(marketRate)
 }
