@@ -6,11 +6,13 @@ import zio.{RIO, ZIO}
 
 private[coincheck] trait AuthStrategy {
   type Header = Map[String, String]
+  private lazy val start   = System.nanoTime()
+  private var requestCount = 0
 
   final protected def headers(
     url: String,
     body: String = ""
-  ): RIO[Conf, Header]    = for {
+  ): RIO[Conf, Header] = for {
     nonce <- ZIO.effectTotal(createNonce)
     conf  <- ZIO.service[Conf.Service]
     sec   <- conf.ccSecretKey
@@ -18,5 +20,8 @@ private[coincheck] trait AuthStrategy {
     acc   <- conf.ccAccessKey
   } yield Map("ACCESS-KEY" -> acc.value.value, "ACCESS-NONCE" -> nonce, "ACCESS-SIGNATURE" -> sig)
 
-  private def createNonce = System.currentTimeMillis().toString
+  private def createNonce = {
+    requestCount = requestCount + 1
+    (start + requestCount).toString
+  }
 }
