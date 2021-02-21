@@ -1,4 +1,5 @@
 import Dependencies._
+import sbt.Keys.{envVars, fork}
 import sbtwelcome.UsefulTask
 
 ThisBuild / scalaVersion := "2.13.3"
@@ -64,7 +65,10 @@ lazy val commonSettings = Seq(
   ),
   addCompilerPlugin(
     ("org.typelevel" %% "kind-projector" % "0.11.3").cross(CrossVersion.full)
-  )
+  ),
+  Test / envFileName := "test.env",
+  envVars in Test := (envFromFile in Test).value,
+  fork in Test := true
 )
 
 logo :=
