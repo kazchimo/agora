@@ -2,6 +2,7 @@ package domain.exchange
 
 import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder.CCOrderId
+import domain.exchange.coincheck.CCOrderRequest.CCOrderType
 import lib.error.ClientDomainError
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio._
@@ -17,7 +18,7 @@ package object coincheck {
     trait Service {
       def transactions: RIO[SttpClient with Conf, Seq[CCTransaction]]
       def orders(
-        order: CCOrderRequest[_]
+        order: CCOrderRequest[_ <: CCOrderType]
       ): RIO[SttpClient with ZEnv with Conf, CCOrder]
       // Get unsettled orders
       def openOrders: RIO[SttpClient with Conf, Seq[CCOrder]]
@@ -53,7 +54,7 @@ package object coincheck {
         transactionsRes
 
       override def orders(
-        order: CCOrderRequest[_]
+        order: CCOrderRequest[_ <: CCOrderType]
       ): RIO[SttpClient with zio.ZEnv, CCOrder] = ordersRes
 
       override def openOrders: RIO[SttpClient, Seq[CCOrder]] = openOrdersRes
