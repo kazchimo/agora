@@ -29,7 +29,7 @@ package object coincheck {
         : ZIO[SttpClient with ZEnv with Logging with Conf, Throwable, UStream[
           CCPublicTransaction
         ]]
-      def balance: RIO[SttpClient with Conf with Logging, UStream[CCBalance]]
+      def balance: RIO[SttpClient with Conf with Logging, CCBalance]
     }
 
     val notStubbed: ZIO[Any, Throwable, Nothing] = ZIO.fail(
@@ -47,7 +47,7 @@ package object coincheck {
         Throwable,
         Stream[Nothing, CCPublicTransaction]
       ] = notStubbed,
-      balanceRes: RIO[SttpClient with Conf with Logging, UStream[CCBalance]]
+      balanceRes: RIO[SttpClient with Conf with Logging, CCBalance]
     ): ULayer[CoincheckExchange] = ZLayer.succeed(new Service {
       override def transactions: RIO[SttpClient, Seq[CCTransaction]] =
         transactionsRes
@@ -71,8 +71,7 @@ package object coincheck {
         Stream[Nothing, CCPublicTransaction]
       ] = publicTransactionsRes
 
-      override def balance
-        : RIO[SttpClient with Conf with Logging, UStream[CCBalance]] =
+      override def balance: RIO[SttpClient with Conf with Logging, CCBalance] =
         balanceRes
     })
   }
