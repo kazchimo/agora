@@ -11,7 +11,7 @@ import sttp.client3._
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
 import zio.interop.catz.core._
-import zio.{RIO, Task}
+import zio.{RIO, Task, ZEnv}
 
 private[exchange] trait Transactions extends AuthStrategy {
   self: CoincheckExchange.Service =>
@@ -23,7 +23,8 @@ private[exchange] trait Transactions extends AuthStrategy {
         .mapRight(_.transformInto[Task[List[CCTransaction]]])
     )
 
-  final def transactions: RIO[SttpClient with Conf, Seq[CCTransaction]] = (for {
+  final def transactions
+    : RIO[SttpClient with Conf with ZEnv, Seq[CCTransaction]] = (for {
     hs   <- headers(Endpoints.transactions)
     req   = request(hs)
     res  <- send(req)

@@ -13,14 +13,14 @@ import sttp.client3.UriContext
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
 import zio.logging.{Logging, log}
-import zio.{RIO, ZIO}
+import zio.{RIO, ZEnv, ZIO}
 
 private[coincheck] trait CancelOrder extends AuthStrategy {
   self: CoincheckExchange.Service =>
 
   final override def cancelOrder(
     id: CCOrderId
-  ): RIO[SttpClient with Logging with Conf, CCOrderId] = for {
+  ): RIO[SttpClient with Logging with Conf with ZEnv, CCOrderId] = for {
     h    <- headers(Endpoints.cancelOrder(id))
     req   = jsonRequest
               .delete(uri"${Endpoints.cancelOrder(id)}").headers(h).response(

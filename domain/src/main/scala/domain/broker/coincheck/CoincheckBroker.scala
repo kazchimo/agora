@@ -18,10 +18,10 @@ private[coincheck] case object Should        extends ShouldCancel
 private[coincheck] case object ShouldNot     extends ShouldCancel
 
 final case class CoincheckBroker() {
-  def waitOrderSettled(
-    id: CCOrderId
-  ): RIO[CoincheckExchange with SttpClient with Conf, Unit] =
-    CoincheckExchange.openOrders.repeatWhile(_.map(_.id).contains(id)).unit
+  def waitOrderSettled(id: CCOrderId): RIO[
+    CoincheckExchange with SttpClient with Conf with ZEnv with Logging,
+    Unit
+  ] = CoincheckExchange.openOrders.repeatWhile(_.map(_.id).contains(id)).unit
 
   def priceAdjustingOrder(
     orderRequest: CCOrderRequest[LimitOrder],
@@ -49,13 +49,7 @@ final case class CoincheckBroker() {
                             case Should => for {
                                 _          <- transactionFiber.interruptFork
                                 latestRate <- latestRateRef.get
-                                amount     <-
-                                  CCOrderRequestAmount(
-                                    orderRequest.limitRate.value.value * orderRequest.limitAmount.value.value /
-                                      latestRate.value.value
-                                  )
-                                newOrderReq =
-                                  orderRequest.changeRate(latestRate).changeAmount(amount)
+                                newOrderReq = orderRequest.changeRate(latestRate)
                                 _          <-
                                   log.info(
                                     s"Cancel order! Reordering... order=${newOrderReq.toString}"

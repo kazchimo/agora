@@ -14,12 +14,12 @@ import sttp.client3.UriContext
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
 import zio.logging.Logging
-import zio.{RIO, ZIO}
+import zio.{RIO, ZEnv, ZIO}
 
 private[coincheck] trait Balance extends AuthStrategy {
   self: CoincheckExchange.Service =>
   final override def balance
-    : RIO[SttpClient with Conf with Logging, CCBalance] = for {
+    : RIO[SttpClient with Conf with Logging with ZEnv, CCBalance] = for {
     h       <- headers(Endpoints.balance)
     req      = jsonRequest
                  .get(uri"${Endpoints.balance}").headers(h).response(
