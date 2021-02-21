@@ -2,12 +2,13 @@ package domain.broker.coincheck
 
 import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.exchange.coincheck.CCOrderRequest.{
-  CCOrderRequestAmount,
-  CCOrderRequestRate,
-  LimitOrder
+import domain.exchange.coincheck.CCOrderRequest.{CCOrderRequestRate, LimitOrder}
+import domain.exchange.coincheck.{
+  CCOrder,
+  CCOrderRequest,
+  CoincheckExchange,
+  Env
 }
-import domain.exchange.coincheck.{CCOrder, CCOrderRequest, CoincheckExchange}
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.duration._
 import zio.logging.{Logging, log}
@@ -22,6 +23,11 @@ final case class CoincheckBroker() {
     CoincheckExchange with SttpClient with Conf with ZEnv with Logging,
     Unit
   ] = CoincheckExchange.openOrders.repeatWhile(_.map(_.id).contains(id)).unit
+
+  def cancelWithWait(
+    id: CCOrderId
+  ): ZIO[CoincheckExchange with Env, Throwable, Boolean] = CoincheckExchange
+    .cancelOrder(id) *> CoincheckExchange.cancelStatus(id).repeatUntil(identity)
 
   def priceAdjustingOrder(
     orderRequest: CCOrderRequest[LimitOrder],
@@ -54,9 +60,7 @@ final case class CoincheckBroker() {
                                   log.info(
                                     s"Cancel order! Reordering... order=${newOrderReq.toString}"
                                   )
-                                _          <- CoincheckExchange.cancelOrder(order.id)
-                                _          <- CoincheckExchange
-                                                .cancelStatus(order.id).repeatUntil(identity)
+                                _          <- cancelWithWait(order.id)
                                 r          <- priceAdjustingOrder(newOrderReq, intervalSec)
                               } yield r
                             case _      => transactionFiber.interruptFork *>
