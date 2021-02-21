@@ -64,9 +64,9 @@ final case class CoincheckBroker() {
                                           .effectTotal(Should).delay(intervalSec.seconds).race(
                                             waitOrderSettled(order.id).as(ShouldNot)
                                           )
+    _                                <- updateCancelRef.set(true)
     result                           <- shouldCancel match {
                                           case Should => for {
-                                              _          <- updateCancelRef.set(true)
                                               latestRate <- latestRateRef.get
                                               _          <-
                                                 log.info(
@@ -78,8 +78,7 @@ final case class CoincheckBroker() {
                                                               intervalSec
                                                             )
                                             } yield r
-                                          case _      => updateCancelRef
-                                              .set(true) *> log.info("Order settled!").as(order)
+                                          case _      => log.info("Order settled!").as(order)
                                         }
   } yield result
 }
