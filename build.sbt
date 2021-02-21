@@ -57,6 +57,7 @@ lazy val commonSettings = Seq(
     Wart.Recursion,
     Wart.Var
   ) ++ ContribWart.allBut(
+    ContribWart.ExposedTuples,
     ContribWart.Apply,
     ContribWart.MissingOverride,
     ContribWart.SymbolicName,
