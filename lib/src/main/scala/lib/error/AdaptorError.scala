@@ -8,10 +8,10 @@ sealed abstract class AdaptorError(
 
 final case class AdaptorClientError(
   override val msg: String,
-  override val cause: Option[Throwable]
+  override val cause: Option[Throwable] = None
 ) extends AdaptorError(msg, cause, ClientErr)
 
 final case class AdaptorInternalError(
   override val msg: String,
-  override val cause: Option[Throwable]
+  override val cause: Option[Throwable] = None
 ) extends AdaptorError(msg, cause, InternalErr)
