@@ -9,9 +9,9 @@ import infra.exchange.coincheck.responses.{
 }
 import lib.error.{ClientInfraError, InternalInfraError}
 import lib.sttp.jsonRequest
+import sttp.client3.UriContext
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
-import sttp.client3.{UriContext, basicRequest}
 import zio.logging.{Logging, log}
 import zio.{RIO, ZIO}
 

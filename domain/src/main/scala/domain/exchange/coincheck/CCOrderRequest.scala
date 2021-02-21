@@ -1,7 +1,6 @@
 package domain.exchange.coincheck
 
 import domain.exchange.coincheck.CCOrderRequest.CCOrderPair.BtcJpy
-import domain.exchange.coincheck.CCOrderRequest.CCOrderType
 import domain.exchange.coincheck.CCOrderRequest.CCOrderType.{
   Buy,
   MarketBuy,

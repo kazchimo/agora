@@ -2,6 +2,7 @@ package infra.exchange.coincheck.impl
 
 import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder.CCOrderId
+import domain.exchange.coincheck.CCOrderRequest._
 import domain.exchange.coincheck.{CCOrder, CCOrderRequest, CoincheckExchange}
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
@@ -17,7 +18,6 @@ import sttp.client3.UriContext
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
 import zio.{RIO, Task, ZEnv, ZIO}
-import domain.exchange.coincheck.CCOrderRequest._
 
 private[coincheck] trait Orders extends AuthStrategy {
   self: CoincheckExchange.Service =>

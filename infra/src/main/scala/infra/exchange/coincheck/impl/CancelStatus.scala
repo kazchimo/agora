@@ -10,9 +10,9 @@ import infra.exchange.coincheck.responses.{
 }
 import lib.error.ClientInfraError
 import lib.sttp.jsonRequest
+import sttp.client3.UriContext
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
-import sttp.client3.{UriContext, basicRequest}
 import zio.{RIO, ZIO}
 
 private[coincheck] trait CancelStatus extends AuthStrategy {
