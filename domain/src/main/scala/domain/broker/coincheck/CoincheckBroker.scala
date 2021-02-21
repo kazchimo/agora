@@ -70,7 +70,7 @@ final case class CoincheckBroker() {
                                               latestRate <- latestRateRef.get
                                               _          <-
                                                 log.info(
-                                                  s"Cancel order! Reordering... at=${latestRate.toString}"
+                                                  s"Cancel order! Reordering... at=${latestRate.toString} amount=${orderRequest.amount.toString}"
                                                 )
                                               _          <- cancelWithWait(order.id)
                                               r          <- priceAdjustingOrder(
