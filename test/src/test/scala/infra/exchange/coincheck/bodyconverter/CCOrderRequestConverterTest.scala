@@ -4,10 +4,10 @@ import helpers.gen.domain.exchange.coincheck.CCOrderRequestGen._
 import infra.exchange.coincheck.bodyconverter.CCOrderConverter._
 import io.circe.syntax._
 import io.circe.{Json, JsonObject}
+import lib.syntax.all._
 import zio.random.Random
 import zio.test.Assertion._
 import zio.test._
-import lib.syntax.all._
 
 object CCOrderRequestConverterTest extends DefaultRunnableSpec {
   val ccOrderRateEncTet

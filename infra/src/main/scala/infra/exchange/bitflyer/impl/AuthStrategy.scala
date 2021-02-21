@@ -1,8 +1,8 @@
 package infra.exchange.bitflyer.impl
 
 import lib.cripto.HmacSha256Encode.hmacSHA256Encode
-import zio.{Task, ZIO}
 import lib.syntax.all._
+import zio.{Task, ZIO}
 
 private[bitflyer] trait AuthStrategy { self: BitflyerExchangeImpl =>
   type Header = Map[String, String]

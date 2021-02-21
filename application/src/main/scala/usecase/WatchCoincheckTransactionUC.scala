@@ -4,10 +4,10 @@ import cats.Show
 import cats.syntax.show._
 import domain.conf.Conf
 import domain.exchange.coincheck.{CCPublicTransaction, CoincheckExchange}
+import lib.syntax.all._
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.ZIO
 import zio.logging.{Logging, log}
-import lib.syntax.all._
 
 object WatchCoincheckTransactionUC {
   implicit private val show: Show[CCPublicTransaction] = Show.show(a => s"""

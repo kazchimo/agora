@@ -3,9 +3,9 @@ package usecase
 import domain.broker.coincheck.CoincheckBroker
 import domain.exchange.coincheck.{CCOrderRequest, CoincheckExchange}
 import lib.error.AdaptorInternalError
+import lib.syntax.all._
 import zio.ZIO
 import zio.logging.log
-import lib.syntax.all._
 
 object SellAllCoinInCoincheckUC {
   def sell(updatePriceIntervalSec: Int) = for {

@@ -1,12 +1,12 @@
+import cats.syntax.show._
 import infra.conf.ConfImpl
 import infra.exchange.ExchangeImpl
+import lib.error._
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import usecase.{SellAllCoinInCoincheckUC, TradeInDowMethodUC}
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
-import lib.error._
-import cats.syntax.show._
 
 object Main extends zio.App {
   override def run(args: List[String]): URIO[ZEnv, ExitCode] = app

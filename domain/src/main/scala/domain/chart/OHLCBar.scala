@@ -1,8 +1,8 @@
 package domain.chart
 
 import domain.exchange.coincheck.CCPublicTransaction
-import zio.Chunk
 import lib.syntax.all._
+import zio.Chunk
 
 final case class OHLCBar(
   open: Double,

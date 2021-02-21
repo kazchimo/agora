@@ -2,9 +2,9 @@ package infra.exchange.coincheck.impl
 
 import domain.conf.Conf
 import lib.cripto.HmacSha256Encode.hmacSHA256Encode
+import lib.syntax.all._
 import zio.clock.nanoTime
 import zio.{RIO, ZEnv, ZIO}
-import lib.syntax.all._
 
 private[coincheck] trait AuthStrategy {
   type Header = Map[String, String]

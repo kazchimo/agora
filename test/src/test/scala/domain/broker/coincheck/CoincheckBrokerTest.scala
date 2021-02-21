@@ -5,10 +5,10 @@ import domain.exchange.coincheck.CCOrder.CCOrderId
 import domain.exchange.coincheck.{CCOrder, CoincheckExchange}
 import infra.conf.ConfImpl
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
-import zio.{ZEnv, ZIO}
 import zio.logging.Logging
 import zio.test.Assertion.isFalse
 import zio.test._
+import zio.{ZEnv, ZIO}
 
 object CoincheckBrokerTest extends DefaultRunnableSpec {
   override def spec = suite("#CoincheckBroker")(testM("#waitOrderSettled") {

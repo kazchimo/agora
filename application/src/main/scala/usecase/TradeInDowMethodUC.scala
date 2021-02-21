@@ -3,9 +3,9 @@ package usecase
 import domain.broker.coincheck.CoincheckBroker
 import domain.exchange.coincheck.{CCOrderRequest, CoincheckExchange}
 import domain.strategy.DowMethod
+import lib.syntax.all._
 import zio.Ref
 import zio.logging.log
-import lib.syntax.all._
 
 final case class TradingState(
   onLong: Boolean,
