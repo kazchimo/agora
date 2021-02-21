@@ -38,14 +38,10 @@ final case class CoincheckBroker() {
     CCOrder
   ] = for {
     latestRateRef      <- Ref.make(orderRequest.limitRate)
-    settledRef         <- Ref.make(false)
     transactionsStream <- CoincheckExchange.publicTransactions
-    transactionFiber   <- transactionsStream
-                            .foreach(t =>
-                              latestRateRef.set(
-                                CCOrderRequestRate(t.rate.value)
-                              ) *> settledRef.get.map(!_)
-                            ).fork
+    transactionFiber   <-
+      transactionsStream
+        .foreach(t => latestRateRef.set(CCOrderRequestRate(t.rate.value))).fork
     order              <- CoincheckExchange.orders(orderRequest)
     shouldCancel       <- ZIO
                             .effectTotal(Should).delay(intervalSec.seconds).race(
@@ -66,7 +62,7 @@ final case class CoincheckBroker() {
                                               )
                               } yield r
                             case _      => transactionFiber.interruptFork *>
-                                log.info("Order settled!").as(order) <* settledRef.set(true)
+                                log.info("Order settled!").as(order)
                           }
   } yield result
 }
