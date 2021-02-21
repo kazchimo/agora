@@ -1,14 +1,14 @@
 package domain.exchange.coincheck
 
 import domain.exchange.coincheck.CCOrderRequest.CCOrderPair.BtcJpy
-import domain.exchange.coincheck.CCOrderRequest.CCOrderType.{Buy, Sell}
-import domain.exchange.coincheck.CCOrderRequest.{
-  CCOrderPair,
-  CCOrderRequestAmount,
-  CCOrderRequestRate,
-  CCOrderType,
-  LimitOrder
+import domain.exchange.coincheck.CCOrderRequest.CCOrderType
+import domain.exchange.coincheck.CCOrderRequest.CCOrderType.{
+  Buy,
+  MarketBuy,
+  MarketSell,
+  Sell
 }
+import domain.exchange.coincheck.CCOrderRequest._
 import domain.lib.VOFactory
 import enumeratum.EnumEntry.Snakecase
 import enumeratum._
@@ -16,7 +16,7 @@ import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
 import lib.error.ClientDomainError
 import lib.refined.PositiveDouble
-import zio.{IO, ZIO}
+import zio.IO
 
 // about order -> https://coincheck.com/ja/documents/exchange/api#order-new
 // about stop order -> https://faq.coincheck.com/s/article/40203?language=ja
@@ -24,10 +24,10 @@ import zio.{IO, ZIO}
 final case class CCOrderRequest[+T <: CCOrderType] private (
   pair: CCOrderPair,
   orderType: T,
-  rate: Option[CCOrderRequestRate],
-  amount: Option[CCOrderRequestAmount],
-  marketBuyAmount: Option[CCOrderRequestAmount],
-  stopLossRate: Option[CCOrderRequestRate]
+  rate: Option[CCOrderRequestRate] = None,
+  amount: Option[CCOrderRequestAmount] = None,
+  marketBuyAmount: Option[CCOrderRequestAmount] = None, // NOTE: JPY amount
+  stopLossRate: Option[CCOrderRequestRate] = None
 ) {
   @SuppressWarnings(Array("org.wartremover.warts.OptionPartial"))
   def limitRate[S >: T: <:<[*, LimitOrder]]: CCOrderRequestRate = rate.get
@@ -50,21 +50,48 @@ final case class CCOrderRequest[+T <: CCOrderType] private (
 }
 
 private[coincheck] trait OrderFactory {
+  final def unsafeApply[T <: CCOrderType](
+    pair: CCOrderPair,
+    orderType: T,
+    rate: Option[CCOrderRequestRate],
+    amount: Option[CCOrderRequestAmount],
+    marketBuyAmount: Option[CCOrderRequestAmount],
+    stopLossRate: Option[CCOrderRequestRate]
+  ): CCOrderRequest[T] =
+    CCOrderRequest(pair, orderType, rate, amount, marketBuyAmount, stopLossRate)
+
   final def limitBuy(
     rate: Double,
     amount: Double
-  ): IO[ClientDomainError, CCOrderRequest[Buy.type]] = for {
-    r <- CCOrderRequestRate(rate)
-    a <- CCOrderRequestAmount(amount)
-  } yield CCOrderRequest(BtcJpy, Buy, Some(r), Some(a), None, None)
+  ): IO[ClientDomainError, CCOrderRequest[Buy]] = CCOrderRequestRate(rate)
+    .zip(CCOrderRequestAmount(amount)).map(a => limitBuy(a._1, a._2))
+
+  final def limitBuy(
+    rate: CCOrderRequestRate,
+    amount: CCOrderRequestAmount
+  ): CCOrderRequest[Buy] = CCOrderRequest(BtcJpy, Buy, Some(rate), Some(amount))
 
   final def limitSell(
     rate: Double,
     amount: Double
-  ): IO[ClientDomainError, CCOrderRequest[Sell.type]] = for {
-    r <- CCOrderRequestRate(rate)
-    a <- CCOrderRequestAmount(amount)
-  } yield CCOrderRequest(BtcJpy, Sell, Some(r), Some(a), None, None)
+  ): IO[ClientDomainError, CCOrderRequest[Sell]] = CCOrderRequestRate(rate)
+    .zip(CCOrderRequestAmount(amount)).map(a => limitSell(a._1, a._2))
+
+  final def limitSell(
+    rate: CCOrderRequestRate,
+    amount: CCOrderRequestAmount
+  ): CCOrderRequest[Sell] =
+    CCOrderRequest(BtcJpy, Sell, Some(rate), Some(amount))
+
+  final def marketBuy(
+    marketBuyAmount: CCOrderRequestAmount
+  ): CCOrderRequest[MarketBuy] =
+    CCOrderRequest(BtcJpy, MarketBuy, marketBuyAmount = Some(marketBuyAmount))
+
+  final def marketSell(
+    amount: CCOrderRequestAmount
+  ): CCOrderRequest[MarketSell] =
+    CCOrderRequest(BtcJpy, MarketSell, amount = Some(amount))
 }
 
 object CCOrderRequest extends OrderFactory {
@@ -89,6 +116,11 @@ object CCOrderRequest extends OrderFactory {
     case object Sell       extends LimitOrder
     case object MarketBuy  extends MarketOrder
     case object MarketSell extends MarketOrder
+
+    type Buy        = Buy.type
+    type Sell       = Sell.type
+    type MarketBuy  = MarketBuy.type
+    type MarketSell = MarketSell.type
   }
 
   @newtype case class CCOrderRequestRate(value: PositiveDouble)
