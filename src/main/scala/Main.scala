@@ -1,22 +1,33 @@
 import infra.conf.ConfImpl
 import infra.exchange.ExchangeImpl
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import usecase.TradeInDowMethodUC
+import usecase.{SellAllCoinInCoincheckUC, TradeInDowMethodUC}
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
-import zio.{ExitCode, URIO, ZEnv}
+import zio.{ExitCode, URIO, ZEnv, ZIO}
+import lib.error._
+import cats.syntax.show._
 
 object Main extends zio.App {
   override def run(args: List[String]): URIO[ZEnv, ExitCode] = app
+    .foldM(
+      {
+        case e: Error => log.error(e.show)
+        case e        => log.error(e.getMessage)
+      },
+      _ => ZIO.unit
+    )
     .provideCustomMagicLayer(
       ConfImpl.layer,
       ExchangeImpl.coinCheckExchange,
       AsyncHttpClientZioBackend.layer(),
-      Logging.console(logLevel = LogLevel.Info)
+      Logging.console(logLevel = LogLevel.Debug)
     )
     .exitCode
 
-  private val app =
-    log.info("start") *> TradeInDowMethodUC.trade(5, 3, 5) *> log.info("end")
+  val tradeInDow = TradeInDowMethodUC.trade(5, 3, 3)
+  val sellAll    = SellAllCoinInCoincheckUC.sell(10)
+
+  private val app = log.info("start") *> sellAll *> log.info("end")
 
 }
