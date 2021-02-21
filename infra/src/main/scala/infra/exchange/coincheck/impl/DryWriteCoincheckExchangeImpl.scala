@@ -1,6 +1,10 @@
 package infra.exchange.coincheck.impl
 
-final case class DryWriteCoincheckExchangeImpl(orderSettledInterval: Int)
-    extends DryCoincheckExchangeImpl with PublicTransactions with Transactions
-    with DryOrders with DryOpenOrders with DryCancelOrder with DryCancelStatus
-    with DryBalance
+import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
+
+final case class DryWriteCoincheckExchangeImpl(
+  orderSettledInterval: Int,
+  marketRate: CCOrderRequestRate
+) extends DryCoincheckExchangeImpl(marketRate) with PublicTransactions
+    with Transactions with DryOrders with DryOpenOrders with DryCancelOrder
+    with DryCancelStatus with DryBalance

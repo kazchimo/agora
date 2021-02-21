@@ -2,6 +2,7 @@ package infra.exchange
 
 import domain.conf.Conf
 import domain.exchange.bitflyer.BitflyerExchange
+import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
 import domain.exchange.coincheck.CoincheckExchange
 import infra.exchange.bitflyer.impl.BitflyerExchangeImpl
 import infra.exchange.coincheck.impl.{
@@ -15,9 +16,11 @@ object ExchangeImpl {
     ZLayer.succeed(CoinCheckExchangeImpl())
 
   def dryWriteCoinCheckExchange(
-    orderSettledInterval: Int
-  ): ULayer[CoincheckExchange] =
-    ZLayer.succeed(DryWriteCoincheckExchangeImpl(orderSettledInterval))
+    orderSettledInterval: Int,
+    marketRate: CCOrderRequestRate
+  ): ULayer[CoincheckExchange] = ZLayer.succeed(
+    DryWriteCoincheckExchangeImpl(orderSettledInterval, marketRate)
+  )
 
   val bitflyerExchange: ZLayer[Conf, Throwable, BitflyerExchange] =
     ZLayer.fromFunctionM(conf =>
