@@ -66,7 +66,7 @@ final private[impl] case class OrderCache(marketRate: CCOrderRequestRate) {
     _       <- ZIO.effect(removeOrder(orderId))
   } yield ()
 
-  def hasId(id: CCOrderId): Boolean = pendingOrders.keys.toSeq.contains(id)
+  def submitted(id: CCOrderId): Boolean = pendingOrders.keys.toSeq.contains(id)
 
   private def rebalanceWithDiff(btc: Double, jpy: Double): Unit =
     balance = balance.rebalanceWithDiff(jpy, btc)
