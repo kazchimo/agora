@@ -9,6 +9,7 @@ import domain.exchange.coincheck.{
   CoincheckExchange,
   Env
 }
+import lib.zio.{UReadOnlyRef, UWriteOnlyRef}
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.clock.sleep
 import zio.duration._
@@ -33,10 +34,7 @@ final case class CoincheckBroker() {
   def latestRateRef(initialRate: CCOrderRequestRate): ZIO[
     CoincheckExchange with Env,
     Throwable,
-    (
-      ZRef[Nothing, Nothing, Nothing, CCOrderRequestRate],
-      ZRef[Nothing, Unit, Boolean, Nothing]
-    )
+    (UReadOnlyRef[CCOrderRequestRate], UWriteOnlyRef[Boolean])
   ] = for {
     latestRateRef      <- Ref.make(initialRate)
     updateCancelRef    <- Ref.make(false)
