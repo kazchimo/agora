@@ -55,13 +55,15 @@ final case class CoincheckBroker() {
                             case Should => for {
                                 _          <- transactionFiber.interruptFork
                                 latestRate <- latestRateRef.get
-                                newOrderReq = orderRequest.changeRate(latestRate)
                                 _          <-
                                   log.info(
-                                    s"Cancel order! Reordering... order=${newOrderReq.toString}"
+                                    s"Cancel order! Reordering... at=${latestRate.toString}"
                                   )
                                 _          <- cancelWithWait(order.id)
-                                r          <- priceAdjustingOrder(newOrderReq, intervalSec)
+                                r          <- priceAdjustingOrder(
+                                                orderRequest.changeRate(latestRate),
+                                                intervalSec
+                                              )
                               } yield r
                             case _      => transactionFiber.interruptFork *>
                                 log.info("Order settled!").as(order) <* settledRef.set(true)
