@@ -3,7 +3,7 @@ package lib
 import eu.timepit.refined.api.{Refined, Validate}
 import eu.timepit.refined.numeric.{NonNegative, Positive}
 import eu.timepit.refined.refineV
-import zio.{IO, Task, ZIO}
+import _root_.zio.{IO, Task, ZIO}
 
 package object refined {
   def refineVZ[P, T](t: T)(implicit
