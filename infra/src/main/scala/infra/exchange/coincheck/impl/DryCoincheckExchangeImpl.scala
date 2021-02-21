@@ -2,19 +2,20 @@ package infra.exchange.coincheck.impl
 
 import domain.exchange.coincheck.CCOrder.CCOrderId
 import domain.exchange.coincheck.CCOrderRequest.CCOrderType._
-import domain.exchange.coincheck.CCOrderRequest.LimitOrder
+import domain.exchange.coincheck.CCOrderRequest.{CCOrderType, LimitOrder}
 import domain.exchange.coincheck._
 import zio.{Task, ZIO}
 
 import scala.util.Random
 
 final private[coincheck] case class OrderCache() {
-  private var ids: Seq[CCOrderId]                              = Seq.empty[CCOrderId]
-  private var pendingOrders: Map[CCOrderId, CCOrderRequest[_]] = Map.empty
-  private var balance: Map[String, Double]                     = Map("jpy" -> 0, "btc" -> 0)
-  private var maxId                                            = 1
+  private var ids: Seq[CCOrderId]                                             = Seq.empty[CCOrderId]
+  private var pendingOrders: Map[CCOrderId, CCOrderRequest[_ <: CCOrderType]] =
+    Map.empty
+  private var balance: Map[String, Double]                                    = Map("jpy" -> 0, "btc" -> 0)
+  private var maxId                                                           = 1
 
-  def submitOrder(limitOrder: CCOrderRequest[_]): CCOrder = {
+  def submitOrder(limitOrder: CCOrderRequest[_ <: CCOrderType]): CCOrder = {
     maxId = maxId + 1
     val id = CCOrderId.unsafeFrom(maxId)
     ids = id +: ids
