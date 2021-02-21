@@ -1,53 +1,72 @@
 package domain.exchange.coincheck
 
+import domain.exchange.coincheck.CCOrderRequest.CCOrderPair.BtcJpy
+import domain.exchange.coincheck.CCOrderRequest.CCOrderType.{Buy, Sell}
 import domain.exchange.coincheck.CCOrderRequest.{
   CCOrderPair,
   CCOrderRequestAmount,
   CCOrderRequestRate,
-  CCOrderType
+  CCOrderType,
+  LimitOrder
 }
 import domain.lib.VOFactory
 import enumeratum.EnumEntry.Snakecase
 import enumeratum._
 import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
+import lib.error.ClientDomainError
 import lib.refined.PositiveDouble
+import zio.{IO, ZIO}
 
 // about order -> https://coincheck.com/ja/documents/exchange/api#order-new
 // about stop order -> https://faq.coincheck.com/s/article/40203?language=ja
 
-sealed trait CCOrderRequestKind
-@SuppressWarnings(Array("org.wartremover.warts.LeakingSealed"))
-trait MarketOrder extends CCOrderRequestKind
-@SuppressWarnings(Array("org.wartremover.warts.LeakingSealed"))
-trait LimitOrder  extends CCOrderRequestKind
-
-final case class CCOrderRequest[+K <: CCOrderRequestKind] private (
+final case class CCOrderRequest[+T <: CCOrderType] private (
   pair: CCOrderPair,
-  orderType: CCOrderType,
+  orderType: T,
   rate: Option[CCOrderRequestRate],
   amount: Option[CCOrderRequestAmount],
   marketBuyAmount: Option[CCOrderRequestAmount],
   stopLossRate: Option[CCOrderRequestRate]
 ) {
   @SuppressWarnings(Array("org.wartremover.warts.OptionPartial"))
-  def limitRate[S >: K: =:=[*, LimitOrder]]: CCOrderRequestRate = rate.get
+  def limitRate[S >: T: <:<[*, LimitOrder]]: CCOrderRequestRate = rate.get
 
   @SuppressWarnings(Array("org.wartremover.warts.OptionPartial"))
-  def limitAmount[S >: K: =:=[*, LimitOrder]]: CCOrderRequestAmount = amount.get
+  def limitAmount[S >: T: <:<[*, LimitOrder]]: CCOrderRequestAmount = amount.get
 
-  def changeRate[S >: K: =:=[*, LimitOrder]](
+  def changeRate[S >: T](
     rate: CCOrderRequestRate
-  ): CCOrderRequest[LimitOrder] = this.copy(rate = Some(rate))
+  )(implicit ev: =:=[S, LimitOrder]): CCOrderRequest[LimitOrder] =
+    this.copy(rate = Some(rate), orderType = ev(orderType))
 
-  def changeAmount[S >: K: =:=[*, LimitOrder]](
+  def changeAmount[S >: T: =:=[*, LimitOrder]](
     amount: CCOrderRequestAmount
-  ): CCOrderRequest[LimitOrder] = this.copy(amount = Some(amount))
+  )(implicit ev: =:=[S, LimitOrder]): CCOrderRequest[LimitOrder] =
+    this.copy(amount = Some(amount), orderType = ev(orderType))
 }
 
-object CCOrderRequest {
+private[coincheck] trait OrderFactory {
+  final def limitBuy(
+    rate: Double,
+    amount: Double
+  ): IO[ClientDomainError, CCOrderRequest[Buy.type]] = for {
+    r <- CCOrderRequestRate(rate)
+    a <- CCOrderRequestAmount(amount)
+  } yield CCOrderRequest(BtcJpy, Buy, Some(r), Some(a), None, None)
+
+  final def limitSell(
+    rate: Double,
+    amount: Double
+  ): IO[ClientDomainError, CCOrderRequest[Sell.type]] = for {
+    r <- CCOrderRequestRate(rate)
+    a <- CCOrderRequestAmount(amount)
+  } yield CCOrderRequest(BtcJpy, Sell, Some(r), Some(a), None, None)
+}
+
+object CCOrderRequest extends OrderFactory {
   sealed trait CCOrderPair extends Snakecase
-  object CCOrderPair       extends Enum[CCOrderPair] {
+  object CCOrderPair       extends Enum[CCOrderPair] with CirceEnum[CCOrderPair] {
     val values: IndexedSeq[CCOrderPair] = findValues
 
     case object BtcJpy  extends CCOrderPair
@@ -57,13 +76,16 @@ object CCOrderRequest {
   }
 
   sealed trait CCOrderType extends Snakecase
-  object CCOrderType       extends Enum[CCOrderType] {
+  sealed trait LimitOrder  extends CCOrderType
+  sealed trait MarketOrder extends CCOrderType
+
+  object CCOrderType extends Enum[CCOrderType] with CirceEnum[CCOrderType] {
     val values: IndexedSeq[CCOrderType] = findValues
 
-    case object Buy        extends CCOrderType
-    case object Sell       extends CCOrderType
-    case object MarketBuy  extends CCOrderType
-    case object MarketSell extends CCOrderType
+    case object Buy        extends LimitOrder
+    case object Sell       extends LimitOrder
+    case object MarketBuy  extends MarketOrder
+    case object MarketSell extends MarketOrder
   }
 
   @newtype case class CCOrderRequestRate(value: PositiveDouble)

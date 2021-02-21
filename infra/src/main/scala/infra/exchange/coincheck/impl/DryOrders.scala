@@ -11,7 +11,7 @@ private[coincheck] trait DryOrders {
   val orderSettledInterval: Int
 
   final override def orders(
-    order: CCOrderRequest
+    order: CCOrderRequest[_]
   ): RIO[SttpClient with zio.ZEnv with Conf, CCOrder] = for {
     order <- ZIO.succeed(cache.submitOrder)
     _     <- ZIO

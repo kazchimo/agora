@@ -4,6 +4,7 @@ import domain.broker.coincheck.CoincheckBroker
 import domain.exchange.coincheck.{
   CCLimitBuyRequest,
   CCLimitSellRequest,
+  CCOrderRequest,
   CoincheckExchange
 }
 import domain.strategy.DowMethod
@@ -42,8 +43,7 @@ object TradeInDowMethodUC {
                               _            <- {
                                 for {
                                   _       <- log.info(s"Buy at ${signal.at.toString}!")
-                                  request <-
-                                    CCLimitBuyRequest.fromRaw(signal.at, jpy / signal.at)
+                                  request <- CCOrderRequest.limitBuy(signal.at, jpy / signal.at)
                                   _       <- broker.priceAdjustingOrder(request, interval)
                                   _       <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at))
                                 } yield ()
@@ -51,14 +51,14 @@ object TradeInDowMethodUC {
                               _            <- {
                                 for {
                                   _            <- log.info(s"Sell at ${signal.at.toString}!")
-                                  request      <- CCLimitSellRequest.fromRaw(
+                                  request      <- CCOrderRequest.limitSell(
                                                     signal.at,
                                                     jpy / tradingState.lastBuyRate
                                                   )
                                   _            <- broker.priceAdjustingOrder(request, interval)
                                   tradingState <- tradingStateRef.get
                                   profit        =
-                                    request.amount.value.value * (signal.at - tradingState.lastBuyRate)
+                                    request.limitAmount.value.value * (signal.at - tradingState.lastBuyRate)
                                   summary      <- tradingStateRef.updateAndGet(
                                                     _.toNeutralPosition.addSummary(profit)
                                                   )

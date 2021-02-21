@@ -4,14 +4,10 @@ import domain.conf.Conf
 import domain.exchange.coincheck.CCOrder.CCOrderId
 import domain.exchange.coincheck.CCOrderRequest.{
   CCOrderRequestAmount,
-  CCOrderRequestRate
-}
-import domain.exchange.coincheck.{
-  CCOrder,
-  CCOrderRequest,
-  CoincheckExchange,
+  CCOrderRequestRate,
   LimitOrder
 }
+import domain.exchange.coincheck.{CCOrder, CCOrderRequest, CoincheckExchange}
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.duration._
 import zio.logging.{Logging, log}
