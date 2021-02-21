@@ -11,8 +11,10 @@ trait VOFactory[V, P] {
   def apply(v: V Refined P): VO
 
   final def apply(v: V)(implicit V: Validate[V, P]): IO[ClientDomainError, VO] =
-    refineVZE[P, V](v)
-      .bimap(e => ClientDomainError("Failed to create VO", Some(e)), apply)
+    refineVZE[P, V](v).bimap(
+      e => ClientDomainError(s"Failed to create ${this.toString}", Some(e)),
+      apply
+    )
 
   final def applyS(v: V)(implicit V: Validate[V, P]): IO[String, VO] =
     refineVZE[P, V](v).bimap(_.getMessage, apply)
