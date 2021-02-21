@@ -4,7 +4,7 @@ import domain.exchange.coincheck.CCBalance.{BtcAmount, JpyAmount}
 import io.estatico.newtype.macros.newtype
 import lib.refined.NonNegativeDouble
 
-case class CCBalance(jpy: JpyAmount, btc: BtcAmount)
+final case class CCBalance(jpy: JpyAmount, btc: BtcAmount)
 
 object CCBalance {
   @newtype case class JpyAmount(value: NonNegativeDouble)
