@@ -17,7 +17,7 @@ package object coincheck {
     trait Service {
       def transactions: RIO[SttpClient with Conf, Seq[CCTransaction]]
       def orders(
-        order: CCOrderRequest
+        order: CCOrderRequest[_]
       ): RIO[SttpClient with ZEnv with Conf, CCOrder]
       // Get unsettled orders
       def openOrders: RIO[SttpClient with Conf, Seq[CCOrder]]
@@ -53,7 +53,7 @@ package object coincheck {
         transactionsRes
 
       override def orders(
-        order: CCOrderRequest
+        order: CCOrderRequest[_]
       ): RIO[SttpClient with zio.ZEnv, CCOrder] = ordersRes
 
       override def openOrders: RIO[SttpClient, Seq[CCOrder]] = openOrdersRes

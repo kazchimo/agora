@@ -13,17 +13,39 @@ import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
 import lib.refined.PositiveDouble
 
+import scala.annotation.nowarn
+
 // about order -> https://coincheck.com/ja/documents/exchange/api#order-new
 // about stop order -> https://faq.coincheck.com/s/article/40203?language=ja
 
-final case class CCOrderRequest private (
+sealed trait CCOrderRequestKind
+@SuppressWarnings(Array("org.wartremover.warts.LeakingSealed"))
+trait MarketOrder extends CCOrderRequestKind
+@SuppressWarnings(Array("org.wartremover.warts.LeakingSealed"))
+trait LimitOrder  extends CCOrderRequestKind
+
+final case class CCOrderRequest[+K <: CCOrderRequestKind] private (
   pair: CCOrderPair,
   orderType: CCOrderType,
   rate: Option[CCOrderRequestRate],
   amount: Option[CCOrderRequestAmount],
   marketBuyAmount: Option[CCOrderRequestAmount],
   stopLossRate: Option[CCOrderRequestRate]
-)
+) {
+  @SuppressWarnings(Array("org.wartremover.warts.OptionPartial"))
+  def limitRate[S >: K: =:=[*, LimitOrder]]: CCOrderRequestRate = rate.get
+
+  @SuppressWarnings(Array("org.wartremover.warts.OptionPartial"))
+  def limitAmount[S >: K: =:=[*, LimitOrder]]: CCOrderRequestAmount = amount.get
+
+  def changeRate[S >: K: =:=[*, LimitOrder]](
+    rate: CCOrderRequestRate
+  ): CCOrderRequest[LimitOrder] = this.copy(rate = Some(rate))
+
+  def changeAmount[S >: K: =:=[*, LimitOrder]](
+    amount: CCOrderRequestAmount
+  ): CCOrderRequest[LimitOrder] = this.copy(amount = Some(amount))
+}
 
 object CCOrderRequest {
   sealed trait CCOrderPair extends Snakecase

@@ -1,12 +1,17 @@
 package domain.broker.coincheck
 
 import domain.conf.Conf
-import domain.exchange.coincheck.CCLimitOrderRequest.{
+import domain.exchange.coincheck.CCOrder.CCOrderId
+import domain.exchange.coincheck.CCOrderRequest.{
   CCOrderRequestAmount,
   CCOrderRequestRate
 }
-import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.exchange.coincheck.{CCLimitOrderRequest, CCOrder, CoincheckExchange}
+import domain.exchange.coincheck.{
+  CCOrder,
+  CCOrderRequest,
+  CoincheckExchange,
+  LimitOrder
+}
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.duration._
 import zio.logging.{Logging, log}
@@ -23,14 +28,14 @@ final case class CoincheckBroker() {
     CoincheckExchange.openOrders.repeatWhile(_.map(_.id).contains(id)).unit
 
   def priceAdjustingOrder(
-    orderRequest: CCLimitOrderRequest,
+    orderRequest: CCOrderRequest[LimitOrder],
     intervalSec: Int
   ): ZIO[
     SttpClient with CoincheckExchange with ZEnv with Logging with Conf,
     Throwable,
     CCOrder
   ] = for {
-    latestRateRef      <- Ref.make(orderRequest.rate)
+    latestRateRef      <- Ref.make(orderRequest.limitRate)
     settledRef         <- Ref.make(false)
     transactionsStream <- CoincheckExchange.publicTransactions
     transactionFiber   <- transactionsStream
@@ -50,7 +55,7 @@ final case class CoincheckBroker() {
                                 latestRate <- latestRateRef.get
                                 amount     <-
                                   CCOrderRequestAmount(
-                                    orderRequest.rate.value.value * orderRequest.amount.value.value /
+                                    orderRequest.limitRate.value.value * orderRequest.limitAmount.value.value /
                                       latestRate.value.value
                                   )
                                 newOrderReq =
