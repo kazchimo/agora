@@ -6,7 +6,7 @@ import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.RIO
 import zio.logging.Logging
 
-private[coincheck] trait DryBalance extends AuthStrategy {
+private[coincheck] trait DryBalance {
   self: DryCoincheckExchangeImpl =>
 
   final override def balance
