@@ -44,6 +44,9 @@ final case class CCOrderRequest[+T <: CCOrderType] private (
     amount: CCOrderRequestAmount
   )(implicit ev: <:<[S, LimitOrder]): CCOrderRequest[LimitOrder] =
     this.copy(amount = Some(amount), orderType = ev(orderType))
+
+  def jpy[S >: T: =:=[*, LimitOrder]]: Double =
+    limitAmount.value.value * limitRate.value.value
 }
 
 private[coincheck] trait OrderFactory {
