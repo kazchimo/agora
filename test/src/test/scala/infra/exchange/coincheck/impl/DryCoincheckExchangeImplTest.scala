@@ -3,7 +3,7 @@ package infra.exchange.coincheck.impl
 import domain.exchange.coincheck.CCOrderRequest
 import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
 import zio.ZIO
-import zio.test.Assertion.equalTo
+import zio.test.Assertion.{equalTo, isTrue}
 import zio.test._
 
 object DryCoincheckExchangeImplTest extends DefaultRunnableSpec {
@@ -63,6 +63,13 @@ object DryCoincheckExchangeImplTest extends DefaultRunnableSpec {
           mb <- marketBuy
           ms <- marketSell
         } yield b && s && mb && ms
+      },
+      testM("submitted") {
+        for {
+          req   <- CCOrderRequest.limitBuy(2, 1)
+          cache  = OrderCache(marketRate)
+          order <- ZIO.effect(cache.submitOrder(req))
+        } yield assert(cache.submitted(order.id))(isTrue)
       }
     )
   )
