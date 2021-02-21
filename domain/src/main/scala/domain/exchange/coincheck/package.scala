@@ -48,7 +48,7 @@ package object coincheck {
         Throwable,
         Stream[Nothing, CCPublicTransaction]
       ] = notStubbed,
-      balanceRes: RIO[SttpClient with Conf with Logging, CCBalance]
+      balanceRes: RIO[SttpClient with Conf with Logging, CCBalance] = notStubbed
     ): ULayer[CoincheckExchange] = ZLayer.succeed(new Service {
       override def transactions: RIO[SttpClient, Seq[CCTransaction]] =
         transactionsRes
