@@ -13,8 +13,6 @@ import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
 import lib.refined.PositiveDouble
 
-import scala.annotation.nowarn
-
 // about order -> https://coincheck.com/ja/documents/exchange/api#order-new
 // about stop order -> https://faq.coincheck.com/s/article/40203?language=ja
 
