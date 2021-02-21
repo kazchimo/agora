@@ -12,5 +12,6 @@ private[coincheck] object Endpoints {
     url(s"exchange/orders/${id.value.value.toString}")
   def cancelStatus(id: CCOrderId): String =
     url(s"exchange/orders/cancel_status?id=${id.value.value.toString}")
+  val balance: String                     = url("accounts/balance")
   val websocket: String                   = "wss://ws-api.coincheck.com/"
 }
