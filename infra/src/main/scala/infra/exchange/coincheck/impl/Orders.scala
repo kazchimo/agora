@@ -12,19 +12,20 @@ import infra.exchange.coincheck.responses.{
   SuccessOrdersResponse
 }
 import io.circe.syntax._
+import lib.sttp.jsonRequest
+import sttp.client3.UriContext
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
-import sttp.client3.{UriContext, basicRequest}
 import zio.{RIO, Task, ZEnv, ZIO}
 
 private[coincheck] trait Orders extends AuthStrategy {
   self: CoincheckExchange.Service =>
   private def request(order: CCOrderRequest) =
     headers(Endpoints.orders, order.asJson.noSpaces).map(h =>
-      basicRequest
-        .post(uri"${Endpoints.orders}").contentType("application/json").body(
-          order.asJson.noSpaces
-        ).headers(h).response(asJson[OrdersResponse])
+      jsonRequest
+        .post(uri"${Endpoints.orders}").body(order.asJson.noSpaces).headers(
+          h
+        ).response(asJson[OrdersResponse])
     )
 
   final override def orders(

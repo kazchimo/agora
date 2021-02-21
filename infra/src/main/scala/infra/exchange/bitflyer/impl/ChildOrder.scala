@@ -4,10 +4,10 @@ import infra.exchange.bitflyer.bodyconverter.BFChildOrderConverter._
 import infra.exchange.bitflyer.responses.ChildOrderResponse
 import io.circe.generic.auto._
 import io.circe.syntax._
+import lib.sttp.jsonRequest
+import sttp.client3.UriContext
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
-import sttp.client3.{UriContext, basicRequest}
-import sttp.model.MediaType.ApplicationJson
 import sttp.model.Method.POST
 import zio.console.{Console, putStrLn}
 import zio.{RIO, ZIO}
@@ -18,9 +18,8 @@ private[bitflyer] trait ChildOrder { self: BitflyerExchangeImpl =>
 
   private def request(order: BFChildOrder) =
     headers(POST.method, path, order.asJson.noSpaces).map { h =>
-      basicRequest
+      jsonRequest
         .post(uri"$uri")
-        .contentType(ApplicationJson)
         .body(order.asJson.noSpaces)
         .headers(h)
         .response(asJson[ChildOrderResponse])

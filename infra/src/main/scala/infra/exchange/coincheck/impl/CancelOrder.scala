@@ -8,6 +8,7 @@ import infra.exchange.coincheck.responses.{
   FailedCancelOrderResponse
 }
 import lib.error.{ClientInfraError, InternalInfraError}
+import lib.sttp.jsonRequest
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
 import sttp.client3.{UriContext, basicRequest}
@@ -21,10 +22,10 @@ private[coincheck] trait CancelOrder extends AuthStrategy {
     id: CCOrderId
   ): RIO[SttpClient with Logging with Conf, CCOrderId] = for {
     h    <- headers(Endpoints.cancelOrder(id))
-    req   = basicRequest
-              .delete(uri"${Endpoints.cancelOrder(id)}").contentType(
-                "application/json"
-              ).headers(h).response(asJson[CancelOrderResponse])
+    req   = jsonRequest
+              .delete(uri"${Endpoints.cancelOrder(id)}").headers(h).response(
+                asJson[CancelOrderResponse]
+              )
     res  <- send(req).tap(a => log.trace(a.toString))
     body <- ZIO
               .fromEither(res.body).mapError(e =>

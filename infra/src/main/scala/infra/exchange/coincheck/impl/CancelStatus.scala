@@ -9,6 +9,7 @@ import infra.exchange.coincheck.responses.{
   SuccessCancelStatusResponse
 }
 import lib.error.ClientInfraError
+import lib.sttp.jsonRequest
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.circe.asJson
 import sttp.client3.{UriContext, basicRequest}
@@ -21,10 +22,10 @@ private[coincheck] trait CancelStatus extends AuthStrategy {
     id: CCOrderId
   ): RIO[SttpClient with Conf, Boolean] = for {
     h      <- headers(Endpoints.cancelStatus(id))
-    req     = basicRequest
-                .get(uri"${Endpoints.cancelStatus(id)}").contentType(
-                  "application/json"
-                ).headers(h).response(asJson[CancelStatusResponse])
+    req     = jsonRequest
+                .get(uri"${Endpoints.cancelStatus(id)}").headers(h).response(
+                  asJson[CancelStatusResponse]
+                )
     res    <- send(req)
     body   <- ZIO.fromEither(res.body)
     status <- body match {
