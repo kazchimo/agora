@@ -13,7 +13,7 @@ private[coincheck] trait DryOrders {
   final override def orders(
     order: CCOrderRequest[_]
   ): RIO[SttpClient with zio.ZEnv with Conf, CCOrder] = for {
-    order <- ZIO.succeed(cache.submitOrder)
+    order <- ZIO.succeed(cache.submitOrder(order))
     _     <- ZIO
                .succeed(cache.closeOrder(order.id)).delay(
                  orderSettledInterval.seconds

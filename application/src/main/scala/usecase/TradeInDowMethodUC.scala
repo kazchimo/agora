@@ -1,12 +1,7 @@
 package usecase
 
 import domain.broker.coincheck.CoincheckBroker
-import domain.exchange.coincheck.{
-  CCLimitBuyRequest,
-  CCLimitSellRequest,
-  CCOrderRequest,
-  CoincheckExchange
-}
+import domain.exchange.coincheck.{CCOrderRequest, CoincheckExchange}
 import domain.strategy.DowMethod
 import zio.Ref
 import zio.logging.log
