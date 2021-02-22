@@ -8,7 +8,7 @@ import domain.exchange.coincheck.CCOrder.CCOrderType.{
 }
 import domain.exchange.coincheck.CCOrder.{
   CCOrderId,
-  CCOrderRequestRate,
+  CCOrderRate,
   CCOrderType,
   LimitOrder
 }
@@ -21,7 +21,7 @@ final private[impl] case class FakeBalance(jpy: Double, btc: Double) {
     FakeBalance(this.jpy + jpy, this.btc + btc)
 }
 
-final private[impl] case class FakeExchange(marketRate: CCOrderRequestRate) {
+final private[impl] case class FakeExchange(marketRate: CCOrderRate) {
   private var pendingOrders: Map[CCOrderId, CCOrderRequest[_ <: CCOrderType]] =
     Map.empty
   private var balance                                                         = FakeBalance(0, 0)
@@ -79,7 +79,7 @@ final private[impl] case class FakeExchange(marketRate: CCOrderRequestRate) {
 }
 
 abstract private[coincheck] class DryCoincheckExchangeImpl(
-  marketRate: CCOrderRequestRate
+  marketRate: CCOrderRate
 ) extends CoincheckExchange.Service {
   protected val fakeExchange: FakeExchange = FakeExchange(marketRate)
 }

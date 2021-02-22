@@ -2,11 +2,7 @@ package domain.broker.coincheck
 
 import domain.conf.Conf
 import domain.exchange.Nonce.Nonce
-import domain.exchange.coincheck.CCOrder.{
-  CCOrderId,
-  CCOrderRequestRate,
-  LimitOrder
-}
+import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderRate, LimitOrder}
 import domain.exchange.coincheck.{
   CCOrder,
   CCOrderRequest,
@@ -36,10 +32,10 @@ final case class CoincheckBroker() {
     CoincheckExchange.cancelOrder(id) *> CoincheckExchange
       .cancelStatus(id).repeatUntil(identity).unit
 
-  def latestRateRef(initialRate: CCOrderRequestRate): ZIO[
+  def latestRateRef(initialRate: CCOrderRate): ZIO[
     CoincheckExchange with Env,
     Throwable,
-    (UReadOnlyRef[CCOrderRequestRate], UWriteOnlyRef[Boolean])
+    (UReadOnlyRef[CCOrderRate], UWriteOnlyRef[Boolean])
   ] = for {
     latestRateRef      <- Ref.make(initialRate)
     updateCancelRef    <- Ref.make(false)
@@ -47,7 +43,7 @@ final case class CoincheckBroker() {
     transactionsStream <- CoincheckExchange.publicTransactions
     streamFiber        <-
       transactionsStream
-        .foreach(t => latestRateRef.set(CCOrderRequestRate(t.rate.value))).fork
+        .foreach(t => latestRateRef.set(CCOrderRate(t.rate.value))).fork
     _                  <- (streamFiber.interruptFork *> canceledRef.set(true))
                             .whenM(updateCancelRef.get).repeatUntilM(_ =>
                               sleep(1.seconds) *> canceledRef.get

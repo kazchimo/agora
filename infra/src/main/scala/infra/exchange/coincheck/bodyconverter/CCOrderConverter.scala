@@ -1,8 +1,8 @@
 package infra.exchange.coincheck.bodyconverter
 
 import domain.exchange.coincheck.CCOrder.{
-  CCOrderRequestAmount,
-  CCOrderRequestRate,
+  CCOrderAmount,
+  CCOrderRate,
   CCOrderType
 }
 import domain.exchange.coincheck._
@@ -31,9 +31,9 @@ object CCOrderConverter {
   implicit def encodeOrderType[T <: CCOrderType]: Encoder[T] =
     Encoder.instance(_.entryName.asJson)
 
-  implicit val ccOrderRequestRateEncoder: Encoder[CCOrderRequestRate] =
+  implicit val ccOrderRequestRateEncoder: Encoder[CCOrderRate] =
     Encoder.instance(_.deepInnerV.asJson)
 
-  implicit val ccOrderRequestAmountEncoder: Encoder[CCOrderRequestAmount] =
+  implicit val ccOrderRequestAmountEncoder: Encoder[CCOrderAmount] =
     Encoder.instance(_.deepInnerV.asJson)
 }

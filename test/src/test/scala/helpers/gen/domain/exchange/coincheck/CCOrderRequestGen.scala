@@ -7,8 +7,8 @@ import domain.exchange.coincheck.CCOrder.CCOrderType.{
   Sell
 }
 import domain.exchange.coincheck.CCOrder.{
-  CCOrderRequestAmount,
-  CCOrderRequestRate,
+  CCOrderAmount,
+  CCOrderRate,
   CCOrderType
 }
 import domain.exchange.coincheck._
@@ -17,11 +17,11 @@ import zio.random.Random
 import zio.test.{Gen, Sized}
 
 object CCOrderRequestGen {
-  val ccOrderRateGen: Gen[Random, CCOrderRequestRate] =
-    positiveDoubleGen.map(CCOrderRequestRate.unsafeFrom)
+  val ccOrderRateGen: Gen[Random, CCOrderRate] =
+    positiveDoubleGen.map(CCOrderRate.unsafeFrom)
 
-  val ccOrderAmountGen: Gen[Random, CCOrderRequestAmount] =
-    positiveDoubleGen.map(CCOrderRequestAmount.unsafeFrom)
+  val ccOrderAmountGen: Gen[Random, CCOrderAmount] =
+    positiveDoubleGen.map(CCOrderAmount.unsafeFrom)
 
   val ccLimitBuyOrderRequestGen: Gen[Random, CCOrderRequest[Buy]] =
     Gen.zipN(ccOrderRateGen, ccOrderAmountGen)(CCOrderRequest.limitBuy)

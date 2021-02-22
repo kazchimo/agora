@@ -1,13 +1,13 @@
 package infra.exchange.coincheck.impl
 
-import domain.exchange.coincheck.CCOrder.CCOrderRequestRate
+import domain.exchange.coincheck.CCOrder.CCOrderRate
 import domain.exchange.coincheck.CCOrderRequest
 import zio.ZIO
 import zio.test.Assertion.{equalTo, isTrue}
 import zio.test._
 
 object DryCoincheckExchangeImplTest extends DefaultRunnableSpec {
-  private val marketRate = CCOrderRequestRate.unsafeFrom(10)
+  private val marketRate = CCOrderRate.unsafeFrom(10)
 
   override def spec = suite("DryCoincheckExchangeImpl")(
     suite("FakeExchange")(

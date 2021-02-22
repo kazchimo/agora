@@ -18,24 +18,24 @@ import zio.IO
 final case class CCOrderRequest[+T <: CCOrderType] private (
   pair: CCOrderPair,
   orderType: T,
-  rate: Option[CCOrderRequestRate] = None,
-  amount: Option[CCOrderRequestAmount] = None,
-  marketBuyAmount: Option[CCOrderRequestAmount] = None, // NOTE: JPY amount
-  stopLossRate: Option[CCOrderRequestRate] = None
+  rate: Option[CCOrderRate] = None,
+  amount: Option[CCOrderAmount] = None,
+  marketBuyAmount: Option[CCOrderAmount] = None, // NOTE: JPY amount
+  stopLossRate: Option[CCOrderRate] = None
 ) {
   @SuppressWarnings(Array("org.wartremover.warts.OptionPartial"))
-  def limitRate[S >: T: <:<[*, LimitOrder]]: CCOrderRequestRate = rate.get
+  def limitRate[S >: T: <:<[*, LimitOrder]]: CCOrderRate = rate.get
 
   @SuppressWarnings(Array("org.wartremover.warts.OptionPartial"))
-  def limitAmount[S >: T: <:<[*, LimitOrder]]: CCOrderRequestAmount = amount.get
+  def limitAmount[S >: T: <:<[*, LimitOrder]]: CCOrderAmount = amount.get
 
   def changeRate[S >: T](
-    rate: CCOrderRequestRate
+    rate: CCOrderRate
   )(implicit ev: <:<[S, LimitOrder]): CCOrderRequest[LimitOrder] =
     this.copy(rate = Some(rate), orderType = ev(orderType))
 
   def changeAmount[S >: T](
-    amount: CCOrderRequestAmount
+    amount: CCOrderAmount
   )(implicit ev: <:<[S, LimitOrder]): CCOrderRequest[LimitOrder] =
     this.copy(amount = Some(amount), orderType = ev(orderType))
 
@@ -47,54 +47,52 @@ private[coincheck] trait OrderFactory {
   final def unsafeApply[T <: CCOrderType](
     pair: CCOrderPair,
     orderType: T,
-    rate: Option[CCOrderRequestRate],
-    amount: Option[CCOrderRequestAmount],
-    marketBuyAmount: Option[CCOrderRequestAmount],
-    stopLossRate: Option[CCOrderRequestRate]
+    rate: Option[CCOrderRate],
+    amount: Option[CCOrderAmount],
+    marketBuyAmount: Option[CCOrderAmount],
+    stopLossRate: Option[CCOrderRate]
   ): CCOrderRequest[T] =
     CCOrderRequest(pair, orderType, rate, amount, marketBuyAmount, stopLossRate)
 
   final def limitBuy(
     rate: Double,
     amount: Double
-  ): IO[ClientDomainError, CCOrderRequest[Buy]] = CCOrderRequestRate(rate)
-    .zip(CCOrderRequestAmount(amount)).map(a => limitBuy(a._1, a._2))
+  ): IO[ClientDomainError, CCOrderRequest[Buy]] =
+    CCOrderRate(rate).zip(CCOrderAmount(amount)).map(a => limitBuy(a._1, a._2))
 
   final def limitBuy(
-    rate: CCOrderRequestRate,
-    amount: CCOrderRequestAmount
+    rate: CCOrderRate,
+    amount: CCOrderAmount
   ): CCOrderRequest[Buy] = CCOrderRequest(BtcJpy, Buy, Some(rate), Some(amount))
 
   final def limitSell(
     rate: Double,
     amount: Double
-  ): IO[ClientDomainError, CCOrderRequest[Sell]] = CCOrderRequestRate(rate)
-    .zip(CCOrderRequestAmount(amount)).map(a => limitSell(a._1, a._2))
+  ): IO[ClientDomainError, CCOrderRequest[Sell]] =
+    CCOrderRate(rate).zip(CCOrderAmount(amount)).map(a => limitSell(a._1, a._2))
 
   final def limitSell(
-    rate: CCOrderRequestRate,
-    amount: CCOrderRequestAmount
+    rate: CCOrderRate,
+    amount: CCOrderAmount
   ): CCOrderRequest[Sell] =
     CCOrderRequest(BtcJpy, Sell, Some(rate), Some(amount))
 
   final def marketBuy(
     marketBuyAmount: Double
   ): IO[ClientDomainError, CCOrderRequest[MarketBuy]] =
-    CCOrderRequestAmount(marketBuyAmount).map(marketBuy)
+    CCOrderAmount(marketBuyAmount).map(marketBuy)
 
   final def marketBuy(
-    marketBuyAmount: CCOrderRequestAmount
+    marketBuyAmount: CCOrderAmount
   ): CCOrderRequest[MarketBuy] =
     CCOrderRequest(BtcJpy, MarketBuy, marketBuyAmount = Some(marketBuyAmount))
 
   final def marketSell(
     amount: Double
   ): IO[ClientDomainError, CCOrderRequest[MarketSell]] =
-    CCOrderRequestAmount(amount).map(marketSell)
+    CCOrderAmount(amount).map(marketSell)
 
-  final def marketSell(
-    amount: CCOrderRequestAmount
-  ): CCOrderRequest[MarketSell] =
+  final def marketSell(amount: CCOrderAmount): CCOrderRequest[MarketSell] =
     CCOrderRequest(BtcJpy, MarketSell, amount = Some(amount))
 }
 

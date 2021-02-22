@@ -47,13 +47,13 @@ object CCOrder {
     case object MonaJpy extends CCOrderPair
   }
 
-  @newtype case class CCOrderRequestRate(value: PositiveDouble)
-  object CCOrderRequestRate extends VOFactory[Double, Positive] {
-    override type VO = CCOrderRequestRate
+  @newtype case class CCOrderRate(value: PositiveDouble)
+  object CCOrderRate extends VOFactory[Double, Positive] {
+    override type VO = CCOrderRate
   }
 
-  @newtype case class CCOrderRequestAmount(value: PositiveDouble)
-  object CCOrderRequestAmount extends VOFactory[Double, Positive] {
-    override type VO = CCOrderRequestAmount
+  @newtype case class CCOrderAmount(value: PositiveDouble)
+  object CCOrderAmount extends VOFactory[Double, Positive] {
+    override type VO = CCOrderAmount
   }
 }
