@@ -28,7 +28,7 @@ lazy val rootDeps = Seq(
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-deprecation",
-    "-Xlint",
+    "-Xlint:_,-byname-implicit",
     "-language:existentials",
     "-language:experimental.macros",
     "-language:higherKinds",
