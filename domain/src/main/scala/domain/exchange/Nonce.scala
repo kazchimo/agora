@@ -1,13 +1,14 @@
 package domain.exchange
 
+import domain.AllEnv
 import zio.macros.accessible
-import zio.{Has, UIO}
+import zio.{Has, URIO}
 
 @accessible
 object Nonce {
   type Nonce = Has[Service]
 
   trait Service {
-    def getNonce: UIO[Long]
+    def getNonce: URIO[AllEnv, Long]
   }
 }
