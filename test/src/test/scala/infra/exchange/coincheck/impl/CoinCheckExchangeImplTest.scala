@@ -2,12 +2,11 @@ package infra.exchange.coincheck.impl
 
 import domain.exchange.coincheck.CoincheckExchange
 import infra.conf.ConfImpl
-import infra.exchange.{ExchangeImpl, IncreasingNonceImpl}
+import infra.exchange.IncreasingNonceImpl
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio._
 import zio.logging.Logging
 import zio.test.DefaultRunnableSpec
-import zio.magic._
 
 object CoinCheckExchangeImplTest
     extends DefaultRunnableSpec with TransactionsTest with OrdersTest

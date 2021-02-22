@@ -2,18 +2,16 @@ package infra.exchange.coincheck.impl
 
 import cats.syntax.traverse._
 import domain.AllEnv
-import domain.conf.Conf
-import domain.exchange.Nonce.Nonce
 import domain.exchange.coincheck.{CCTransaction, CoincheckExchange}
 import infra.InfraError
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.TransactionsResponse
 import io.scalaland.chimney.dsl._
 import sttp.client3._
-import sttp.client3.asynchttpclient.zio.{SttpClient, send}
+import sttp.client3.asynchttpclient.zio.send
 import sttp.client3.circe.asJson
 import zio.interop.catz.core._
-import zio.{RIO, Task, ZEnv}
+import zio.{RIO, Task}
 
 private[exchange] trait Transactions extends AuthStrategy {
   self: CoincheckExchange.Service =>
