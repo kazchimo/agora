@@ -18,6 +18,9 @@ object SellAllCoinInCoincheckUC {
     req                     <- CCOrderRequest
                                  .limitSell(transaction.rate.deepInnerV, balance.btc.deepInnerV)
     _                       <- log.info(s"Sell All btc at ${req.toString}!")
-    _                       <- CoincheckBroker().priceAdjustingOrder(req, updatePriceIntervalSec)
+    _                       <- CoincheckBroker()
+                                 .priceAdjustingOrder(req, updatePriceIntervalSec).when(
+                                   balance.btc.deepInnerV > 0
+                                 )
   } yield ()
 }
