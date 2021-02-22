@@ -35,4 +35,14 @@ object CCOrder {
     type MarketBuy  = MarketBuy.type
     type MarketSell = MarketSell.type
   }
+
+  sealed trait CCOrderPair extends Snakecase
+  object CCOrderPair       extends Enum[CCOrderPair] with CirceEnum[CCOrderPair] {
+    val values: IndexedSeq[CCOrderPair] = findValues
+
+    case object BtcJpy  extends CCOrderPair
+    case object EtcJpy  extends CCOrderPair
+    case object FctJpy  extends CCOrderPair
+    case object MonaJpy extends CCOrderPair
+  }
 }

@@ -1,17 +1,15 @@
 package domain.exchange.coincheck
 
-import domain.exchange.coincheck.CCOrder.{CCOrderType, LimitOrder}
+import domain.exchange.coincheck.CCOrder.CCOrderPair.BtcJpy
 import domain.exchange.coincheck.CCOrder.CCOrderType.{
   Buy,
   MarketBuy,
   MarketSell,
   Sell
 }
-import domain.exchange.coincheck.CCOrderRequest.CCOrderPair.BtcJpy
+import domain.exchange.coincheck.CCOrder.{CCOrderPair, CCOrderType, LimitOrder}
 import domain.exchange.coincheck.CCOrderRequest._
 import domain.lib.VOFactory
-import enumeratum.EnumEntry.Snakecase
-import enumeratum._
 import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
 import lib.error.ClientDomainError
@@ -106,15 +104,6 @@ private[coincheck] trait OrderFactory {
 }
 
 object CCOrderRequest extends OrderFactory {
-  sealed trait CCOrderPair extends Snakecase
-  object CCOrderPair       extends Enum[CCOrderPair] with CirceEnum[CCOrderPair] {
-    val values: IndexedSeq[CCOrderPair] = findValues
-
-    case object BtcJpy  extends CCOrderPair
-    case object EtcJpy  extends CCOrderPair
-    case object FctJpy  extends CCOrderPair
-    case object MonaJpy extends CCOrderPair
-  }
 
   @newtype case class CCOrderRequestRate(value: PositiveDouble)
   object CCOrderRequestRate extends VOFactory[Double, Positive] {
