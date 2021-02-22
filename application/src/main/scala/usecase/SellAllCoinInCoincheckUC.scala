@@ -9,9 +9,8 @@ import zio.logging.log
 
 object SellAllCoinInCoincheckUC {
   def sell(updatePriceIntervalSec: Int) = for {
-    balanceFiber            <- CoincheckExchange.balance.fork
-    transactionsFiber       <- CoincheckExchange.transactions.fork
-    (balance, transactions) <- balanceFiber.zip(transactionsFiber).join
+    (balance, transactions) <-
+      CoincheckExchange.balance.zipPar(CoincheckExchange.transactions)
     transaction             <- ZIO
                                  .fromOption(transactions.headOption).orElseFail(
                                    AdaptorInternalError("Could not find latest price!")
