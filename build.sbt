@@ -5,6 +5,8 @@ import sbtwelcome.UsefulTask
 ThisBuild / scalaVersion := "2.13.3"
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 
+lazy val Lint = config("lint").extend(Compile)
+
 inThisBuild(
   Seq(
     addCompilerPlugin(scalafixSemanticdb),
@@ -14,7 +16,31 @@ inThisBuild(
   )
 )
 
-lazy val rootDeps = Seq(
+lazy val wartErrors = Warts.allBut(
+  Wart.Any,
+  Wart.ImplicitConversion,
+  Wart.ImplicitParameter,
+  Wart.Nothing,
+  Wart.Overloading,
+  Wart.DefaultArguments,
+  Wart.ToString,
+  Wart.TraversableOps,
+  Wart.PublicInference,
+  Wart.Product,
+  Wart.Null,
+  Wart.Equals,
+  Wart.ToString,
+  Wart.Recursion,
+  Wart.Var
+) ++ ContribWart.allBut(
+  ContribWart.ExposedTuples,
+  ContribWart.Apply,
+  ContribWart.MissingOverride,
+  ContribWart.SymbolicName,
+  ContribWart.NoNeedForMonad,
+  ContribWart.SomeApply
+)
+lazy val rootDeps   = Seq(
   codec,
   newtype,
   refined,
@@ -40,37 +66,22 @@ lazy val commonSettings = Seq(
   ),
   libraryDependencies ++= rootDeps,
   testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
-  wartremoverErrors.in(Compile, compile) ++= Warts.allBut(
-    Wart.Any,
-    Wart.ImplicitConversion,
-    Wart.ImplicitParameter,
-    Wart.Nothing,
-    Wart.Overloading,
-    Wart.DefaultArguments,
-    Wart.ToString,
-    Wart.TraversableOps,
-    Wart.PublicInference,
-    Wart.Product,
-    Wart.Null,
-    Wart.Equals,
-    Wart.ToString,
-    Wart.Recursion,
-    Wart.Var
-  ) ++ ContribWart.allBut(
-    ContribWart.ExposedTuples,
-    ContribWart.Apply,
-    ContribWart.MissingOverride,
-    ContribWart.SymbolicName,
-    ContribWart.NoNeedForMonad,
-    ContribWart.SomeApply
-  ),
   addCompilerPlugin(
     ("org.typelevel" %% "kind-projector" % "0.11.3").cross(CrossVersion.full)
   ),
   Test / envFileName := "test.env",
   envVars in Test := (envFromFile in Test).value,
   fork in Test := true
-)
+) ++ inConfig(Lint) {
+  Defaults.compileSettings ++ wartremover.WartRemover.projectSettings ++
+    Seq(
+      sources in Lint := {
+        val old = (sources in Lint).value
+        old ++ (sources in Compile).value
+      },
+      wartremoverErrors := wartErrors
+    )
+}
 
 logo :=
   """
@@ -90,6 +101,7 @@ usefulTasks := Seq(
   UsefulTask("infra", "project infra", "Move to infra project"),
   UsefulTask("t", "test", "Test"),
   UsefulTask("r", "reload", "Reload projects"),
+  UsefulTask("lint", "lint:compile", "Check lint of Wartremover"),
   UsefulTask("fmt", "scalafmtAll; scalafixAll;", "Format code")
 )
 
