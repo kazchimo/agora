@@ -1,6 +1,7 @@
 package domain.broker.coincheck
 
 import domain.conf.Conf
+import domain.exchange.Nonce.Nonce
 import domain.exchange.coincheck.CCOrder.{CCOrderId, LimitOrder}
 import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
 import domain.exchange.coincheck.{
@@ -22,7 +23,7 @@ private[coincheck] case object ShouldNot     extends ShouldCancel
 
 final case class CoincheckBroker() {
   def waitOrderSettled(id: CCOrderId): RIO[
-    CoincheckExchange with SttpClient with Conf with ZEnv with Logging,
+    CoincheckExchange with SttpClient with Conf with ZEnv with Logging with Nonce,
     Unit
   ] = CoincheckExchange.openOrders.repeatWhile(_.map(_.id).contains(id)).unit
 
@@ -54,7 +55,7 @@ final case class CoincheckBroker() {
     orderRequest: CCOrderRequest[LimitOrder],
     intervalSec: Int
   ): ZIO[
-    SttpClient with CoincheckExchange with ZEnv with Logging with Conf,
+    SttpClient with CoincheckExchange with ZEnv with Logging with Conf with Nonce,
     Throwable,
     CCOrder
   ] = for {

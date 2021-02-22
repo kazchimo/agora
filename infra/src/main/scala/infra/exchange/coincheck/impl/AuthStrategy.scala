@@ -1,9 +1,10 @@
 package infra.exchange.coincheck.impl
 
 import domain.conf.Conf
+import domain.exchange.Nonce
+import domain.exchange.Nonce.Nonce
 import lib.cripto.HmacSha256Encode.hmacSHA256Encode
 import lib.syntax.all._
-import zio.clock.nanoTime
 import zio.{RIO, ZEnv, ZIO}
 
 private[coincheck] trait AuthStrategy {
@@ -12,8 +13,8 @@ private[coincheck] trait AuthStrategy {
   final protected def headers(
     url: String,
     body: String = ""
-  ): RIO[Conf with ZEnv, Header] = for {
-    nonce <- nanoTime.map(_.toString)
+  ): RIO[Conf with ZEnv with Nonce, Header] = for {
+    nonce <- Nonce.getNonce.map(_.toString)
     conf  <- ZIO.service[Conf.Service]
     sec   <- conf.ccSecretKey
     sig   <- hmacSHA256Encode(sec.deepInnerV, nonce + url + body)

@@ -3,6 +3,7 @@ package usecase
 import cats.Show
 import cats.syntax.show._
 import domain.conf.Conf
+import domain.exchange.Nonce.Nonce
 import domain.exchange.coincheck.{CCPublicTransaction, CoincheckExchange}
 import lib.syntax.all._
 import sttp.client3.asynchttpclient.zio.SttpClient
@@ -19,7 +20,7 @@ object WatchCoincheckTransactionUC {
       |""".stripMargin)
 
   def watch: ZIO[
-    CoincheckExchange with zio.ZEnv with Logging with SttpClient with Conf,
+    CoincheckExchange with zio.ZEnv with Logging with SttpClient with Conf with Nonce,
     Throwable,
     Unit
   ] = for {

@@ -1,6 +1,7 @@
 package infra.exchange.coincheck.impl
 
 import domain.conf.Conf
+import domain.exchange.Nonce.Nonce
 import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderType}
 import domain.exchange.coincheck.{CCOrder, CCOrderRequest, CoincheckExchange}
 import infra.InfraError
@@ -30,7 +31,7 @@ private[coincheck] trait Orders extends AuthStrategy {
 
   final override def orders(
     order: CCOrderRequest[_ <: CCOrderType]
-  ): RIO[SttpClient with ZEnv with Conf, CCOrder] = (for {
+  ): RIO[SttpClient with ZEnv with Conf with Nonce, CCOrder] = (for {
     req  <- request(order)
     res  <- send(req)
     body <- ZIO.fromEither(res.body)

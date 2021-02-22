@@ -1,5 +1,6 @@
 package infra.exchange.coincheck.impl
 import domain.conf.Conf
+import domain.exchange.Nonce.Nonce
 import domain.exchange.coincheck.CCOrder.CCOrderId
 import domain.exchange.coincheck.CoincheckExchange
 import infra.exchange.coincheck.Endpoints
@@ -20,21 +21,22 @@ private[coincheck] trait CancelOrder extends AuthStrategy {
 
   final override def cancelOrder(
     id: CCOrderId
-  ): RIO[SttpClient with Logging with Conf with ZEnv, CCOrderId] = for {
-    h    <- headers(Endpoints.cancelOrder(id))
-    req   = jsonRequest
-              .delete(uri"${Endpoints.cancelOrder(id)}").headers(h).response(
-                asJson[CancelOrderResponse]
-              )
-    res  <- send(req).tap(a => log.trace(a.toString))
-    body <- ZIO
-              .fromEither(res.body).mapError(e =>
-                InternalInfraError("Cancel Order failed", Some(e))
-              )
-    _    <- body match {
-              case FailedCancelOrderResponse(error) =>
-                ZIO.fail(ClientInfraError(s"Cancel Order failed: $error"))
-              case _                                => ZIO.unit
-            }
-  } yield id
+  ): RIO[SttpClient with Logging with Conf with ZEnv with Nonce, CCOrderId] =
+    for {
+      h    <- headers(Endpoints.cancelOrder(id))
+      req   = jsonRequest
+                .delete(uri"${Endpoints.cancelOrder(id)}").headers(h).response(
+                  asJson[CancelOrderResponse]
+                )
+      res  <- send(req).tap(a => log.trace(a.toString))
+      body <- ZIO
+                .fromEither(res.body).mapError(e =>
+                  InternalInfraError("Cancel Order failed", Some(e))
+                )
+      _    <- body match {
+                case FailedCancelOrderResponse(error) =>
+                  ZIO.fail(ClientInfraError(s"Cancel Order failed: $error"))
+                case _                                => ZIO.unit
+              }
+    } yield id
 }

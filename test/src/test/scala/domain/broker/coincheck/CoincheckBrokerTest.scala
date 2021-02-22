@@ -1,9 +1,11 @@
 package domain.broker.coincheck
 
 import domain.conf.Conf
+import domain.exchange.Nonce.Nonce
 import domain.exchange.coincheck.CCOrder.CCOrderId
 import domain.exchange.coincheck.{CCOrder, CoincheckExchange}
 import infra.conf.ConfImpl
+import infra.exchange.IncreasingNonceImpl
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 import zio.logging.Logging
 import zio.test.Assertion.isFalse
@@ -23,8 +25,11 @@ object CoincheckBrokerTest extends DefaultRunnableSpec {
       _            <- successFiber.join
       done         <- failFiber.status.map(_.isDone)
     } yield assert(done)(isFalse))
-      .provideSomeLayer[SttpClient with Conf with Logging with ZEnv](exchange)
+      .provideSomeLayer[SttpClient with Conf with Logging with ZEnv with Nonce](
+        exchange
+      )
   }).provideCustomLayer(
-    AsyncHttpClientZioBackend.stubLayer.orDie ++ ConfImpl.stubLayer ++ Logging.ignore
+    AsyncHttpClientZioBackend.stubLayer.orDie ++ ConfImpl.stubLayer ++ Logging.ignore ++ IncreasingNonceImpl
+      .layer(0)
   )
 }

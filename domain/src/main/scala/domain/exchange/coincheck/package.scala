@@ -1,6 +1,7 @@
 package domain.exchange
 
 import domain.conf.Conf
+import domain.exchange.Nonce.Nonce
 import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderType}
 import lib.error.ClientDomainError
 import sttp.client3.asynchttpclient.zio.SttpClient
@@ -11,7 +12,7 @@ import zio.stream.{Stream, UStream}
 
 package object coincheck {
   type CoincheckExchange = Has[CoincheckExchange.Service]
-  type Env               = SttpClient with ZEnv with Logging with Conf
+  type Env               = SttpClient with ZEnv with Logging with Conf with Nonce
 
   @accessible
   object CoincheckExchange {
