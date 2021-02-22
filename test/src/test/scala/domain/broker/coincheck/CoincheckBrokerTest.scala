@@ -8,7 +8,7 @@ import domain.exchange.coincheck.CCOrder.{
   CCOrderId,
   CCOrderRate
 }
-import domain.exchange.coincheck.{CCOpenOrder, CCOrder, CoincheckExchange}
+import domain.exchange.coincheck.{CCOpenOrder, CoincheckExchange}
 import infra.conf.ConfImpl
 import infra.exchange.IncreasingNonceImpl
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}

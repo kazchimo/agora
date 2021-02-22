@@ -6,13 +6,7 @@ import domain.exchange.coincheck.CCOrder.CCOrderType.{
   MarketSell,
   Sell
 }
-import domain.exchange.coincheck.CCOrder.{
-  CCOrderCreatedAt,
-  CCOrderId,
-  CCOrderRate,
-  CCOrderType,
-  LimitOrder
-}
+import domain.exchange.coincheck.CCOrder._
 import domain.exchange.coincheck._
 import lib.syntax.all._
 import zio.{Task, ZIO}

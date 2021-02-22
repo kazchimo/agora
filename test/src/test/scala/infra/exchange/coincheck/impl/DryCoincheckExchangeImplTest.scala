@@ -1,10 +1,9 @@
 package infra.exchange.coincheck.impl
 
-import domain.exchange.coincheck.CCOrder.CCOrderPair.BtcJpy
-import domain.exchange.coincheck.CCOrder.{CCOrderCreatedAt, CCOrderRate}
+import domain.exchange.coincheck.CCOrder.CCOrderRate
 import domain.exchange.coincheck.{CCOpenOrder, CCOrderRequest}
 import zio.ZIO
-import zio.test.Assertion.{equalTo, hasAt, hasField, isSubtype, isTrue}
+import zio.test.Assertion._
 import zio.test._
 
 object DryCoincheckExchangeImplTest extends DefaultRunnableSpec {

@@ -1,7 +1,7 @@
 package infra.exchange.coincheck.impl
 
 import domain.conf.Conf
-import domain.exchange.coincheck.{CCOpenOrder, CCOrder}
+import domain.exchange.coincheck.CCOpenOrder
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.{RIO, ZIO}
 
