@@ -1,6 +1,5 @@
 package domain.exchange
 
-import domain.AllEnv
 import zio.macros.accessible
 import zio.{Has, URIO}
 
@@ -8,6 +7,7 @@ import zio.{Has, URIO}
 object Nonce {
   type Nonce = Has[Service]
 
+  import domain.AllEnv
   trait Service {
     def getNonce: URIO[AllEnv, Long]
   }

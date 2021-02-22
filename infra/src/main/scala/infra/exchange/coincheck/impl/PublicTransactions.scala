@@ -1,11 +1,12 @@
 package infra.exchange.coincheck.impl
 
+import domain.AllEnv
 import domain.exchange.coincheck.CCPublicTransaction._
 import domain.exchange.coincheck.{CCPublicTransaction, CoincheckExchange}
 import infra.exchange.coincheck.Endpoints
 import lib.error.InternalInfraError
 import sttp.client3._
-import sttp.client3.asynchttpclient.zio.{SttpClient, sendR}
+import sttp.client3.asynchttpclient.zio.sendR
 import sttp.ws.{WebSocket, WebSocketClosed}
 import zio._
 import zio.logging.{Logging, log}
@@ -14,7 +15,7 @@ import zio.stream.Stream
 private[exchange] trait PublicTransactions { self: CoincheckExchange.Service =>
   private def useWS(
     que: Queue[CCPublicTransaction]
-  )(ws: WebSocket[RIO[ZEnv with Logging, *]]) = {
+  )(ws: WebSocket[RIO[AllEnv, *]]) = {
     val send    =
       ws.sendText("{\"type\":\"subscribe\",\"channel\":\"btc_jpy-trades\"}")
     val receive = for {
@@ -33,14 +34,11 @@ private[exchange] trait PublicTransactions { self: CoincheckExchange.Service =>
       .debug("websocket connection shutdowned")
   }
 
-  final override def publicTransactions: ZIO[
-    SttpClient with ZEnv with Logging,
-    Throwable,
-    Stream[Nothing, CCPublicTransaction]
-  ] = for {
+  final override def publicTransactions
+    : ZIO[AllEnv, Throwable, Stream[Nothing, CCPublicTransaction]] = for {
     _   <- log.info("Querying coincheck public transactions...")
     que <- Queue.unbounded[CCPublicTransaction]
-    _   <- sendR[Unit, ZEnv with Logging](
+    _   <- sendR[Unit, AllEnv](
              basicRequest
                .get(uri"${Endpoints.websocket}")
                .response(asWebSocketAlways(useWS(que)))

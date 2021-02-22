@@ -1,9 +1,7 @@
 package infra.exchange.coincheck.impl
 
-import domain.conf.Conf
+import domain.AllEnv
 import domain.exchange.coincheck.CCOrder
-import sttp.client3.asynchttpclient.zio.SttpClient
-import zio.logging.Logging
 import zio.{RIO, ZIO}
 
 private[coincheck] trait DryCancelOrder {
@@ -11,7 +9,7 @@ private[coincheck] trait DryCancelOrder {
 
   final override def cancelOrder(
     id: CCOrder.CCOrderId
-  ): RIO[SttpClient with Logging with Conf, CCOrder.CCOrderId] = ZIO.succeed {
+  ): RIO[AllEnv, CCOrder.CCOrderId] = ZIO.succeed {
     fakeExchange.cancelOrder(id)
     id
   }

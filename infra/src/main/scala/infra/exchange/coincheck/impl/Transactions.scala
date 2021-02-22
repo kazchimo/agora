@@ -1,6 +1,7 @@
 package infra.exchange.coincheck.impl
 
 import cats.syntax.traverse._
+import domain.AllEnv
 import domain.conf.Conf
 import domain.exchange.Nonce.Nonce
 import domain.exchange.coincheck.{CCTransaction, CoincheckExchange}
@@ -24,14 +25,12 @@ private[exchange] trait Transactions extends AuthStrategy {
         .mapRight(_.transformInto[Task[List[CCTransaction]]])
     )
 
-  final def transactions
-    : RIO[SttpClient with Conf with ZEnv with Nonce, Seq[CCTransaction]] =
-    (for {
-      hs   <- headers(Endpoints.transactions)
-      req   = request(hs)
-      res  <- send(req)
-      ress <- res.body.sequence.rightOrFailWith((e: Throwable) =>
-                InfraError(s"failed to request: ${e.toString}")
-              )
-    } yield ress).retryN(3)
+  final def transactions: RIO[AllEnv, Seq[CCTransaction]] = (for {
+    hs   <- headers(Endpoints.transactions)
+    req   = request(hs)
+    res  <- send(req)
+    ress <- res.body.sequence.rightOrFailWith((e: Throwable) =>
+              InfraError(s"failed to request: ${e.toString}")
+            )
+  } yield ress).retryN(3)
 }

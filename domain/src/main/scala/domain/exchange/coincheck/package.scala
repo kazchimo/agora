@@ -1,30 +1,27 @@
 package domain.exchange
 
-import domain.conf.Conf
-import domain.exchange.Nonce.Nonce
 import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderType}
 import lib.error.ClientDomainError
-import sttp.client3.asynchttpclient.zio.SttpClient
 import zio._
-import zio.logging.Logging
 import zio.macros.accessible
 import zio.stream.{Stream, UStream}
 
 package object coincheck {
   type CoincheckExchange = Has[CoincheckExchange.Service]
-  type Env               = SttpClient with ZEnv with Logging with Conf with Nonce
 
   @accessible
   object CoincheckExchange {
+    import domain.AllEnv
     trait Service {
-      def transactions: RIO[Env, Seq[CCTransaction]]
-      def orders(order: CCOrderRequest[_ <: CCOrderType]): RIO[Env, CCOrder]
+      def transactions: RIO[AllEnv, Seq[CCTransaction]]
+      def orders(order: CCOrderRequest[_ <: CCOrderType]): RIO[AllEnv, CCOrder]
       // Get unsettled orders
-      def openOrders: RIO[Env, Seq[CCOpenOrder]]
-      def cancelOrder(id: CCOrderId): RIO[Env, CCOrderId]
-      def cancelStatus(id: CCOrderId): RIO[Env, Boolean]
-      def publicTransactions: ZIO[Env, Throwable, UStream[CCPublicTransaction]]
-      def balance: RIO[Env, CCBalance]
+      def openOrders: RIO[AllEnv, Seq[CCOpenOrder]]
+      def cancelOrder(id: CCOrderId): RIO[AllEnv, CCOrderId]
+      def cancelStatus(id: CCOrderId): RIO[AllEnv, Boolean]
+      def publicTransactions
+        : ZIO[AllEnv, Throwable, UStream[CCPublicTransaction]]
+      def balance: RIO[AllEnv, CCBalance]
     }
 
     val notStubbed: ZIO[Any, Throwable, Nothing] = ZIO.fail(
@@ -32,37 +29,38 @@ package object coincheck {
     )
 
     def stubLayer(
-      transactionsRes: RIO[Env, Seq[CCTransaction]] = notStubbed,
-      ordersRes: RIO[Env, CCOrder] = notStubbed,
-      openOrdersRes: RIO[Env, Seq[CCOpenOrder]] = notStubbed,
-      cancelOrderRes: RIO[Env, CCOrderId] = notStubbed,
-      cancelStatusRes: RIO[Env, Boolean] = notStubbed,
+      transactionsRes: RIO[AllEnv, Seq[CCTransaction]] = notStubbed,
+      ordersRes: RIO[AllEnv, CCOrder] = notStubbed,
+      openOrdersRes: RIO[AllEnv, Seq[CCOpenOrder]] = notStubbed,
+      cancelOrderRes: RIO[AllEnv, CCOrderId] = notStubbed,
+      cancelStatusRes: RIO[AllEnv, Boolean] = notStubbed,
       publicTransactionsRes: ZIO[
-        Env,
+        AllEnv,
         Throwable,
         Stream[Nothing, CCPublicTransaction]
       ] = notStubbed,
-      balanceRes: RIO[Env, CCBalance] = notStubbed
+      balanceRes: RIO[AllEnv, CCBalance] = notStubbed
     ): ULayer[CoincheckExchange] = ZLayer.succeed(new Service {
-      override def transactions: RIO[Env, Seq[CCTransaction]] = transactionsRes
+      override def transactions: RIO[AllEnv, Seq[CCTransaction]] =
+        transactionsRes
 
       override def orders(
         order: CCOrderRequest[_ <: CCOrderType]
-      ): RIO[Env, CCOrder] = ordersRes
+      ): RIO[AllEnv, CCOrder] = ordersRes
 
-      override def openOrders: RIO[Env, Seq[CCOpenOrder]] = openOrdersRes
+      override def openOrders: RIO[AllEnv, Seq[CCOpenOrder]] = openOrdersRes
 
-      override def cancelOrder(id: CCOrderId): RIO[Env, CCOrderId] =
+      override def cancelOrder(id: CCOrderId): RIO[AllEnv, CCOrderId] =
         cancelOrderRes
 
-      override def cancelStatus(id: CCOrderId): RIO[Env, Boolean] =
+      override def cancelStatus(id: CCOrderId): RIO[AllEnv, Boolean] =
         cancelStatusRes
 
       override def publicTransactions
-        : ZIO[Env, Throwable, Stream[Nothing, CCPublicTransaction]] =
+        : ZIO[AllEnv, Throwable, Stream[Nothing, CCPublicTransaction]] =
         publicTransactionsRes
 
-      override def balance: RIO[Env, CCBalance] = balanceRes
+      override def balance: RIO[AllEnv, CCBalance] = balanceRes
     })
   }
 }

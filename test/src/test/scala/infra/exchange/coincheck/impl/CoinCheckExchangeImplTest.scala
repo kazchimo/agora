@@ -1,11 +1,13 @@
 package infra.exchange.coincheck.impl
 
+import domain.exchange.coincheck.CoincheckExchange
 import infra.conf.ConfImpl
-import infra.exchange.IncreasingNonceImpl
+import infra.exchange.{ExchangeImpl, IncreasingNonceImpl}
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio._
 import zio.logging.Logging
 import zio.test.DefaultRunnableSpec
+import zio.magic._
 
 object CoinCheckExchangeImplTest
     extends DefaultRunnableSpec with TransactionsTest with OrdersTest
@@ -16,7 +18,7 @@ object CoinCheckExchangeImplTest
 
   private val layer =
     AsyncHttpClientZioBackend.stubLayer.orDie ++ ZEnv.live ++ Logging.ignore ++ ConfImpl.stubLayer ++ IncreasingNonceImpl
-      .layer(0)
+      .layer(0) ++ CoincheckExchange.stubLayer()
 
   override def spec = suite("CoinCheckExchangeImpl")(
     transactionsSuite,

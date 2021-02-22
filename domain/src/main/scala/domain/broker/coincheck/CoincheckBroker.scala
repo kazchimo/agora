@@ -1,40 +1,29 @@
 package domain.broker.coincheck
 
-import domain.conf.Conf
-import domain.exchange.Nonce.Nonce
+import domain.AllEnv
 import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderRate, LimitOrder}
-import domain.exchange.coincheck.{
-  CCOrder,
-  CCOrderRequest,
-  CoincheckExchange,
-  Env
-}
+import domain.exchange.coincheck.{CCOrder, CCOrderRequest, CoincheckExchange}
 import lib.error.InternalDomainError
 import lib.zio.{UReadOnlyRef, UWriteOnlyRef}
-import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.clock.sleep
 import zio.duration._
-import zio.logging.{Logging, log}
-import zio.{RIO, Ref, ZEnv, ZIO}
+import zio.logging.log
+import zio.{RIO, Ref, ZIO}
 
 sealed private[coincheck] trait ShouldCancel extends Product with Serializable
 private[coincheck] case object Should        extends ShouldCancel
 private[coincheck] case object ShouldNot     extends ShouldCancel
 
 final case class CoincheckBroker() {
-  def waitOrderSettled(id: CCOrderId): RIO[
-    CoincheckExchange with SttpClient with Conf with ZEnv with Logging with Nonce,
-    Unit
-  ] = CoincheckExchange.openOrders.repeatWhile(_.map(_.id).contains(id)).unit
+  def waitOrderSettled(id: CCOrderId): RIO[AllEnv, Unit] =
+    CoincheckExchange.openOrders.repeatWhile(_.map(_.id).contains(id)).unit
 
-  def cancelWithWait(
-    id: CCOrderId
-  ): ZIO[CoincheckExchange with Env, Throwable, Unit] =
+  def cancelWithWait(id: CCOrderId): ZIO[AllEnv, Throwable, Unit] =
     CoincheckExchange.cancelOrder(id) *> CoincheckExchange
       .cancelStatus(id).repeatUntil(identity).unit
 
   def latestRateRef(initialRate: CCOrderRate): ZIO[
-    CoincheckExchange with Env,
+    AllEnv,
     Throwable,
     (UReadOnlyRef[CCOrderRate], UWriteOnlyRef[Boolean])
   ] = for {
@@ -54,11 +43,7 @@ final case class CoincheckBroker() {
   def priceAdjustingOrder(
     orderRequest: CCOrderRequest[LimitOrder],
     intervalSec: Int
-  ): ZIO[
-    SttpClient with CoincheckExchange with ZEnv with Logging with Conf with Nonce,
-    Throwable,
-    CCOrder
-  ] = for {
+  ): ZIO[AllEnv, Throwable, CCOrder] = for {
     (latestRateRef, updateCancelRef) <- latestRateRef(orderRequest.limitRate)
     order                            <- CoincheckExchange.orders(orderRequest)
     shouldCancel                     <- ZIO

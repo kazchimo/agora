@@ -1,7 +1,6 @@
 package infra.exchange.coincheck.impl
 
-import domain.conf.Conf
-import domain.exchange.Nonce.Nonce
+import domain.AllEnv
 import domain.exchange.coincheck.{CCOpenOrder, CoincheckExchange}
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.{
@@ -12,14 +11,13 @@ import infra.exchange.coincheck.responses.{
 import lib.error.ClientInfraError
 import lib.sttp.jsonRequest
 import sttp.client3.UriContext
-import sttp.client3.asynchttpclient.zio.{SttpClient, send}
+import sttp.client3.asynchttpclient.zio.send
 import sttp.client3.circe.asJson
-import zio.{RIO, ZEnv, ZIO}
+import zio.{RIO, ZIO}
 
 private[coincheck] trait OpenOrders extends AuthStrategy {
   self: CoincheckExchange.Service =>
-  final override def openOrders
-    : RIO[SttpClient with Conf with ZEnv with Nonce, Seq[CCOpenOrder]] = (for {
+  final override def openOrders: RIO[AllEnv, Seq[CCOpenOrder]] = (for {
     h      <- headers(Endpoints.openOrders)
     req     = jsonRequest
                 .get(uri"${Endpoints.openOrders}").headers(h).response(
