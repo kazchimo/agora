@@ -1,31 +1,80 @@
 package domain.exchange.coincheck
 
+import cats.syntax.traverse._
 import domain.exchange.coincheck.CCOpenOrder.CCOpenOrderType
-import domain.exchange.coincheck.CCOrder.{
-  CCOrderAmount,
-  CCOrderCreatedAt,
-  CCOrderId,
-  CCOrderPair,
-  CCOrderRate
-}
-import enumeratum._
+import domain.exchange.coincheck.CCOpenOrder.CCOpenOrderType.{Buy, Sell}
+import domain.exchange.coincheck.CCOrder._
+import domain.lib.EnumZio
 import enumeratum.EnumEntry.Snakecase
+import enumeratum._
+import lib.error.ClientDomainError
+import zio.IO
+import zio.interop.catz.core._
 
-final case class CCOpenOrder(
+final case class CCOpenOrder private (
   id: CCOrderId,
   orderType: CCOpenOrderType,
-  rate: Option[CCOrderRate],
+  rate: Option[CCOrderRate] = None,
   pair: CCOrderPair,
-  pendingAmount: Option[CCOrderAmount],
-  pendingMarketBuyAmount: Option[CCOrderAmount],
-  stopLossRate: Option[CCOrderRate],
+  pendingAmount: Option[CCOrderAmount] = None,
+  pendingMarketBuyAmount: Option[CCOrderAmount] = None,
+  stopLossRate: Option[CCOrderRate] = None,
   createdAt: CCOrderCreatedAt
 )
 
-object CCOpenOrder {
+private[coincheck] trait CCOpenOrderFactory {
+  final def fromRaw(
+    id: Long,
+    orderType: String,
+    rate: Option[Double],
+    pair: String,
+    pendingAmount: Option[Double],
+    pendingMarketBuyAmount: Option[Double],
+    stopLossRate: Option[Double],
+    createdAt: String
+  ): IO[ClientDomainError, CCOpenOrder] = for {
+    i    <- CCOrderId(id)
+    ot   <- CCOpenOrderType.withNameZio(orderType)
+    r    <- rate.map(CCOrderRate(_)).sequence
+    p    <- CCOrderPair.withNameZio(pair)
+    pa   <- pendingAmount.map(CCOrderAmount(_)).sequence
+    pmba <- pendingMarketBuyAmount.map(CCOrderAmount(_)).sequence
+    slr  <- stopLossRate.map(CCOrderRate(_)).sequence
+    ca   <- CCOrderCreatedAt(createdAt)
+  } yield CCOpenOrder(i, ot, r, p, pa, pmba, slr, ca)
+
+  final def buy(
+    id: CCOrderId,
+    rate: CCOrderRate,
+    pair: CCOrderPair,
+    createdAt: CCOrderCreatedAt
+  ): CCOpenOrder = CCOpenOrder(
+    id = id,
+    orderType = Buy,
+    rate = Some(rate),
+    pair = pair,
+    createdAt = createdAt
+  )
+
+  final def sell(
+    id: CCOrderId,
+    rate: CCOrderRate,
+    pair: CCOrderPair,
+    createdAt: CCOrderCreatedAt
+  ): CCOpenOrder = CCOpenOrder(
+    id = id,
+    orderType = Sell,
+    rate = Some(rate),
+    pair = pair,
+    createdAt = createdAt
+  )
+}
+
+object CCOpenOrder extends CCOpenOrderFactory {
   sealed trait CCOpenOrderType extends Snakecase
 
-  object CCOpenOrderType extends Enum[CCOpenOrderType] {
+  object CCOpenOrderType
+      extends Enum[CCOpenOrderType] with EnumZio[CCOpenOrderType] {
     override def values: IndexedSeq[CCOpenOrderType] = findValues
 
     case object Buy  extends CCOpenOrderType

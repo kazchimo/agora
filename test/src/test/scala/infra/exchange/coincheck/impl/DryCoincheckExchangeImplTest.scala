@@ -1,9 +1,10 @@
 package infra.exchange.coincheck.impl
 
-import domain.exchange.coincheck.CCOrder.CCOrderRate
-import domain.exchange.coincheck.CCOrderRequest
+import domain.exchange.coincheck.CCOrder.CCOrderPair.BtcJpy
+import domain.exchange.coincheck.CCOrder.{CCOrderCreatedAt, CCOrderRate}
+import domain.exchange.coincheck.{CCOpenOrder, CCOrderRequest}
 import zio.ZIO
-import zio.test.Assertion.{equalTo, isTrue}
+import zio.test.Assertion.{equalTo, hasAt, hasField, isSubtype, isTrue}
 import zio.test._
 
 object DryCoincheckExchangeImplTest extends DefaultRunnableSpec {
@@ -17,7 +18,11 @@ object DryCoincheckExchangeImplTest extends DefaultRunnableSpec {
         for {
           req   <- CCOrderRequest.limitBuy(1, 1)
           order <- ZIO.effect(cache.submitOrder(req))
-        } yield assert(cache.openOrders)(equalTo(Seq(order)))
+        } yield assert(cache.openOrders)(
+          hasAt(0)(
+            isSubtype[CCOpenOrder](hasField("id", _.id, equalTo(order.id)))
+          )
+        )
       },
       testM("cancelOrder") {
         val cache = FakeExchange(marketRate)

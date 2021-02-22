@@ -20,7 +20,7 @@ package object coincheck {
       def transactions: RIO[Env, Seq[CCTransaction]]
       def orders(order: CCOrderRequest[_ <: CCOrderType]): RIO[Env, CCOrder]
       // Get unsettled orders
-      def openOrders: RIO[Env, Seq[CCOrder]]
+      def openOrders: RIO[Env, Seq[CCOpenOrder]]
       def cancelOrder(id: CCOrderId): RIO[Env, CCOrderId]
       def cancelStatus(id: CCOrderId): RIO[Env, Boolean]
       def publicTransactions: ZIO[Env, Throwable, UStream[CCPublicTransaction]]
@@ -34,7 +34,7 @@ package object coincheck {
     def stubLayer(
       transactionsRes: RIO[Env, Seq[CCTransaction]] = notStubbed,
       ordersRes: RIO[Env, CCOrder] = notStubbed,
-      openOrdersRes: RIO[Env, Seq[CCOrder]] = notStubbed,
+      openOrdersRes: RIO[Env, Seq[CCOpenOrder]] = notStubbed,
       cancelOrderRes: RIO[Env, CCOrderId] = notStubbed,
       cancelStatusRes: RIO[Env, Boolean] = notStubbed,
       publicTransactionsRes: ZIO[
@@ -50,7 +50,7 @@ package object coincheck {
         order: CCOrderRequest[_ <: CCOrderType]
       ): RIO[Env, CCOrder] = ordersRes
 
-      override def openOrders: RIO[Env, Seq[CCOrder]] = openOrdersRes
+      override def openOrders: RIO[Env, Seq[CCOpenOrder]] = openOrdersRes
 
       override def cancelOrder(id: CCOrderId): RIO[Env, CCOrderId] =
         cancelOrderRes

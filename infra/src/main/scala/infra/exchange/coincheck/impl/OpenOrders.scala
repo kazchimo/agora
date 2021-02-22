@@ -2,8 +2,7 @@ package infra.exchange.coincheck.impl
 
 import domain.conf.Conf
 import domain.exchange.Nonce.Nonce
-import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.exchange.coincheck.{CCOrder, CoincheckExchange}
+import domain.exchange.coincheck.{CCOpenOrder, CoincheckExchange}
 import infra.exchange.coincheck.Endpoints
 import infra.exchange.coincheck.responses.{
   FailedOpenOrdersResponse,
@@ -20,7 +19,7 @@ import zio.{RIO, ZEnv, ZIO}
 private[coincheck] trait OpenOrders extends AuthStrategy {
   self: CoincheckExchange.Service =>
   final override def openOrders
-    : RIO[SttpClient with Conf with ZEnv with Nonce, Seq[CCOrder]] = (for {
+    : RIO[SttpClient with Conf with ZEnv with Nonce, Seq[CCOpenOrder]] = (for {
     h      <- headers(Endpoints.openOrders)
     req     = jsonRequest
                 .get(uri"${Endpoints.openOrders}").headers(h).response(
@@ -29,8 +28,18 @@ private[coincheck] trait OpenOrders extends AuthStrategy {
     res    <- send(req)
     body   <- ZIO.fromEither(res.body)
     orders <- body match {
-                case r: SuccessOpenOrdersResponse  =>
-                  ZIO.foreach(r.orders)(o => CCOrderId(o.id).map(CCOrder(_)))
+                case r: SuccessOpenOrdersResponse  => ZIO.foreach(r.orders)(o =>
+                    CCOpenOrder.fromRaw(
+                      o.id,
+                      o.order_type,
+                      o.rate,
+                      o.pair,
+                      o.pending_amount,
+                      o.pending_market_buy_amount,
+                      o.stop_loss_rate,
+                      o.created_at
+                    )
+                  )
                 case FailedOpenOrdersResponse(err) =>
                   ZIO.fail(ClientInfraError(s"Request failed: $err"))
               }

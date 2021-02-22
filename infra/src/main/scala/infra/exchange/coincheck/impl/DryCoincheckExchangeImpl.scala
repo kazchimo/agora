@@ -7,6 +7,7 @@ import domain.exchange.coincheck.CCOrder.CCOrderType.{
   Sell
 }
 import domain.exchange.coincheck.CCOrder.{
+  CCOrderCreatedAt,
   CCOrderId,
   CCOrderRate,
   CCOrderType,
@@ -15,6 +16,8 @@ import domain.exchange.coincheck.CCOrder.{
 import domain.exchange.coincheck._
 import lib.syntax.all._
 import zio.{Task, ZIO}
+
+import java.time.ZonedDateTime
 
 final private[impl] case class FakeBalance(jpy: Double, btc: Double) {
   def rebalanceWithDiff(jpy: Double, btc: Double): FakeBalance =
@@ -38,7 +41,28 @@ final private[impl] case class FakeExchange(marketRate: CCOrderRate) {
 
   def jpy: Double = balance.jpy
 
-  def openOrders: Seq[CCOrder] = pendingOrders.keys.map(CCOrder(_)).toSeq
+  @SuppressWarnings(Array("org.wartremover.warts.All"))
+  def openOrders: Seq[CCOpenOrder] = pendingOrders.keys.map { key =>
+    val req = pendingOrders(key)
+    req.orderType match {
+      case Buy  =>
+        val e = req.asInstanceOf[CCOrderRequest[Buy]]
+        CCOpenOrder.buy(
+          key,
+          e.limitRate,
+          e.pair,
+          CCOrderCreatedAt.unsafeFrom(ZonedDateTime.now().toString)
+        )
+      case Sell =>
+        val e = req.asInstanceOf[CCOrderRequest[Sell]]
+        CCOpenOrder.sell(
+          key,
+          e.limitRate,
+          e.pair,
+          CCOrderCreatedAt.unsafeFrom(ZonedDateTime.now().toString)
+        )
+    }
+  }.toSeq
 
   def removeOrder(orderId: CCOrderId): Unit = {
     pendingOrders = pendingOrders.-(orderId)
