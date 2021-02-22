@@ -9,6 +9,7 @@ import domain.exchange.coincheck.{
   CoincheckExchange,
   Env
 }
+import lib.error.InternalDomainError
 import lib.zio.{UReadOnlyRef, UWriteOnlyRef}
 import sttp.client3.asynchttpclient.zio.SttpClient
 import zio.clock.sleep
@@ -73,8 +74,21 @@ final case class CoincheckBroker() {
                                                   s"Cancel order! Reordering... at=${latestRate.toString} amount=${orderRequest.amount.toString}"
                                                 )
                                               _          <- cancelWithWait(order.id)
+                                              openOrders <- CoincheckExchange.openOrders
+                                              openOrder  <-
+                                                ZIO
+                                                  .fromOption(openOrders.find(_.id == order.id))
+                                                  .orElseFail(
+                                                    InternalDomainError("Order already canceled")
+                                                  )
+                                              amount     <-
+                                                ZIO
+                                                  .fromOption(openOrder.pendingAmount).orElseFail(
+                                                    InternalDomainError("Pending amount is not exist")
+                                                  )
                                               r          <- priceAdjustingOrder(
-                                                              orderRequest.changeRate(latestRate),
+                                                              orderRequest
+                                                                .changeRate(latestRate).changeAmount(amount),
                                                               intervalSec
                                                             )
                                             } yield r
