@@ -5,7 +5,9 @@ import domain.lib.VOFactory
 import enumeratum.EnumEntry.Snakecase
 import enumeratum.{CirceEnum, Enum}
 import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
+import eu.timepit.refined.types.all.NonEmptyString
 import io.estatico.newtype.macros.newtype
 import lib.refined.PositiveDouble
 
@@ -55,5 +57,10 @@ object CCOrder {
   @newtype case class CCOrderAmount(value: PositiveDouble)
   object CCOrderAmount extends VOFactory[Double, Positive] {
     override type VO = CCOrderAmount
+  }
+
+  @newtype case class CCOrderCreatedAt(value: NonEmptyString)
+  object CCOrderCreatedAt extends VOFactory[String, NonEmpty] {
+    override type VO = CCOrderCreatedAt
   }
 }
