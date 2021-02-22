@@ -58,14 +58,14 @@ final case class CoincheckBroker() {
                                                 log.info(
                                                   s"Cancel order! Reordering... at=${latestRate.toString} amount=${orderRequest.amount.toString}"
                                                 )
-                                              _          <- cancelWithWait(order.id)
                                               openOrders <- CoincheckExchange.openOrders
                                               openOrder  <-
                                                 ZIO
                                                   .fromOption(openOrders.find(_.id == order.id))
                                                   .orElseFail(
-                                                    InternalDomainError("Order already canceled")
+                                                    InternalDomainError("Order already settled")
                                                   )
+                                              _          <- cancelWithWait(order.id)
                                               amount     <-
                                                 ZIO
                                                   .fromOption(openOrder.pendingAmount).orElseFail(
