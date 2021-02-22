@@ -1,11 +1,11 @@
 package domain.exchange
 
-import zio.{Has, Task}
+import zio.{Has, UIO}
 
 object Nonce {
   type Nonce = Has[Service]
 
   trait Service {
-    def getNonce: Task[Long]
+    def getNonce: UIO[Long]
   }
 }
