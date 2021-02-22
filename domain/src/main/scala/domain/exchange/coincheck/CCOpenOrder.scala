@@ -35,11 +35,11 @@ private[coincheck] trait CCOpenOrderFactory {
   ): IO[ClientDomainError, CCOpenOrder] = for {
     i    <- CCOrderId(id)
     ot   <- CCOpenOrderType.withNameZio(orderType)
-    r    <- rate.map(CCOrderRate(_)).sequence
+    r    <- rate.traverse(CCOrderRate(_))
     p    <- CCOrderPair.withNameZio(pair)
-    pa   <- pendingAmount.map(CCOrderAmount(_)).sequence
-    pmba <- pendingMarketBuyAmount.map(CCOrderAmount(_)).sequence
-    slr  <- stopLossRate.map(CCOrderRate(_)).sequence
+    pa   <- pendingAmount.traverse(CCOrderAmount(_))
+    pmba <- pendingMarketBuyAmount.traverse(CCOrderAmount(_))
+    slr  <- stopLossRate.traverse(CCOrderRate(_))
     ca   <- CCOrderCreatedAt(createdAt)
   } yield CCOpenOrder(i, ot, r, p, pa, pmba, slr, ca)
 
