@@ -1,7 +1,10 @@
 package infra.exchange.coincheck.bodyconverter
 
-import domain.exchange.coincheck.CCOrder.CCOrderType
-import domain.exchange.coincheck.CCOrderRequest._
+import domain.exchange.coincheck.CCOrder.{
+  CCOrderRequestAmount,
+  CCOrderRequestRate,
+  CCOrderType
+}
 import domain.exchange.coincheck._
 import io.circe.generic.extras.Configuration
 import io.circe.syntax._

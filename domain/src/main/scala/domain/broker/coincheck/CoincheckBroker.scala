@@ -2,8 +2,11 @@ package domain.broker.coincheck
 
 import domain.conf.Conf
 import domain.exchange.Nonce.Nonce
-import domain.exchange.coincheck.CCOrder.{CCOrderId, LimitOrder}
-import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
+import domain.exchange.coincheck.CCOrder.{
+  CCOrderId,
+  CCOrderRequestRate,
+  LimitOrder
+}
 import domain.exchange.coincheck.{
   CCOrder,
   CCOrderRequest,

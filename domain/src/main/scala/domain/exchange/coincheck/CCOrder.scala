@@ -7,6 +7,7 @@ import enumeratum.{CirceEnum, Enum}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import io.estatico.newtype.macros.newtype
+import lib.refined.PositiveDouble
 
 final case class CCOrder(id: CCOrderId)
 
@@ -44,5 +45,15 @@ object CCOrder {
     case object EtcJpy  extends CCOrderPair
     case object FctJpy  extends CCOrderPair
     case object MonaJpy extends CCOrderPair
+  }
+
+  @newtype case class CCOrderRequestRate(value: PositiveDouble)
+  object CCOrderRequestRate extends VOFactory[Double, Positive] {
+    override type VO = CCOrderRequestRate
+  }
+
+  @newtype case class CCOrderRequestAmount(value: PositiveDouble)
+  object CCOrderRequestAmount extends VOFactory[Double, Positive] {
+    override type VO = CCOrderRequestAmount
   }
 }

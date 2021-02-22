@@ -2,7 +2,7 @@ package infra.exchange
 
 import domain.conf.Conf
 import domain.exchange.bitflyer.BitflyerExchange
-import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
+import domain.exchange.coincheck.CCOrder.CCOrderRequestRate
 import domain.exchange.coincheck.CoincheckExchange
 import infra.exchange.bitflyer.impl.BitflyerExchangeImpl
 import infra.exchange.coincheck.impl.{

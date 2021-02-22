@@ -7,13 +7,8 @@ import domain.exchange.coincheck.CCOrder.CCOrderType.{
   MarketSell,
   Sell
 }
-import domain.exchange.coincheck.CCOrder.{CCOrderPair, CCOrderType, LimitOrder}
-import domain.exchange.coincheck.CCOrderRequest._
-import domain.lib.VOFactory
-import eu.timepit.refined.numeric.Positive
-import io.estatico.newtype.macros.newtype
+import domain.exchange.coincheck.CCOrder._
 import lib.error.ClientDomainError
-import lib.refined.PositiveDouble
 import lib.syntax.all._
 import zio.IO
 
@@ -103,15 +98,4 @@ private[coincheck] trait OrderFactory {
     CCOrderRequest(BtcJpy, MarketSell, amount = Some(amount))
 }
 
-object CCOrderRequest extends OrderFactory {
-
-  @newtype case class CCOrderRequestRate(value: PositiveDouble)
-  object CCOrderRequestRate extends VOFactory[Double, Positive] {
-    override type VO = CCOrderRequestRate
-  }
-
-  @newtype case class CCOrderRequestAmount(value: PositiveDouble)
-  object CCOrderRequestAmount extends VOFactory[Double, Positive] {
-    override type VO = CCOrderRequestAmount
-  }
-}
+object CCOrderRequest extends OrderFactory

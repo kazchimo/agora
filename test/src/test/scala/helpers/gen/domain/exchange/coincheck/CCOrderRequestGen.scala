@@ -1,13 +1,16 @@
 package helpers.gen.domain.exchange.coincheck
 
-import domain.exchange.coincheck.CCOrder.CCOrderType
 import domain.exchange.coincheck.CCOrder.CCOrderType.{
   Buy,
   MarketBuy,
   MarketSell,
   Sell
 }
-import domain.exchange.coincheck.CCOrderRequest._
+import domain.exchange.coincheck.CCOrder.{
+  CCOrderRequestAmount,
+  CCOrderRequestRate,
+  CCOrderType
+}
 import domain.exchange.coincheck._
 import helpers.gen.std.StdGen.positiveDoubleGen
 import zio.random.Random

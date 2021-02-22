@@ -6,8 +6,12 @@ import domain.exchange.coincheck.CCOrder.CCOrderType.{
   MarketSell,
   Sell
 }
-import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderType, LimitOrder}
-import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
+import domain.exchange.coincheck.CCOrder.{
+  CCOrderId,
+  CCOrderRequestRate,
+  CCOrderType,
+  LimitOrder
+}
 import domain.exchange.coincheck._
 import lib.syntax.all._
 import zio.{Task, ZIO}

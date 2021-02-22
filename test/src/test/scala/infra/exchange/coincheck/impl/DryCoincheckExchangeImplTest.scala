@@ -1,7 +1,7 @@
 package infra.exchange.coincheck.impl
 
+import domain.exchange.coincheck.CCOrder.CCOrderRequestRate
 import domain.exchange.coincheck.CCOrderRequest
-import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
 import zio.ZIO
 import zio.test.Assertion.{equalTo, isTrue}
 import zio.test._

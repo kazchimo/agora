@@ -1,6 +1,6 @@
 package infra.exchange.coincheck.impl
 
-import domain.exchange.coincheck.CCOrderRequest.CCOrderRequestRate
+import domain.exchange.coincheck.CCOrder.CCOrderRequestRate
 
 final case class DryWriteCoincheckExchangeImpl(
   orderSettledInterval: Int,
