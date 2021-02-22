@@ -3,7 +3,11 @@ import infra.conf.ConfImpl
 import infra.exchange.{ExchangeImpl, IncreasingNonceImpl}
 import lib.error._
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import usecase.{SellAllCoinInCoincheckUC, TradeInDowMethodUC}
+import usecase.{
+  CancelAllInCoincheckUC,
+  SellAllCoinInCoincheckUC,
+  TradeInDowMethodUC
+}
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
@@ -28,6 +32,8 @@ object Main extends zio.App {
 
   val tradeInDow = TradeInDowMethodUC.trade(5, 3, 3)
   val sellAll    = SellAllCoinInCoincheckUC.sell(10)
+  val cancelAll  = CancelAllInCoincheckUC.cancelAll
+  val settleAll  = sellAll <&> cancelAll
 
   private val app = log.info("start") *> sellAll *> log.info("end")
 }
