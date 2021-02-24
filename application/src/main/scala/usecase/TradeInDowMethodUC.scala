@@ -2,7 +2,7 @@ package usecase
 
 import domain.broker.coincheck.CoincheckBroker
 import domain.exchange.coincheck.{CCOrderRequest, CoincheckExchange}
-import domain.strategy.DowMethod
+import domain.strategy.{DowMethod, Signal}
 import lib.syntax.all._
 import zio.Ref
 import zio.logging.log
@@ -26,50 +26,48 @@ object TradeInDowMethodUC {
   val jpy      = 50000
   val interval = 10
 
+  private def buy(signal: Signal, tradingStateRef: Ref[TradingState]) = for {
+    _       <-
+      log.info(
+        s"Buy! rate=${signal.at.toString} amount=${(jpy / signal.at).toString}"
+      )
+    request <- CCOrderRequest.limitBuy(signal.at, jpy / signal.at)
+    _       <- CoincheckBroker().priceAdjustingOrder(request, interval)
+    _       <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at))
+  } yield ()
+
+  private def sell(signal: Signal, tradingStateRef: Ref[TradingState]) = for {
+    tradingState <- tradingStateRef.get
+    _            <-
+      log.info(
+        s"Sell! rate=${signal.at.toString} amount=${(jpy / tradingState.lastBuyRate).toString}"
+      )
+    request      <-
+      CCOrderRequest.limitSell(signal.at, jpy / tradingState.lastBuyRate)
+    _            <- CoincheckBroker().priceAdjustingOrder(request, interval)
+    tradingState <- tradingStateRef.get
+    profit        =
+      request.limitAmount.deepInnerV * (signal.at - tradingState.lastBuyRate)
+    summary      <-
+      tradingStateRef.updateAndGet(_.toNeutralPosition.addSummary(profit))
+    _            <- log.info(
+                      s"Profit: ${profit.toString} Total: ${summary.tradeSummary.toString}"
+                    )
+  } yield ()
+
   def trade(aggCount: Int, buyContinuous: Int, sellContinuous: Int) = for {
     _                  <- log.info("Buying in Dow method start...")
     transactionsStream <- CoincheckExchange.publicTransactions
     tradingStateRef    <- Ref.make(TradingState(false, 0, 0))
     signalStream       <- DowMethod(aggCount, buyContinuous, sellContinuous)
                             .signal(transactionsStream)
-    broker              = CoincheckBroker()
     _                  <- signalStream.foreach { signal =>
                             for {
                               tradingState <- tradingStateRef.get
-                              _            <- {
-                                for {
-                                  _       <-
-                                    log.info(
-                                      s"Buy! rate=${signal.at.toString} amount=${(jpy / signal.at).toString}"
-                                    )
-                                  request <- CCOrderRequest.limitBuy(signal.at, jpy / signal.at)
-                                  _       <- broker.priceAdjustingOrder(request, interval)
-                                  _       <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at))
-                                } yield ()
-                              }.when(signal.shouldBuy & !tradingState.onLong)
-                              _            <- {
-                                for {
-                                  _            <-
-                                    log.info(
-                                      s"Sell! rate=${signal.at.toString} amount=${(jpy / tradingState.lastBuyRate).toString}"
-                                    )
-                                  request      <- CCOrderRequest.limitSell(
-                                                    signal.at,
-                                                    jpy / tradingState.lastBuyRate
-                                                  )
-                                  _            <- broker.priceAdjustingOrder(request, interval)
-                                  tradingState <- tradingStateRef.get
-                                  profit        =
-                                    request.limitAmount.deepInnerV * (signal.at - tradingState.lastBuyRate)
-                                  summary      <- tradingStateRef.updateAndGet(
-                                                    _.toNeutralPosition.addSummary(profit)
-                                                  )
-                                  _            <-
-                                    log.info(
-                                      s"Profit: ${profit.toString} Total: ${summary.tradeSummary.toString}"
-                                    )
-                                } yield ()
-                              }.when(signal.shouldSell & tradingState.onLong)
+                              _            <- buy(signal, tradingStateRef)
+                                                .when(signal.shouldBuy & !tradingState.onLong)
+                              _            <- sell(signal, tradingStateRef)
+                                                .when(signal.shouldSell & tradingState.onLong)
                             } yield ()
                           }
   } yield ()
