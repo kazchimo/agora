@@ -8,12 +8,12 @@ import domain.exchange.coincheck.{
   CCOrderRequest,
   CoincheckExchange
 }
-import lib.error.{ClientDomainError, InternalDomainError}
+import lib.error.ClientDomainError
 import lib.zio.{UReadOnlyRef, UWriteOnlyRef}
 import zio.clock.sleep
 import zio.duration._
 import zio.logging.log
-import zio.{Has, RIO, Ref, ZIO}
+import zio.{RIO, Ref, ZIO}
 
 sealed private[coincheck] trait ShouldCancel extends Product with Serializable
 private[coincheck] case object Should        extends ShouldCancel
@@ -72,11 +72,7 @@ final case class CoincheckBroker() {
                                                 )
                                               openOrder  <- findOpenOrder(order.id)
                                               _          <- cancelWithWait(order.id)
-                                              amount     <-
-                                                ZIO
-                                                  .fromOption(openOrder.pendingAmount).orElseFail(
-                                                    InternalDomainError("Pending amount is not exist")
-                                                  )
+                                              amount     <- openOrder.zioPendingAmount
                                               r          <- priceAdjustingOrder(
                                                               orderRequest
                                                                 .changeRate(latestRate).changeAmount(amount),

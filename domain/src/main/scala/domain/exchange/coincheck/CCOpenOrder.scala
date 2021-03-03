@@ -7,8 +7,8 @@ import domain.exchange.coincheck.CCOrder._
 import domain.lib.EnumZio
 import enumeratum.EnumEntry.Snakecase
 import enumeratum._
-import lib.error.ClientDomainError
-import zio.IO
+import lib.error.{ClientDomainError, InternalDomainError}
+import zio.{IO, ZIO}
 import zio.interop.catz.core._
 
 final case class CCOpenOrder private (
@@ -20,7 +20,12 @@ final case class CCOpenOrder private (
   pendingMarketBuyAmount: Option[CCOrderAmount] = None,
   stopLossRate: Option[CCOrderRate] = None,
   createdAt: CCOrderCreatedAt
-)
+) {
+  def zioPendingAmount: IO[InternalDomainError, CCOrderAmount] = ZIO
+    .fromOption(pendingAmount).orElseFail(
+      InternalDomainError("Pending amount is not exist")
+    )
+}
 
 private[coincheck] trait CCOpenOrderFactory {
   final def fromRaw(
