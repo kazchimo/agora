@@ -25,7 +25,7 @@ object Main extends zio.App {
       ConfImpl.layer,
       ExchangeImpl.coinCheckExchange,
       AsyncHttpClientZioBackend.layer(),
-      Logging.console(logLevel = LogLevel.Debug),
+      Logging.console(logLevel = LogLevel.Info),
       IncreasingNonceImpl.layer(System.currentTimeMillis())
     )
     .exitCode
@@ -35,5 +35,5 @@ object Main extends zio.App {
   val cancelAll  = CancelAllInCoincheckUC.cancelAll
   val settleAll  = sellAll <&> cancelAll
 
-  private val app = log.info("start") *> sellAll *> log.info("end")
+  private val app = log.info("start") *> tradeInDow *> log.info("end")
 }

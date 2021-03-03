@@ -2,13 +2,18 @@ package domain.broker.coincheck
 
 import domain.AllEnv
 import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderRate, LimitOrder}
-import domain.exchange.coincheck.{CCOrder, CCOrderRequest, CoincheckExchange}
-import lib.error.InternalDomainError
+import domain.exchange.coincheck.{
+  CCOpenOrder,
+  CCOrder,
+  CCOrderRequest,
+  CoincheckExchange
+}
+import lib.error.{ClientDomainError, InternalDomainError}
 import lib.zio.{UReadOnlyRef, UWriteOnlyRef}
 import zio.clock.sleep
 import zio.duration._
 import zio.logging.log
-import zio.{RIO, Ref, ZIO}
+import zio.{Has, RIO, Ref, ZIO}
 
 sealed private[coincheck] trait ShouldCancel extends Product with Serializable
 private[coincheck] case object Should        extends ShouldCancel
@@ -40,6 +45,13 @@ final case class CoincheckBroker() {
                             ).fork
   } yield (latestRateRef.readOnly, updateCancelRef.writeOnly)
 
+  def findOpenOrder(
+    id: CCOrderId
+  ): ZIO[AllEnv, ClientDomainError, CCOpenOrder] = CoincheckExchange.openOrders
+    .flatMap(o => ZIO.fromOption(o.find(_.id == id))).orElseFail(
+      ClientDomainError("Order already settled")
+    )
+
   def priceAdjustingOrder(
     orderRequest: CCOrderRequest[LimitOrder],
     intervalSec: Int
@@ -58,13 +70,7 @@ final case class CoincheckBroker() {
                                                 log.info(
                                                   s"Cancel order! Reordering... at=${latestRate.toString} amount=${orderRequest.amount.toString}"
                                                 )
-                                              openOrders <- CoincheckExchange.openOrders
-                                              openOrder  <-
-                                                ZIO
-                                                  .fromOption(openOrders.find(_.id == order.id))
-                                                  .orElseFail(
-                                                    InternalDomainError("Order already settled")
-                                                  )
+                                              openOrder  <- findOpenOrder(order.id)
                                               _          <- cancelWithWait(order.id)
                                               amount     <-
                                                 ZIO
