@@ -73,11 +73,9 @@ final case class CoincheckBroker() {
                                               openOrder  <- findOpenOrder(order.id)
                                               _          <- cancelWithWait(order.id)
                                               amount     <- openOrder.zioPendingAmount
-                                              r          <- priceAdjustingOrder(
-                                                              orderRequest
-                                                                .changeRate(latestRate).changeAmount(amount),
-                                                              intervalSec
-                                                            )
+                                              req         =
+                                                orderRequest.changeRate(latestRate).changeAmount(amount)
+                                              r          <- priceAdjustingOrder(req, intervalSec)
                                             } yield r
                                           case _      => log.info("Order settled!").as(order)
                                         }
