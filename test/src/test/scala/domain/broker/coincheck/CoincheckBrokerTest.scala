@@ -10,30 +10,35 @@ import domain.exchange.coincheck.CCOrder.{
 }
 import domain.exchange.coincheck.{CCOpenOrder, CoincheckExchange}
 import helpers.mockModule.zio.conf.defaultMockConfLayer
-import infra.conf.ConfImpl
 import infra.exchange.IncreasingNonceImpl
+import org.mockito.MockitoSugar
+import org.mockito.MockitoSugar._
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 import zio.logging.Logging
 import zio.test.Assertion.isFalse
 import zio.test._
-import zio.{ZEnv, ZIO}
+import zio.{ZEnv, ZIO, ZLayer}
 
 object CoincheckBrokerTest extends DefaultRunnableSpec {
   override def spec = suite("#CoincheckBroker")(testM("#waitOrderSettled") {
     val id       = CCOrderId.unsafeFrom(1L)
     val id2      = CCOrderId.unsafeFrom(2L)
-    val exchange = CoincheckExchange.stubLayer(openOrdersRes =
-      ZIO.succeed(
-        Seq(
-          CCOpenOrder.buy(
-            id,
-            CCOrderRate.unsafeFrom(100d),
-            BtcJpy,
-            CCOrderCreatedAt.unsafeFrom("today")
+    val exchange = ZLayer.succeed {
+      val m = MockitoSugar.mock[CoincheckExchange.Service]
+      when(m.openOrders).thenReturn(
+        ZIO.succeed(
+          Seq(
+            CCOpenOrder.buy(
+              id,
+              CCOrderRate.unsafeFrom(100d),
+              BtcJpy,
+              CCOrderCreatedAt.unsafeFrom("today")
+            )
           )
         )
       )
-    )
+      m
+    }
 
     (for {
       successFiber <- CoincheckBroker().waitOrderSettled(id2).fork
