@@ -15,9 +15,7 @@ final case class CCOrder(id: CCOrderId)
 
 object CCOrder {
   @newtype case class CCOrderId(value: Refined[Long, Positive])
-  object CCOrderId extends VOFactory[Long, Positive] {
-    override type VO = CCOrderId
-  }
+  object CCOrderId extends VOFactory[Long, Positive]
 
   sealed trait CCOrderType extends Snakecase
   sealed trait LimitOrder  extends CCOrderType
@@ -54,17 +52,11 @@ object CCOrder {
   }
 
   @newtype case class CCOrderRate(value: PositiveDouble)
-  object CCOrderRate extends VOFactory[Double, Positive] {
-    override type VO = CCOrderRate
-  }
+  object CCOrderRate extends VOFactory[Double, Positive]
 
   @newtype case class CCOrderAmount(value: PositiveDouble)
-  object CCOrderAmount extends VOFactory[Double, Positive] {
-    override type VO = CCOrderAmount
-  }
+  object CCOrderAmount extends VOFactory[Double, Positive]
 
   @newtype case class CCOrderCreatedAt(value: NonEmptyString)
-  object CCOrderCreatedAt extends VOFactory[String, NonEmpty] {
-    override type VO = CCOrderCreatedAt
-  }
+  object CCOrderCreatedAt extends VOFactory[String, NonEmpty]
 }

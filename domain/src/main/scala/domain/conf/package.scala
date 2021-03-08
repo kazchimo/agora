@@ -21,22 +21,14 @@ package object conf {
   }
 
   @newtype final case class CCEAccessKey(value: NonEmptyString)
-  object CCEAccessKey extends VOFactory[String, NonEmpty] {
-    override type VO = CCEAccessKey
-  }
+  object CCEAccessKey extends VOFactory[String, NonEmpty]
 
   @newtype final case class CCESecretKey(value: NonEmptyString)
-  object CCESecretKey extends VOFactory[String, NonEmpty] {
-    override type VO = CCESecretKey
-  }
+  object CCESecretKey extends VOFactory[String, NonEmpty]
 
   @newtype final case class BFAccessKey(value: NonEmptyString)
-  object BFAccessKey extends VOFactory[String, NonEmpty] {
-    override type VO = BFAccessKey
-  }
+  object BFAccessKey extends VOFactory[String, NonEmpty]
 
   @newtype final case class BFSecretKey(value: NonEmptyString)
-  object BFSecretKey extends VOFactory[String, NonEmpty] {
-    override type VO = BFSecretKey
-  }
+  object BFSecretKey extends VOFactory[String, NonEmpty]
 }

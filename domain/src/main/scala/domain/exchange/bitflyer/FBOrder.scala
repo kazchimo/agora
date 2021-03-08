@@ -23,19 +23,13 @@ final case class BFChildOrder(
 
 object BFChildOrder {
   @newtype case class BFOrderPrice(v: Long Refined Positive)
-  object BFOrderPrice extends VOFactory[Long, Positive] {
-    override type VO = BFOrderPrice
-  }
+  object BFOrderPrice extends VOFactory[Long, Positive]
 
   @newtype case class BFOrderSize(v: Double Refined Positive)
-  object BFOrderSize extends VOFactory[Double, Positive] {
-    override type VO = BFOrderSize
-  }
+  object BFOrderSize extends VOFactory[Double, Positive]
 
   @newtype case class BFOrderMinuteToExpire(v: Long Refined Positive)
-  object BFOrderMinuteToExpire extends VOFactory[Long, Positive] {
-    override type VO = BFOrderMinuteToExpire
-  }
+  object BFOrderMinuteToExpire extends VOFactory[Long, Positive]
 }
 
 sealed abstract class BFChildOrderType(val v: String)

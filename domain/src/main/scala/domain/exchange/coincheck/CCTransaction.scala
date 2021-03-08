@@ -22,21 +22,15 @@ final case class CCTransaction(
 
 object CCTransaction {
   @newtype case class CCTraId(value: Long Refined Positive)
-  object CCTraId extends VOFactory[Long, Positive] {
-    override type VO = CCTraId
-  }
+  object CCTraId extends VOFactory[Long, Positive]
 
   @newtype case class CCTraCreatedAt(
     value: NonEmptyString
   ) // TODO: validate with iso date regex
-  object CCTraCreatedAt extends VOFactory[String, NonEmpty] {
-    override type VO = CCTraCreatedAt
-  }
+  object CCTraCreatedAt extends VOFactory[String, NonEmpty]
 
   @newtype case class CCTraRate(value: Double Refined Positive)
-  object CCTraRate extends VOFactory[Double, Positive] {
-    override type VO = CCTraRate
-  }
+  object CCTraRate extends VOFactory[Double, Positive]
 
   sealed abstract class CCTraSide(override val entryName: String)
       extends Serializable with Product with EnumEntry
