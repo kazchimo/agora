@@ -1,25 +1,29 @@
 package domain.lib
 
 import eu.timepit.refined.api.{Refined, Validate}
-import io.estatico.newtype.Coercible
 import lib.error.ClientDomainError
 import lib.refined.refineVZE
 import zio.IO
 
-abstract class VOFactory[V, P] {
+abstract class VOFactory {
   type Type
+  type Repr <: Refined[_, _]
 
-  def apply(v: V Refined P): Type
+  def apply(v: Repr): Type
 
-  final def apply(v: V)(implicit
+  final def apply[V, P](v: V)(implicit
+    ev: Refined[V, P] =:= Repr,
     V: Validate[V, P]
   ): IO[ClientDomainError, Type] = refineVZE[P, V](v).bimap(
     e => ClientDomainError(s"Failed to create ${this.toString}", Some(e)),
-    apply
+    a => apply(ev(a))
   )
 
-  final def applyS(v: V)(implicit V: Validate[V, P]): IO[String, Type] =
-    refineVZE[P, V](v).bimap(_.getMessage, apply)
+  final def applyS[V, P](
+    v: V
+  )(implicit ev: Refined[V, P] =:= Repr, V: Validate[V, P]): IO[String, Type] =
+    refineVZE[P, V](v).bimap(_.getMessage, a => apply(ev(a)))
 
-  final def unsafeFrom(v: V): Type = apply(Refined.unsafeApply[V, P](v))
+  final def unsafeFrom[V, P](v: V)(implicit ev: Refined[V, P] =:= Repr): Type =
+    apply(Refined.unsafeApply[V, P](v))
 }

@@ -7,7 +7,7 @@ import zio.test.Assertion._
 import zio.test._
 
 object DryCoincheckExchangeImplTest extends DefaultRunnableSpec {
-  private val marketRate = CCOrderRate.unsafeFrom(10)
+  private val marketRate = CCOrderRate.unsafeFrom(10d)
 
   override def spec = suite("DryCoincheckExchangeImpl")(
     suite("FakeExchange")(

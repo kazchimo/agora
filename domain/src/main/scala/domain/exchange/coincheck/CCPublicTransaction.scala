@@ -19,18 +19,18 @@ final case class CCPublicTransaction(
 
 object CCPublicTransaction {
   @newtype final case class CCPubTraId(value: Refined[Long, Positive])
-  object CCPubTraId extends VOFactory[Long, Positive]
+  object CCPubTraId extends VOFactory
 
   @newtype final case class CCPubTraPair(value: NonEmptyString)
-  object CCPubTraPair extends VOFactory[String, NonEmpty]
+  object CCPubTraPair extends VOFactory
 
   @newtype final case class CCPubTraRate(value: Refined[Double, Positive])
-  object CCPubTraRate extends VOFactory[Double, Positive]
+  object CCPubTraRate extends VOFactory
 
   @newtype final case class CCPubTraQuantity(
     value: Refined[Double, NonNegative]
   )
-  object CCPubTraQuantity extends VOFactory[Double, NonNegative]
+  object CCPubTraQuantity extends VOFactory
 
   sealed abstract class CCPubTraSide(override val entryName: String)
       extends EnumEntry

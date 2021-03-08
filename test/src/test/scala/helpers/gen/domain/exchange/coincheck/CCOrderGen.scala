@@ -7,5 +7,5 @@ import zio.test.Gen
 
 object CCOrderGen {
   val ccOrderIdGen: Gen[Random, CCOrderId] =
-    positiveLongGen.map(CCOrderId.unsafeFrom)
+    positiveLongGen.map(l => CCOrderId.unsafeFrom(l))
 }

@@ -1,7 +1,6 @@
 package domain
 
 import domain.lib.VOFactory
-import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
 import zio.macros.accessible
@@ -21,14 +20,14 @@ package object conf {
   }
 
   @newtype final case class CCEAccessKey(value: NonEmptyString)
-  object CCEAccessKey extends VOFactory[String, NonEmpty]
+  object CCEAccessKey extends VOFactory
 
   @newtype final case class CCESecretKey(value: NonEmptyString)
-  object CCESecretKey extends VOFactory[String, NonEmpty]
+  object CCESecretKey extends VOFactory
 
   @newtype final case class BFAccessKey(value: NonEmptyString)
-  object BFAccessKey extends VOFactory[String, NonEmpty]
+  object BFAccessKey extends VOFactory
 
   @newtype final case class BFSecretKey(value: NonEmptyString)
-  object BFSecretKey extends VOFactory[String, NonEmpty]
+  object BFSecretKey extends VOFactory
 }

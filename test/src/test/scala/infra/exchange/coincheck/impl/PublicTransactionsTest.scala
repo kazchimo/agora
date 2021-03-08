@@ -42,9 +42,9 @@ trait PublicTransactionsTest { self: CoinCheckExchangeImplTest.type =>
         assertM(PublicTransactions.textToModel(text))(
           equalTo(
             CCPublicTransaction(
-              CCPubTraId.unsafeFrom(2357068),
+              CCPubTraId.unsafeFrom(2357068L),
               CCPubTraPair.unsafeFrom("btc_jpy"),
-              CCPubTraRate.unsafeFrom(148642),
+              CCPubTraRate.unsafeFrom(148642d),
               CCPubTraQuantity.unsafeFrom(0.7828),
               CCPubTraSide.CCPubTraBuy
             )

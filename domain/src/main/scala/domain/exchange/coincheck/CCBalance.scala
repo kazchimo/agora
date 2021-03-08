@@ -15,8 +15,8 @@ object CCBalance {
     JpyAmount(jpy).zip(BtcAmount(btc)).map((CCBalance.apply _).tupled)
 
   @newtype case class JpyAmount(value: NonNegativeDouble)
-  object JpyAmount extends VOFactory[Double, NonNegative]
+  object JpyAmount extends VOFactory
 
   @newtype case class BtcAmount(value: NonNegativeDouble)
-  object BtcAmount extends VOFactory[Double, NonNegative]
+  object BtcAmount extends VOFactory
 }

@@ -18,10 +18,10 @@ import zio.test.{Gen, Sized}
 
 object CCOrderRequestGen {
   val ccOrderRateGen: Gen[Random, CCOrderRate] =
-    positiveDoubleGen.map(CCOrderRate.unsafeFrom)
+    positiveDoubleGen.map(d => CCOrderRate.unsafeFrom(d))
 
   val ccOrderAmountGen: Gen[Random, CCOrderAmount] =
-    positiveDoubleGen.map(CCOrderAmount.unsafeFrom)
+    positiveDoubleGen.map(d => CCOrderAmount.unsafeFrom(d))
 
   val ccLimitBuyOrderRequestGen: Gen[Random, CCOrderRequest[Buy]] =
     Gen.zipN(ccOrderRateGen, ccOrderAmountGen)(CCOrderRequest.limitBuy)

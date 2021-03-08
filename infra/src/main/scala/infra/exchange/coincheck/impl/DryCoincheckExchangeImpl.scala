@@ -22,7 +22,7 @@ final private[impl] case class FakeExchange(marketRate: CCOrderRate) {
   private var pendingOrders: Map[CCOrderId, CCOrderRequest[_ <: CCOrderType]] =
     Map.empty
   private var balance                                                         = FakeBalance(0, 0)
-  private var maxId                                                           = 1
+  private var maxId                                                           = 1L
 
   def submitOrder(limitOrder: CCOrderRequest[_ <: CCOrderType]): CCOrder = {
     maxId = maxId + 1
