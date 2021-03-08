@@ -10,9 +10,7 @@ import zio.test._
 
 object VOFactoryTest extends DefaultRunnableSpec {
   @newtype case class V(v: NonEmptyString)
-  object V extends VOFactory[String, NonEmpty] {
-    override type VO = V
-  }
+  object V extends VOFactory[String, NonEmpty]
 
   val nonEmptyStringGen: Gen[Random with Sized, String] = for {
     s <- Gen.anyString
