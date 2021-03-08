@@ -1,7 +1,7 @@
 package infra.exchange.coincheck.impl
 
 import domain.exchange.coincheck.CoincheckExchange
-import infra.conf.ConfImpl
+import helpers.mockModule.zio.conf.defaultMockConfLayer
 import infra.exchange.IncreasingNonceImpl
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio._
@@ -15,9 +15,10 @@ object CoinCheckExchangeImplTest
   val failJson: String                =
     "{\"success\":false,\"error\":\"Nonce must be incremented\"}"
 
-  private val layer =
-    AsyncHttpClientZioBackend.stubLayer.orDie ++ ZEnv.live ++ Logging.ignore ++ ConfImpl.stubLayer ++ IncreasingNonceImpl
-      .layer(0) ++ CoincheckExchange.stubLayer()
+  private val layer = AsyncHttpClientZioBackend.stubLayer.orDie
+    .++(ZEnv.live).++(Logging.ignore).++(defaultMockConfLayer).++(
+      IncreasingNonceImpl.layer(0)
+    ).++(CoincheckExchange.stubLayer())
 
   override def spec = suite("CoinCheckExchangeImpl")(
     transactionsSuite,

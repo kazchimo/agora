@@ -9,6 +9,7 @@ import domain.exchange.coincheck.CCOrder.{
   CCOrderRate
 }
 import domain.exchange.coincheck.{CCOpenOrder, CoincheckExchange}
+import helpers.mockModule.zio.conf.defaultMockConfLayer
 import infra.conf.ConfImpl
 import infra.exchange.IncreasingNonceImpl
 import sttp.client3.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
@@ -44,7 +45,7 @@ object CoincheckBrokerTest extends DefaultRunnableSpec {
         exchange
       )
   }).provideCustomLayer(
-    AsyncHttpClientZioBackend.stubLayer.orDie ++ ConfImpl.stubLayer ++ Logging.ignore ++ IncreasingNonceImpl
+    AsyncHttpClientZioBackend.stubLayer.orDie ++ defaultMockConfLayer ++ Logging.ignore ++ IncreasingNonceImpl
       .layer(0)
   )
 }
