@@ -35,9 +35,10 @@ object Dependencies {
   ).map(_ % Versions.zio)
 
   lazy val testDeps       = Seq(
-    "dev.zio" %% "zio-test"          % Versions.zio,
-    "dev.zio" %% "zio-test-sbt"      % Versions.zio,
-    "dev.zio" %% "zio-test-magnolia" % Versions.zio
+    "dev.zio"     %% "zio-test"          % Versions.zio,
+    "dev.zio"     %% "zio-test-sbt"      % Versions.zio,
+    "dev.zio"     %% "zio-test-magnolia" % Versions.zio,
+    "org.mockito" %% "mockito-scala"     % "1.16.29"
   ).map(_ % Test)
 
   lazy val sttpDeps       = Seq(
