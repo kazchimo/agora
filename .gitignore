@@ -8,4 +8,5 @@ target
 .env
 .bsp
 .sbtconfig
+.bloop
 
