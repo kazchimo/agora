@@ -4,7 +4,6 @@ import domain.exchange.coincheck.CCPublicTransaction._
 import domain.lib.VOFactory
 import enumeratum._
 import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.{NonNegative, Positive}
 import eu.timepit.refined.types.all.NonEmptyString
 import io.estatico.newtype.macros.newtype

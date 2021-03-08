@@ -1,6 +1,7 @@
 package usecase
 
 import cats.Show
+import cats.syntax.show._
 import domain.broker.coincheck.CoincheckBroker
 import domain.exchange.coincheck.CCOrder.LimitOrder
 import domain.exchange.coincheck.{CCOrderRequest, CoincheckExchange}
@@ -8,7 +9,6 @@ import domain.strategy.{DowMethod, Signal}
 import lib.syntax.all._
 import zio.Ref
 import zio.logging.log
-import cats.syntax.show._
 
 final case class TradingState(
   onLong: Boolean,

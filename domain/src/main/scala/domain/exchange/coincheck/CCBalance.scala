@@ -2,7 +2,6 @@ package domain.exchange.coincheck
 
 import domain.exchange.coincheck.CCBalance.{BtcAmount, JpyAmount}
 import domain.lib.VOFactory
-import eu.timepit.refined.numeric.NonNegative
 import io.estatico.newtype.macros.newtype
 import lib.error.ClientDomainError
 import lib.refined.NonNegativeDouble

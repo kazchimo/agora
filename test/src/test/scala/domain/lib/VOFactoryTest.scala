@@ -1,6 +1,5 @@
 package domain.lib
 
-import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
 import lib.error.ClientDomainError

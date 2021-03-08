@@ -5,8 +5,8 @@ import domain.broker.coincheck.CoincheckBroker
 import domain.exchange.coincheck.{CCOrderRequest, CoincheckExchange}
 import lib.error.AdaptorInternalError
 import lib.syntax.all._
-import zio.{RIO, ZIO}
 import zio.logging.log
+import zio.{RIO, ZIO}
 
 object SellAllCoinInCoincheckUC {
   def sell(updatePriceIntervalSec: Int): RIO[AllEnv, Unit] = for {

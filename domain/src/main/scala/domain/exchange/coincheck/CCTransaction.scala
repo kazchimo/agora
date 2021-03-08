@@ -4,7 +4,6 @@ import domain.currency.Currency
 import domain.lib.{EnumZio, VOFactory}
 import enumeratum._
 import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype

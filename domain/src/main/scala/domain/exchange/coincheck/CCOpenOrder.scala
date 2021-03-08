@@ -8,8 +8,8 @@ import domain.lib.EnumZio
 import enumeratum.EnumEntry.Snakecase
 import enumeratum._
 import lib.error.{ClientDomainError, InternalDomainError}
-import zio.{IO, ZIO}
 import zio.interop.catz.core._
+import zio.{IO, ZIO}
 
 final case class CCOpenOrder private (
   id: CCOrderId,

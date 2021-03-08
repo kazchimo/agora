@@ -5,7 +5,6 @@ import domain.lib.{EnumZio, VOFactory}
 import enumeratum.EnumEntry.Snakecase
 import enumeratum.{CirceEnum, Enum}
 import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.all.NonEmptyString
 import io.estatico.newtype.macros.newtype
