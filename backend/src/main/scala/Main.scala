@@ -3,7 +3,7 @@ import infra.conf.ConfImpl
 import infra.exchange.{ExchangeImpl, IncreasingNonceImpl}
 import lib.error._
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import usecase.{
+import usecase.coincheck.{
   CancelAllInCoincheckUC,
   SellAllCoinInCoincheckUC,
   TradeInDowMethodUC

@@ -1,4 +1,4 @@
-package usecase
+package usecase.coincheck
 
 import domain.AllEnv
 import domain.broker.coincheck.CoincheckBroker

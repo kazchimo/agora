@@ -1,4 +1,4 @@
-package usecase
+package usecase.coincheck
 
 import cats.Show
 import cats.syntax.show._
