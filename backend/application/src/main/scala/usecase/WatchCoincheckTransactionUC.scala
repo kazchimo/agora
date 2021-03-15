@@ -2,13 +2,11 @@ package usecase
 
 import cats.Show
 import cats.syntax.show._
-import domain.conf.Conf
-import domain.exchange.Nonce.Nonce
+import domain.AllEnv
 import domain.exchange.coincheck.{CCPublicTransaction, CoincheckExchange}
 import lib.syntax.all._
-import sttp.client3.asynchttpclient.zio.SttpClient
-import zio.ZIO
-import zio.logging.{Logging, log}
+import zio.RIO
+import zio.logging.log
 
 object WatchCoincheckTransactionUC {
   implicit private val show: Show[CCPublicTransaction] = Show.show(a => s"""
@@ -19,11 +17,7 @@ object WatchCoincheckTransactionUC {
       |side: ${a.side.entryName}
       |""".stripMargin)
 
-  def watch: ZIO[
-    CoincheckExchange with zio.ZEnv with Logging with SttpClient with Conf with Nonce,
-    Throwable,
-    Unit
-  ] = for {
+  def watch: RIO[AllEnv, Unit] = for {
     _      <- log.info("Watching Coincheck transactions...")
     stream <- CoincheckExchange.publicTransactions
     _      <- stream.foreach(s => log.info(s.show))
