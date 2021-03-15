@@ -47,9 +47,7 @@ private[exchange] trait PublicTransactions { self: CoincheckExchange.Service =>
 }
 
 object PublicTransactions {
-  def textToModel(
-    text: String
-  ): ZIO[Logging, Throwable, CCPublicTransaction] = {
+  def textToModel(text: String): RIO[Logging, CCPublicTransaction] = {
     val regex = """\[(\d*),"(.*?)","(\d*\.\d*)","(\d*\.\d*)","(.*?)"\]""".r
     val error = InternalInfraError(
       s"Failed to parse body of Coincheck public transaction: $text"
