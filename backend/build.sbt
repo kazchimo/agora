@@ -1,4 +1,5 @@
 import Dependencies._
+import Wartremover.wartErrors
 import sbt.Keys.{envVars, fork}
 import sbtwelcome.UsefulTask
 
@@ -16,31 +17,7 @@ inThisBuild(
   )
 )
 
-lazy val wartErrors = Warts.allBut(
-  Wart.Any,
-  Wart.ImplicitConversion,
-  Wart.ImplicitParameter,
-  Wart.Nothing,
-  Wart.Overloading,
-  Wart.DefaultArguments,
-  Wart.ToString,
-  Wart.TraversableOps,
-  Wart.PublicInference,
-  Wart.Product,
-  Wart.Null,
-  Wart.Equals,
-  Wart.ToString,
-  Wart.Recursion,
-  Wart.Var
-) ++ ContribWart.allBut(
-  ContribWart.ExposedTuples,
-  ContribWart.Apply,
-  ContribWart.MissingOverride,
-  ContribWart.SymbolicName,
-  ContribWart.NoNeedForMonad,
-  ContribWart.SomeApply
-)
-lazy val rootDeps   = Seq(
+lazy val rootDeps = Seq(
   codec,
   newtype,
   refined,
