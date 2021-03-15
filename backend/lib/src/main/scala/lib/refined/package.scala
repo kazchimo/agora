@@ -15,4 +15,6 @@ package object refined {
 
   type NonNegativeDouble = Refined[Double, NonNegative]
   type PositiveDouble    = Refined[Double, Positive]
+
+  type PositiveLong = Refined[Long, Positive]
 }

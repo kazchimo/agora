@@ -1,14 +1,12 @@
 package domain.exchange.coincheck
 
 import domain.currency.Currency
+import domain.exchange.coincheck.CCTransaction._
 import domain.lib.{EnumZio, VOFactory}
 import enumeratum._
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
-
-import CCTransaction._
+import lib.refined.{PositiveDouble, PositiveLong}
 
 final case class CCTransaction(
   id: CCTraId,
@@ -20,7 +18,7 @@ final case class CCTransaction(
 )
 
 object CCTransaction {
-  @newtype case class CCTraId(value: Long Refined Positive)
+  @newtype case class CCTraId(value: PositiveLong)
   object CCTraId extends VOFactory
 
   @newtype case class CCTraCreatedAt(
@@ -28,7 +26,7 @@ object CCTransaction {
   ) // TODO: validate with iso date regex
   object CCTraCreatedAt extends VOFactory
 
-  @newtype case class CCTraRate(value: Double Refined Positive)
+  @newtype case class CCTraRate(value: PositiveDouble)
   object CCTraRate extends VOFactory
 
   sealed abstract class CCTraSide(override val entryName: String)
