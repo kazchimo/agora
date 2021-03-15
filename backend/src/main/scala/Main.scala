@@ -24,6 +24,7 @@ object Main extends zio.App {
     .provideCustomMagicLayer(
       ConfImpl.layer,
       ExchangeImpl.coinCheckExchange,
+      ExchangeImpl.liquidExchange,
       AsyncHttpClientZioBackend.layer(),
       Logging.console(logLevel = LogLevel.Info),
       IncreasingNonceImpl.layer(System.currentTimeMillis())
