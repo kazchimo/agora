@@ -28,7 +28,7 @@ private[liquid] case class ProductResponse(
 }
 
 private[liquid] case class WSMessage(event: String)
-private[liquid] case class UpdateMessage(event: String, data: ProductResponse)
+private[liquid] case class UpdateMessage(event: String, data: String)
 
 private[liquid] trait ProductsStream { self: LiquidExchange.Service =>
   private val subscribeText = WebSocketFrame.text(
@@ -50,11 +50,11 @@ private[liquid] trait ProductsStream { self: LiquidExchange.Service =>
                 ws.send(subscribeText) *> log.info("Connected!")
               case "pusher_internal:subscription_succeeded" =>
                 log.debug("Subscribed ws!")
-              case "updated"                                => ZIO
-                  .fromEither(decode[UpdateMessage](msg.payload)).onError(e =>
-                    log.error(e.prettyPrint)
-                  )
-                  .flatMap(d => queue.offer(d.data.toLiquidProduct))
+              case "updated"                                => for {
+                  d   <- ZIO.fromEither(decode[UpdateMessage](msg.payload))
+                  res <- ZIO.fromEither(decode[ProductResponse](d.data))
+                  _   <- queue.offer(res.toLiquidProduct)
+                } yield ()
               case a                                        => log.warn(s"Unexpected ws response: $a")
             }
   } yield ()).retryWhile(_.isInstanceOf[WebSocketClosed]).forever
