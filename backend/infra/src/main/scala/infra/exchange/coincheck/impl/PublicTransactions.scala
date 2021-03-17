@@ -35,15 +35,15 @@ private[exchange] trait PublicTransactions { self: CoincheckExchange.Service =>
   }
 
   final override def publicTransactions
-    : ZIO[AllEnv, Throwable, Stream[Nothing, CCPublicTransaction]] = for {
-    _   <- log.info("Querying coincheck public transactions...")
-    que <- Queue.unbounded[CCPublicTransaction]
-    _   <- sendR[Unit, AllEnv](
-             basicRequest
-               .get(uri"${Endpoints.websocket}")
-               .response(asWebSocketAlways(useWS(que)))
-           ).retryWhile(_.isInstanceOf[WebSocketClosed]).fork
-  } yield Stream.fromQueueWithShutdown(que).haltWhen(que.awaitShutdown)
+    : ZIO[AllEnv, Throwable, Stream[Throwable, CCPublicTransaction]] = for {
+    _     <- log.info("Querying coincheck public transactions...")
+    que   <- Queue.unbounded[CCPublicTransaction]
+    fiber <- sendR[Unit, AllEnv](
+               basicRequest
+                 .get(uri"${Endpoints.websocket}")
+                 .response(asWebSocketAlways(useWS(que)))
+             ).retryWhile(_.isInstanceOf[WebSocketClosed]).fork
+  } yield Stream.fromQueueWithShutdown(que).interruptWhen(fiber.join)
 }
 
 object PublicTransactions {

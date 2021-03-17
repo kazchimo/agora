@@ -13,7 +13,7 @@ final case class DowMethod(
   sellContinuous: Int
 ) {
   def signal(
-    tras: UStream[CCPublicTransaction]
+    tras: Stream[Throwable, CCPublicTransaction]
   ): ZIO[Logging, Nothing, UStream[Signal]] = for {
     barsForBuyRef  <- Ref.make(Chunk[OHLCBar]())
     barsForSellRef <- Ref.make(Chunk[OHLCBar]())

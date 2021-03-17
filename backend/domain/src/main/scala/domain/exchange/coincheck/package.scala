@@ -3,7 +3,7 @@ package domain.exchange
 import domain.exchange.coincheck.CCOrder.{CCOrderId, CCOrderType}
 import zio._
 import zio.macros.accessible
-import zio.stream.UStream
+import zio.stream.Stream
 
 package object coincheck {
   type CoincheckExchange = Has[CoincheckExchange.Service]
@@ -19,7 +19,7 @@ package object coincheck {
       def cancelOrder(id: CCOrderId): RIO[AllEnv, CCOrderId]
       def cancelStatus(id: CCOrderId): RIO[AllEnv, Boolean]
       def publicTransactions
-        : ZIO[AllEnv, Throwable, UStream[CCPublicTransaction]]
+        : ZIO[AllEnv, Throwable, Stream[Throwable, CCPublicTransaction]]
       def balance: RIO[AllEnv, CCBalance]
     }
   }
