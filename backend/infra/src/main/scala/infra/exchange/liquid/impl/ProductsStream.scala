@@ -27,7 +27,10 @@ private[liquid] case class ProductResponse(
   )
 }
 
-private[liquid] case class WSData(event: String, data: Option[ProductResponse])
+private[liquid] case class WSMessage(
+  event: String,
+  data: Option[ProductResponse]
+)
 
 private[liquid] trait ProductsStream { self: LiquidExchange.Service =>
   private val subscribeText = WebSocketFrame.text(
@@ -43,7 +46,7 @@ private[liquid] trait ProductsStream { self: LiquidExchange.Service =>
   )(ws: WebSocket[RIO[AllEnv, *]]) = log.debug("Websocket start!") *> (for {
     msg  <- ws.receiveTextFrame()
     _    <- log.trace(msg.payload)
-    data <- ZIO.fromEither(decode[WSData](msg.payload))
+    data <- ZIO.fromEither(decode[WSMessage](msg.payload))
     _    <- data.event match {
               case "pusher:connection_established"          =>
                 ws.send(subscribeText) *> log.info("Connected!")
