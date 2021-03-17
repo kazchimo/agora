@@ -2,7 +2,7 @@ package domain.exchange
 
 import zio.macros.accessible
 import zio.stream.Stream
-import zio.{Has, RIO, ZIO}
+import zio.{Has, ZIO}
 
 package object liquid {
   type LiquidExchange = Has[LiquidExchange.Service]

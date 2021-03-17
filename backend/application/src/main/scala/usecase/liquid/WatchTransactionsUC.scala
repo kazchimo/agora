@@ -1,12 +1,12 @@
 package usecase.liquid
 
 import cats.Show
+import cats.syntax.show._
 import domain.AllEnv
 import domain.exchange.liquid.{LiquidExchange, LiquidProduct}
-import zio.{Has, ZIO}
-import zio.logging.log
-import cats.syntax.show._
 import lib.syntax.all._
+import zio.ZIO
+import zio.logging.log
 
 object WatchTransactionsUC {
   implicit private val show: Show[LiquidProduct] = Show.show { a =>

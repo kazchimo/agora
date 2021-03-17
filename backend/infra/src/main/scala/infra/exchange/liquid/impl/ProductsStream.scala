@@ -6,15 +6,15 @@ import infra.exchange.liquid.Endpoints
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import io.circe.syntax._
 import io.circe.refined._
+import io.circe.syntax._
 import lib.error.InternalInfraError
 import lib.refined.NonNegativeDouble
-import sttp.client3.asynchttpclient.zio.{SttpClient, sendR}
+import sttp.client3.asynchttpclient.zio.sendR
 import sttp.client3.{basicRequest, _}
 import sttp.ws.{WebSocket, WebSocketClosed, WebSocketFrame}
 import zio.logging.log
-import zio.stream.{Stream, UStream, ZStream}
+import zio.stream.Stream
 import zio.{Queue, RIO, ZIO}
 
 private[liquid] case class ProductResponse(
