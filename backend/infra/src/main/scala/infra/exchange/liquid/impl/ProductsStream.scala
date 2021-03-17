@@ -35,7 +35,7 @@ private[liquid] trait ProductsStream { self: LiquidExchange.Service =>
     Json
       .obj(
         "event" -> "pusher:subscribe".asJson,
-        "data"  -> Json.obj("channel" -> "product_cash_BTC/JPY_5".asJson)
+        "data"  -> Json.obj("channel" -> "product_cash_btcjpy_5".asJson)
       ).asJson.noSpaces
   )
 
@@ -51,7 +51,9 @@ private[liquid] trait ProductsStream { self: LiquidExchange.Service =>
               case "pusher_internal:subscription_succeeded" =>
                 log.debug("Subscribed ws!")
               case "updated"                                => ZIO
-                  .fromEither(decode[UpdateMessage](msg.payload))
+                  .fromEither(decode[UpdateMessage](msg.payload)).onError(e =>
+                    log.error(e.prettyPrint)
+                  )
                   .flatMap(d => queue.offer(d.data.toLiquidProduct))
               case a                                        => log.warn(s"Unexpected ws response: $a")
             }
