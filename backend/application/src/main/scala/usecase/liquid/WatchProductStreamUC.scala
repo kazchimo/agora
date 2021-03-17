@@ -8,7 +8,7 @@ import lib.syntax.all._
 import zio.ZIO
 import zio.logging.log
 
-object WatchTransactionsUC {
+object WatchProductStreamUC {
   implicit private val show: Show[LiquidProduct] = Show.show { a =>
     s"""
        |last_traded_price: ${a.lastTradedPrice.deepInnerV.toString}
