@@ -1,7 +1,7 @@
 package domain.exchange
 
 import zio.macros.accessible
-import zio.stream.UStream
+import zio.stream.Stream
 import zio.{Has, RIO, ZIO}
 
 package object liquid {
@@ -12,7 +12,8 @@ package object liquid {
     import domain.AllEnv
 
     trait Service {
-      def productsStream: ZIO[AllEnv, Throwable, UStream[LiquidProduct]]
+      def productsStream
+        : ZIO[AllEnv, Throwable, Stream[Throwable, LiquidProduct]]
     }
   }
 }

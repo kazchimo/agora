@@ -10,13 +10,12 @@ import io.circe.syntax._
 import io.circe.refined._
 import lib.error.InternalInfraError
 import lib.refined.NonNegativeDouble
-import sttp.client3.asynchttpclient.zio.sendR
+import sttp.client3.asynchttpclient.zio.{SttpClient, sendR}
 import sttp.client3.{basicRequest, _}
 import sttp.ws.{WebSocket, WebSocketClosed, WebSocketFrame}
 import zio.logging.log
-import zio.stream.UStream
+import zio.stream.{Stream, UStream, ZStream}
 import zio.{Queue, RIO, ZIO}
-import zio.stream.Stream
 
 private[liquid] case class ProductResponse(
   last_traded_price: NonNegativeDouble,
@@ -41,11 +40,13 @@ private[liquid] trait ProductsStream { self: LiquidExchange.Service =>
 
   private def useWS(
     queue: Queue[LiquidProduct]
-  )(ws: WebSocket[RIO[AllEnv, *]]) = (for {
+  )(ws: WebSocket[RIO[AllEnv, *]]) = log.debug("Websocket start!") *> (for {
     msg  <- ws.receiveTextFrame()
+    _    <- log.trace(msg.payload)
     data <- ZIO.fromEither(decode[WSData](msg.payload))
     _    <- data.event match {
-              case "pusher:connection_established"          => ws.send(subscribeText)
+              case "pusher:connection_established"          =>
+                ws.send(subscribeText) *> log.info("Connected!")
               case "pusher_internal:subscription_succeeded" =>
                 log.debug("Subscribed ws!")
               case "updated"                                => ZIO
@@ -55,16 +56,18 @@ private[liquid] trait ProductsStream { self: LiquidExchange.Service =>
                     )
                   )(data.data)
                   .flatMap(d => queue.offer(d.toLiquidProduct))
+              case a                                        => log.warn(s"Unexpected ws response: $a")
             }
   } yield ()).retryWhile(_.isInstanceOf[WebSocketClosed]).forever
 
   final override def productsStream
-    : ZIO[AllEnv, Throwable, UStream[LiquidProduct]] = for {
+    : ZIO[AllEnv, Nothing, Stream[Throwable, LiquidProduct]] = for {
+    _     <- log.info("Getting liquid product stream...")
     queue <- Queue.unbounded[LiquidProduct]
-    _     <-
+    fiber <-
       sendR[Unit, AllEnv](
         basicRequest
           .get(uri"${Endpoints.ws}").response(asWebSocketAlways(useWS(queue)))
       ).fork
-  } yield Stream.fromQueueWithShutdown(queue).haltWhen(queue.awaitShutdown)
+  } yield Stream.fromQueueWithShutdown(queue).interruptWhen(fiber.join)
 }
