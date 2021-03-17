@@ -24,8 +24,6 @@ private[liquid] case class ProductResponse(
   )
 }
 
-private[liquid] case class UpdateMessage(event: String, data: String)
-
 private[liquid] trait ProductsStream extends WebSocketHandler {
   self: LiquidExchange.Service =>
 
@@ -35,7 +33,7 @@ private[liquid] trait ProductsStream extends WebSocketHandler {
     "Websocket start!"
   ) *> handleMessage(ws, "product_cash_btcjpy_5", "updated")(s =>
     for {
-      d   <- ZIO.fromEither(decode[UpdateMessage](s))
+      d   <- ZIO.fromEither(decode[DataMessage](s))
       res <- ZIO.fromEither(decode[ProductResponse](d.data))
       _   <- queue.offer(res.toLiquidProduct)
     } yield ()

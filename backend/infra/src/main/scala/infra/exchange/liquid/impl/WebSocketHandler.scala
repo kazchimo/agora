@@ -11,6 +11,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 
 private[liquid] case class WSMessage(event: String)
+private[liquid] case class DataMessage(event: String, data: String)
 
 private[liquid] trait WebSocketHandler { self: LiquidExchange.Service =>
   private def subscribeText(channel: String) = WebSocketFrame.text(
