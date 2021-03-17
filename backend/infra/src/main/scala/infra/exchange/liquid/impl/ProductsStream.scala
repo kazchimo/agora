@@ -3,16 +3,13 @@ package infra.exchange.liquid.impl
 import domain.AllEnv
 import domain.exchange.liquid.{LiquidExchange, LiquidProduct}
 import infra.exchange.liquid.Endpoints
-import io.circe.Json
 import io.circe.generic.auto._
-import io.circe.parser.decode
 import io.circe.refined._
-import io.circe.syntax._
-import lib.error.InternalInfraError
+import io.circe.parser.decode
 import lib.refined.NonNegativeDouble
 import sttp.client3.asynchttpclient.zio.sendR
 import sttp.client3.{basicRequest, _}
-import sttp.ws.{WebSocket, WebSocketClosed, WebSocketFrame}
+import sttp.ws.WebSocket
 import zio.logging.log
 import zio.stream.Stream
 import zio.{Queue, RIO, ZIO}
@@ -27,37 +24,22 @@ private[liquid] case class ProductResponse(
   )
 }
 
-private[liquid] case class WSMessage(event: String)
 private[liquid] case class UpdateMessage(event: String, data: String)
 
-private[liquid] trait ProductsStream { self: LiquidExchange.Service =>
-  private val subscribeText = WebSocketFrame.text(
-    Json
-      .obj(
-        "event" -> "pusher:subscribe".asJson,
-        "data"  -> Json.obj("channel" -> "product_cash_btcjpy_5".asJson)
-      ).asJson.noSpaces
-  )
+private[liquid] trait ProductsStream extends WebSocketHandler {
+  self: LiquidExchange.Service =>
 
   private def useWS(
     queue: Queue[LiquidProduct]
-  )(ws: WebSocket[RIO[AllEnv, *]]) = log.debug("Websocket start!") *> (for {
-    msg  <- ws.receiveTextFrame()
-    _    <- log.trace(msg.payload)
-    data <- ZIO.fromEither(decode[WSMessage](msg.payload))
-    _    <- data.event match {
-              case "pusher:connection_established"          =>
-                ws.send(subscribeText) *> log.info("Connected!")
-              case "pusher_internal:subscription_succeeded" =>
-                log.debug("Subscribed ws!")
-              case "updated"                                => for {
-                  d   <- ZIO.fromEither(decode[UpdateMessage](msg.payload))
-                  res <- ZIO.fromEither(decode[ProductResponse](d.data))
-                  _   <- queue.offer(res.toLiquidProduct)
-                } yield ()
-              case a                                        => log.warn(s"Unexpected ws response: $a")
-            }
-  } yield ()).retryWhile(_.isInstanceOf[WebSocketClosed]).forever
+  )(ws: WebSocket[RIO[AllEnv, *]]) = log.debug(
+    "Websocket start!"
+  ) *> handleMessage(ws, "product_cash_btcjpy_5")(s =>
+    for {
+      d   <- ZIO.fromEither(decode[UpdateMessage](s))
+      res <- ZIO.fromEither(decode[ProductResponse](d.data))
+      _   <- queue.offer(res.toLiquidProduct)
+    } yield ()
+  ).forever
 
   final override def productsStream
     : ZIO[AllEnv, Nothing, Stream[Throwable, LiquidProduct]] = for {
