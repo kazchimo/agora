@@ -1,6 +1,7 @@
 package infra.exchange.coincheck.impl
 
 import domain.exchange.coincheck.CoincheckExchange
+import domain.exchange.liquid.LiquidExchange
 import helpers.mockModule.zio.conf.defaultMockConfLayer
 import infra.exchange.IncreasingNonceImpl
 import org.mockito.MockitoSugar
@@ -19,7 +20,9 @@ object CoinCheckExchangeImplTest
   private val layer = AsyncHttpClientZioBackend.stubLayer.orDie
     .++(ZEnv.live).++(Logging.ignore).++(defaultMockConfLayer).++(
       IncreasingNonceImpl.layer(0)
-    ).++(ZLayer.succeed(MockitoSugar.mock[CoincheckExchange.Service]))
+    ).++(ZLayer.succeed(MockitoSugar.mock[CoincheckExchange.Service])).++(
+      ZLayer.succeed(MockitoSugar.mock[LiquidExchange.Service])
+    )
 
   override def spec = suite("CoinCheckExchangeImpl")(
     transactionsSuite,

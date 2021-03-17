@@ -9,6 +9,7 @@ import domain.exchange.coincheck.CCOrder.{
   CCOrderRate
 }
 import domain.exchange.coincheck.{CCOpenOrder, CoincheckExchange}
+import domain.exchange.liquid.LiquidExchange
 import helpers.mockModule.zio.conf.defaultMockConfLayer
 import infra.exchange.IncreasingNonceImpl
 import org.mockito.MockitoSugar
@@ -45,12 +46,11 @@ object CoincheckBrokerTest extends DefaultRunnableSpec {
       failFiber    <- CoincheckBroker().waitOrderSettled(id).fork
       _            <- successFiber.join
       done         <- failFiber.status.map(_.isDone)
-    } yield assert(done)(isFalse))
-      .provideSomeLayer[SttpClient with Conf with Logging with ZEnv with Nonce](
-        exchange
-      )
+    } yield assert(done)(isFalse)).provideSomeLayer[
+      LiquidExchange with SttpClient with Conf with Logging with ZEnv with Nonce
+    ](exchange)
   }).provideCustomLayer(
     AsyncHttpClientZioBackend.stubLayer.orDie ++ defaultMockConfLayer ++ Logging.ignore ++ IncreasingNonceImpl
-      .layer(0)
+      .layer(0) ++ ZLayer.succeed(MockitoSugar.mock[LiquidExchange.Service])
   )
 }
