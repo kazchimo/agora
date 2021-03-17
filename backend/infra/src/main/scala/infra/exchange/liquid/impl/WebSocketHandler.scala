@@ -2,6 +2,7 @@ package infra.exchange.liquid.impl
 
 import domain.AllEnv
 import domain.exchange.liquid.LiquidExchange
+import infra.exchange.liquid.Endpoints
 import io.circe.Json
 import sttp.ws.{WebSocket, WebSocketClosed, WebSocketFrame}
 import zio.{IO, RIO, ZIO}
@@ -9,6 +10,8 @@ import zio.logging.log
 import io.circe.parser.decode
 import io.circe.generic.auto._
 import io.circe.syntax._
+import sttp.client3.asynchttpclient.zio.{SttpClient, sendR}
+import sttp.client3.{Response, UriContext, asWebSocketAlways, basicRequest}
 
 private[liquid] case class WSMessage(event: String)
 private[liquid] case class DataMessage(event: String, data: String)
@@ -22,7 +25,7 @@ private[liquid] trait WebSocketHandler { self: LiquidExchange.Service =>
       ).asJson.noSpaces
   )
 
-  def handleMessage(
+  protected def handleMessage(
     ws: WebSocket[RIO[AllEnv, *]],
     subscribeChannel: String,
     eventName: String
@@ -41,4 +44,10 @@ private[liquid] trait WebSocketHandler { self: LiquidExchange.Service =>
               case a                                        => log.warn(s"Unexpected ws response: $a")
             }
   } yield ()).retryWhile(_.isInstanceOf[WebSocketClosed])
+
+  protected def sendWS(
+    f: WebSocket[RIO[AllEnv, *]] => ZIO[AllEnv, Throwable, Unit]
+  ): ZIO[AllEnv, Throwable, Response[Unit]] = sendR[Unit, AllEnv](
+    basicRequest.get(uri"${Endpoints.ws}").response(asWebSocketAlways(f))
+  )
 }

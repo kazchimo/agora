@@ -51,10 +51,6 @@ private[liquid] trait ExecutionStream extends WebSocketHandler {
   override def executionStream
     : ZIO[AllEnv, Throwable, stream.Stream[Throwable, LiquidExecution]] = for {
     queue <- Queue.unbounded[LiquidExecution]
-    fiber <-
-      sendR[Unit, AllEnv](
-        basicRequest
-          .get(uri"${Endpoints.ws}").response(asWebSocketAlways(useWS(queue)))
-      ).fork
+    fiber <- sendWS(useWS(queue)).fork
   } yield Stream.fromQueueWithShutdown(queue).interruptWhen(fiber.join)
 }

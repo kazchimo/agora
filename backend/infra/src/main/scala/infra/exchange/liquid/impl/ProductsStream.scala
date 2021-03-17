@@ -43,10 +43,6 @@ private[liquid] trait ProductsStream extends WebSocketHandler {
     : ZIO[AllEnv, Nothing, Stream[Throwable, LiquidProduct]] = for {
     _     <- log.info("Getting liquid product stream...")
     queue <- Queue.unbounded[LiquidProduct]
-    fiber <-
-      sendR[Unit, AllEnv](
-        basicRequest
-          .get(uri"${Endpoints.ws}").response(asWebSocketAlways(useWS(queue)))
-      ).fork
+    fiber <- sendWS(useWS(queue)).fork
   } yield Stream.fromQueueWithShutdown(queue).interruptWhen(fiber.join)
 }
