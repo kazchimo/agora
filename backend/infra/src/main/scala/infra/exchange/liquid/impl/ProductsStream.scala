@@ -2,13 +2,10 @@ package infra.exchange.liquid.impl
 
 import domain.AllEnv
 import domain.exchange.liquid.{LiquidExchange, LiquidProduct}
-import infra.exchange.liquid.Endpoints
 import io.circe.generic.auto._
-import io.circe.refined._
 import io.circe.parser.decode
+import io.circe.refined._
 import lib.refined.NonNegativeDouble
-import sttp.client3.asynchttpclient.zio.sendR
-import sttp.client3.{basicRequest, _}
 import sttp.ws.WebSocket
 import zio.logging.log
 import zio.stream.Stream

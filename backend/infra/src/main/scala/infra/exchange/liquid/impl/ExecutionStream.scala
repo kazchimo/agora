@@ -3,17 +3,13 @@ package infra.exchange.liquid.impl
 import domain.AllEnv
 import domain.exchange.liquid.LiquidCurrencyPairCode.BtcJpy
 import domain.exchange.liquid.{LiquidExchange, LiquidExecution}
-import infra.exchange.liquid.Endpoints
-import sttp.client3.asynchttpclient.zio.sendR
-import sttp.client3.{UriContext, asWebSocketAlways, basicRequest}
-import sttp.ws.WebSocket
-import zio.logging.log
-import zio.{Queue, RIO, ZIO, stream}
-import zio.stream._
-import io.circe.parser.decode
 import io.circe.generic.auto._
-import lib.refined.{NonNegativeDouble, NonNegativeLong, PositiveLong}
+import io.circe.parser.decode
 import io.circe.refined._
+import lib.refined.{NonNegativeDouble, NonNegativeLong}
+import sttp.ws.WebSocket
+import zio.stream._
+import zio.{Queue, RIO, ZIO, stream}
 
 private[liquid] case class ExecutionResponse(
   id: NonNegativeLong,
