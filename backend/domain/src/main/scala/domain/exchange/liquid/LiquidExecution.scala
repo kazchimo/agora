@@ -10,7 +10,8 @@ final case class LiquidExecution(
   id: Id,
   quantity: Quantity,
   price: Price,
-  takerSide: TakerSide
+  takerSide: TakerSide,
+  createdAt: CreatedAt
 )
 
 object LiquidExecution {

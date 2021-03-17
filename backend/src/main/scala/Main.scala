@@ -1,5 +1,6 @@
 import cats.syntax.show._
 import infra.conf.ConfImpl
+import infra.exchange.liquid.impl.LiquidExchangeImpl
 import infra.exchange.{ExchangeImpl, IncreasingNonceImpl}
 import lib.error._
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
@@ -8,7 +9,7 @@ import usecase.coincheck.{
   SellAllCoinInCoincheckUC,
   TradeInDowMethodUC
 }
-import usecase.liquid.WatchProductStreamUC
+import usecase.liquid.{WatchExecutionStreamUC, WatchProductStreamUC}
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
@@ -38,5 +39,5 @@ object Main extends zio.App {
   val settleAll  = sellAll <&> cancelAll
 
   private val app =
-    log.info("start") *> WatchProductStreamUC.watch *> log.info("end")
+    log.info("start") *> WatchExecutionStreamUC.watch *> log.info("end")
 }
