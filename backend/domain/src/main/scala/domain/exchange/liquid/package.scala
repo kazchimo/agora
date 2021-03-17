@@ -14,6 +14,8 @@ package object liquid {
     trait Service {
       def productsStream
         : ZIO[AllEnv, Throwable, Stream[Throwable, LiquidProduct]]
+      def executionStream
+        : ZIO[AllEnv, Throwable, Stream[Throwable, LiquidExecution]]
     }
   }
 }
