@@ -1,6 +1,7 @@
 package infra.exchange.liquid.impl
 
 import domain.AllEnv
+import domain.exchange.liquid.LiquidCurrencyPairCode.BtcJpy
 import domain.exchange.liquid.{LiquidExchange, LiquidProduct}
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -28,7 +29,7 @@ private[liquid] trait ProductsStream extends WebSocketHandler {
     queue: Queue[LiquidProduct]
   )(ws: WebSocket[RIO[AllEnv, *]]) = log.debug(
     "Websocket start!"
-  ) *> handleMessage(ws, "product_cash_btcjpy_5", "updated")(s =>
+  ) *> handleMessage(ws, s"product_cash_${BtcJpy.entryName}_5", "updated")(s =>
     for {
       d   <- ZIO.fromEither(decode[DataMessage](s))
       res <- ZIO.fromEither(decode[ProductResponse](d.data))
