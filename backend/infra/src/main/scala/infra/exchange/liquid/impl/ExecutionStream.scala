@@ -6,10 +6,11 @@ import domain.exchange.liquid.{LiquidExchange, LiquidExecution}
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.refined._
+import lib.error.ClientDomainError
 import lib.refined.{NonNegativeDouble, NonNegativeLong}
 import sttp.ws.WebSocket
 import zio.stream._
-import zio.{Queue, RIO, ZIO, stream}
+import zio.{IO, Queue, RIO, ZIO, stream}
 
 private[liquid] case class ExecutionResponse(
   id: NonNegativeLong,
@@ -18,7 +19,7 @@ private[liquid] case class ExecutionResponse(
   quantity: NonNegativeDouble,
   taker_side: String
 ) {
-  def toLiquidExecution =
+  def toLiquidExecution: IO[ClientDomainError, LiquidExecution] =
     LiquidExecution.TakerSide.withNameZio(taker_side).map { side =>
       LiquidExecution(
         LiquidExecution.Id(id),
