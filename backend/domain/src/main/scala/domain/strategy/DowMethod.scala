@@ -7,8 +7,8 @@ import zio.logging.{Logging, log}
 import zio.stream._
 import lib.instance.all._
 import lib.syntax.all._
-
 import DowMethod._
+import lib.refined.PositiveDouble
 
 final case class DowMethod(
   aggCount: Int,
@@ -16,8 +16,8 @@ final case class DowMethod(
   sellContinuous: Int
 ) {
   def signal(
-    tras: Stream[Throwable, CCPublicTransaction]
-  ): ZIO[Logging, Nothing, UStream[Signal]] = for {
+    tras: Stream[Throwable, PositiveDouble]
+  ): URIO[Logging, UStream[Signal]] = for {
     barsForBuyRef  <- Ref.make(Chunk[OHLCBar]())
     barsForSellRef <- Ref.make(Chunk[OHLCBar]())
     signalQueue    <- Queue.unbounded[Signal]
@@ -45,10 +45,9 @@ final case class DowMethod(
 }
 
 object DowMethod {
-  def toBars(c: Chunk[CCPublicTransaction]): Task[OHLCBar] = for {
-    nonEmptyChunk <- ZIO.getOrFail(NonEmptyChunk.fromChunk(c))
-    rates          = nonEmptyChunk.map(_.rate.value)
-  } yield OHLCBar.fromRates(rates)
+  def toBars(c: Chunk[PositiveDouble]): Task[OHLCBar] = ZIO
+    .getOrFail(NonEmptyChunk.fromChunk(c))
+    .map(rates => OHLCBar.fromRates(rates))
 
   def updateBars[A](
     barsRef: Ref[Chunk[A]],

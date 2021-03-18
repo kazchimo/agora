@@ -67,7 +67,7 @@ object TradeInDowMethodUC {
     transactionsStream <- CoincheckExchange.publicTransactions
     tradingStateRef    <- Ref.make(TradingState(false, 0, 0))
     signalStream       <- DowMethod(aggCount, buyContinuous, sellContinuous)
-                            .signal(transactionsStream)
+                            .signal(transactionsStream.map(_.rate.value))
     _                  <- signalStream.foreach { signal =>
                             for {
                               tradingState <- tradingStateRef.get
