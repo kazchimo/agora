@@ -7,6 +7,7 @@ import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.{NonNegative, Positive}
 import eu.timepit.refined.types.all.NonEmptyString
 import io.estatico.newtype.macros.newtype
+import lib.refined.{NonNegativeDouble, PositiveDouble, PositiveLong}
 
 final case class CCPublicTransaction(
   id: CCPubTraId,
@@ -17,18 +18,16 @@ final case class CCPublicTransaction(
 )
 
 object CCPublicTransaction {
-  @newtype final case class CCPubTraId(value: Refined[Long, Positive])
+  @newtype final case class CCPubTraId(value: PositiveLong)
   object CCPubTraId extends VOFactory
 
   @newtype final case class CCPubTraPair(value: NonEmptyString)
   object CCPubTraPair extends VOFactory
 
-  @newtype final case class CCPubTraRate(value: Refined[Double, Positive])
+  @newtype final case class CCPubTraRate(value: PositiveDouble)
   object CCPubTraRate extends VOFactory
 
-  @newtype final case class CCPubTraQuantity(
-    value: Refined[Double, NonNegative]
-  )
+  @newtype final case class CCPubTraQuantity(value: NonNegativeDouble)
   object CCPubTraQuantity extends VOFactory
 
   sealed abstract class CCPubTraSide(override val entryName: String)
