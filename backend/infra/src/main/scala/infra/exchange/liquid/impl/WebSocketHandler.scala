@@ -30,7 +30,7 @@ private[liquid] trait WebSocketHandler { self: LiquidExchange.Service =>
     subscribeChannel: String,
     eventName: String
   )(
-    onEvent: String => ZIO[AllEnv, Throwable, Unit]
+    onEvent: DataMessage => ZIO[AllEnv, Throwable, Unit]
   ): ZIO[AllEnv, Throwable, Unit] = (for {
     msg  <- ws.receiveTextFrame()
     _    <- log.trace(msg.payload)
@@ -40,7 +40,9 @@ private[liquid] trait WebSocketHandler { self: LiquidExchange.Service =>
                 ws.send(subscribeText(subscribeChannel)) *> log.info("Connected!")
               case "pusher_internal:subscription_succeeded" =>
                 log.debug("Subscribed ws!")
-              case `eventName`                              => onEvent(msg.payload)
+              case `eventName`                              => ZIO
+                  .fromEither(decode[DataMessage](msg.payload))
+                  .flatMap(data => onEvent(data))
               case a                                        => log.warn(s"Unexpected ws response: $a")
             }
   } yield ()).retryWhile(_.isInstanceOf[WebSocketClosed])

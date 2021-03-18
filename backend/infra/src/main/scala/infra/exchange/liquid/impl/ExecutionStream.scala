@@ -36,9 +36,8 @@ private[liquid] trait ExecutionStream extends WebSocketHandler {
   private def useWS(
     queue: Queue[LiquidExecution]
   )(ws: WebSocket[RIO[AllEnv, *]]) =
-    handleMessage(ws, s"executions_cash_${BtcJpy.entryName}", "created") { s =>
+    handleMessage(ws, s"executions_cash_${BtcJpy.entryName}", "created") { d =>
       for {
-        d   <- ZIO.fromEither(decode[DataMessage](s))
         res <- ZIO.fromEither(decode[ExecutionResponse](d.data))
         e   <- res.toLiquidExecution
         _   <- queue.offer(e)
