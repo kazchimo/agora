@@ -2,7 +2,7 @@ package domain.exchange
 
 import zio.macros.accessible
 import zio.stream.Stream
-import zio.{Has, ZIO}
+import zio.{Has, RIO}
 
 package object liquid {
   type LiquidExchange = Has[LiquidExchange.Service]
@@ -12,10 +12,8 @@ package object liquid {
     import domain.AllEnv
 
     trait Service {
-      def productsStream
-        : ZIO[AllEnv, Throwable, Stream[Throwable, LiquidProduct]]
-      def executionStream
-        : ZIO[AllEnv, Throwable, Stream[Throwable, LiquidExecution]]
+      def productsStream: RIO[AllEnv, Stream[Throwable, LiquidProduct]]
+      def executionStream: RIO[AllEnv, Stream[Throwable, LiquidExecution]]
     }
   }
 }
