@@ -3,7 +3,11 @@ package usecase.coincheck
 import cats.Show
 import cats.syntax.show._
 import domain.broker.coincheck.CoincheckBroker
-import domain.exchange.coincheck.CCOrder.LimitOrder
+import domain.exchange.coincheck.CCOrder.{
+  CCOrderAmount,
+  CCOrderRate,
+  LimitOrder
+}
 import domain.exchange.coincheck.{CCOrderRequest, CoincheckExchange}
 import domain.strategy.{DowMethod, Signal}
 import lib.syntax.all._
@@ -35,16 +39,16 @@ object TradeInDowMethodUC {
   )
 
   private def buy(signal: Signal, tradingStateRef: Ref[TradingState]) = for {
-    request <- CCOrderRequest.limitBuy(signal.at, jpy / signal.at)
+    request <- CCOrderRequest.limitBuy(CCOrderRate(signal.at), jpy / signal.at)
     _       <- log.info(s"Buy! ${request.show}")
     _       <- CoincheckBroker().priceAdjustingOrder(request, interval)
-    _       <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at))
+    _       <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at.value))
   } yield ()
 
   private def sell(signal: Signal, tradingStateRef: Ref[TradingState]) = for {
     tradingState <- tradingStateRef.get
-    request      <-
-      CCOrderRequest.limitSell(signal.at, jpy / tradingState.lastBuyRate)
+    amount       <- CCOrderAmount(jpy / tradingState.lastBuyRate)
+    request      <- CCOrderRequest.limitSell(CCOrderRate(signal.at), amount)
     _            <- log.info(s"Sell! ${request.show}")
     _            <- CoincheckBroker().priceAdjustingOrder(request, interval)
     tradingState <- tradingStateRef.get
