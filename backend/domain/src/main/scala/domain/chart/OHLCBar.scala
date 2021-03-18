@@ -26,6 +26,18 @@ object OHLCBar {
   @newtype case class Close(value: PositiveDouble)
   object Close extends VOFactory
 
+  def unsafeApply(
+    open: Double,
+    high: Double,
+    low: Double,
+    close: Double
+  ): OHLCBar = OHLCBar(
+    Open.unsafeFrom(open),
+    High.unsafeFrom(high),
+    Low.unsafeFrom(low),
+    Close.unsafeFrom((close))
+  )
+
   def fromTransactions(ts: Chunk[CCPublicTransaction]): OHLCBar = {
     val rates = ts.map(_.rate.value)
     OHLCBar(

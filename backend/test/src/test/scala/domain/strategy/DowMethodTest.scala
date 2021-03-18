@@ -22,30 +22,54 @@ object DowMethodTest extends DefaultRunnableSpec {
     test("#shouldBuy") {
       assert(
         DowMethod.shouldBuy(
-          Chunk(OHLCBar(0, 0, 0, 0), OHLCBar(1, 1, 1, 1), OHLCBar(2, 2, 2, 2))
+          Chunk(
+            OHLCBar.unsafeApply(0, 0, 0, 0),
+            OHLCBar.unsafeApply(1, 1, 1, 1),
+            OHLCBar.unsafeApply(2, 2, 2, 2)
+          )
         )
       )(isTrue) && assert(
         DowMethod.shouldBuy(
-          Chunk(OHLCBar(1, 1, 1, 1), OHLCBar(2, 2, 2, 2), OHLCBar(0, 0, 0, 0))
+          Chunk(
+            OHLCBar.unsafeApply(1, 1, 1, 1),
+            OHLCBar.unsafeApply(2, 2, 2, 2),
+            OHLCBar.unsafeApply(0, 0, 0, 0)
+          )
         )
       )(isFalse) && assert(
         DowMethod.shouldBuy(
-          Chunk(OHLCBar(0, 0, 0, 0), OHLCBar(0, 0, 0, 0), OHLCBar(0, 0, 0, 0))
+          Chunk(
+            OHLCBar.unsafeApply(0, 0, 0, 0),
+            OHLCBar.unsafeApply(0, 0, 0, 0),
+            OHLCBar.unsafeApply(0, 0, 0, 0)
+          )
         )
       )(isFalse)
     },
     test("#shouldSell") {
       assert(
         DowMethod.shouldSell(
-          Chunk(OHLCBar(0, 0, 0, 0), OHLCBar(1, 1, 1, 1), OHLCBar(2, 2, 2, 2))
+          Chunk(
+            OHLCBar.unsafeApply(0, 0, 0, 0),
+            OHLCBar.unsafeApply(1, 1, 1, 1),
+            OHLCBar.unsafeApply(2, 2, 2, 2)
+          )
         )
       )(isFalse) && assert(
         DowMethod.shouldSell(
-          Chunk(OHLCBar(2, 2, 2, 2), OHLCBar(1, 1, 1, 1), OHLCBar(0, 0, 0, 0))
+          Chunk(
+            OHLCBar.unsafeApply(2, 2, 2, 2),
+            OHLCBar.unsafeApply(1, 1, 1, 1),
+            OHLCBar.unsafeApply(0, 0, 0, 0)
+          )
         )
       )(isTrue) && assert(
         DowMethod.shouldSell(
-          Chunk(OHLCBar(0, 0, 0, 0), OHLCBar(0, 0, 0, 0), OHLCBar(0, 0, 0, 0))
+          Chunk(
+            OHLCBar.unsafeApply(0, 0, 0, 0),
+            OHLCBar.unsafeApply(0, 0, 0, 0),
+            OHLCBar.unsafeApply(0, 0, 0, 0)
+          )
         )
       )(isFalse)
     }
