@@ -55,21 +55,9 @@ private[coincheck] trait OrderFactory {
     CCOrderRequest(pair, orderType, rate, amount, marketBuyAmount, stopLossRate)
 
   final def limitBuy(
-    rate: Double,
-    amount: Double
-  ): IO[ClientDomainError, CCOrderRequest[Buy]] =
-    CCOrderRate(rate).zip(CCOrderAmount(amount)).map(a => limitBuy(a._1, a._2))
-
-  final def limitBuy(
     rate: CCOrderRate,
     amount: CCOrderAmount
   ): CCOrderRequest[Buy] = CCOrderRequest(BtcJpy, Buy, Some(rate), Some(amount))
-
-  final def limitSell(
-    rate: Double,
-    amount: Double
-  ): IO[ClientDomainError, CCOrderRequest[Sell]] =
-    CCOrderRate(rate).zip(CCOrderAmount(amount)).map(a => limitSell(a._1, a._2))
 
   final def limitSell(
     rate: CCOrderRate,
@@ -78,19 +66,9 @@ private[coincheck] trait OrderFactory {
     CCOrderRequest(BtcJpy, Sell, Some(rate), Some(amount))
 
   final def marketBuy(
-    marketBuyAmount: Double
-  ): IO[ClientDomainError, CCOrderRequest[MarketBuy]] =
-    CCOrderAmount(marketBuyAmount).map(marketBuy)
-
-  final def marketBuy(
     marketBuyAmount: CCOrderAmount
   ): CCOrderRequest[MarketBuy] =
     CCOrderRequest(BtcJpy, MarketBuy, marketBuyAmount = Some(marketBuyAmount))
-
-  final def marketSell(
-    amount: Double
-  ): IO[ClientDomainError, CCOrderRequest[MarketSell]] =
-    CCOrderAmount(amount).map(marketSell)
 
   final def marketSell(amount: CCOrderAmount): CCOrderRequest[MarketSell] =
     CCOrderRequest(BtcJpy, MarketSell, amount = Some(amount))
