@@ -1,13 +1,12 @@
 package domain.chart
 
 import domain.chart.OHLCBar._
-import domain.exchange.coincheck.CCPublicTransaction
 import domain.lib.VOFactory
 import io.estatico.newtype.macros.newtype
 import lib.instance.all._
 import lib.refined.PositiveDouble
 import lib.syntax.all._
-import zio.{Chunk, NonEmptyChunk, ZIO}
+import zio.NonEmptyChunk
 
 final case class OHLCBar(open: Open, high: High, low: Low, close: Close) {
   def range: Double = high.deepInnerV - low.deepInnerV

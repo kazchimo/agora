@@ -1,8 +1,6 @@
 package usecase.liquid
 
-import domain.AllEnv
 import domain.exchange.liquid.LiquidExchange
-import zio.{Has, ZIO}
 import zio.logging.log
 
 object WatchExecutionStreamUC {

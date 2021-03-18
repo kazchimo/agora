@@ -1,14 +1,14 @@
 package domain.strategy
 
 import domain.chart.OHLCBar
-import domain.exchange.coincheck.CCPublicTransaction
+import lib.instance.all._
+import lib.refined.PositiveDouble
+import lib.syntax.all._
 import zio._
 import zio.logging.{Logging, log}
 import zio.stream._
-import lib.instance.all._
-import lib.syntax.all._
+
 import DowMethod._
-import lib.refined.PositiveDouble
 
 final case class DowMethod(
   aggCount: Int,

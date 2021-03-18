@@ -9,8 +9,8 @@ import io.circe.refined._
 import lib.error.ClientDomainError
 import lib.refined.{NonNegativeDouble, NonNegativeLong}
 import sttp.ws.WebSocket
+import zio._
 import zio.stream._
-import zio.{IO, Queue, RIO, ZIO, stream}
 
 private[liquid] case class ExecutionResponse(
   id: NonNegativeLong,
