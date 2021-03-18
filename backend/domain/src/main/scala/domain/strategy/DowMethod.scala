@@ -17,18 +17,19 @@ final case class DowMethod(
 ) {
   def signal(
     tras: Stream[Throwable, PositiveDouble]
-  ): URIO[Logging, UStream[Signal]] = for {
+  ): URIO[Logging, Stream[Throwable, Signal]] = for {
     barsForBuyRef  <- Ref.make(Chunk[OHLCBar]())
     barsForSellRef <- Ref.make(Chunk[OHLCBar]())
     signalQueue    <- Queue.unbounded[Signal]
     _              <- log.info("Finding signal by DowMethod...")
-    _              <- tras
+    fiber          <- tras
                         .grouped(aggCount).mapM(toBars).tap(a =>
                           log.info(s"OHLC per ${aggCount.toString}: ${a.toString}")
                         ).foreach { bar =>
                           for {
                             barsForBuy  <- updateBars(barsForBuyRef, buyContinuous, bar)
-                            barsForSell <- updateBars(barsForSellRef, sellContinuous, bar)
+                            barsForSell <-
+                              updateBars(barsForSellRef, sellContinuous, bar)
                             barsAreFull  =
                               barsForBuy.size == buyContinuous & barsForSell.size == sellContinuous
                             _           <- signalQueue
@@ -41,7 +42,7 @@ final case class DowMethod(
                                              )
                           } yield ()
                         }.fork
-  } yield Stream.fromQueueWithShutdown(signalQueue).haltWhen(signalQueue.awaitShutdown)
+  } yield Stream.fromQueueWithShutdown(signalQueue).interruptWhen(fiber.join)
 }
 
 object DowMethod {
