@@ -40,9 +40,8 @@ private[liquid] trait WebSocketHandler { self: LiquidExchange.Service =>
                 ws.send(subscribeText(subscribeChannel)) *> log.info("Connected!")
               case "pusher_internal:subscription_succeeded" =>
                 log.debug("Subscribed ws!")
-              case `eventName`                              => ZIO
-                  .fromEither(decode[DataMessage](msg.payload))
-                  .flatMap(data => onEvent(data))
+              case `eventName`                              =>
+                ZIO.fromEither(decode[DataMessage](msg.payload)).flatMap(onEvent)
               case a                                        => log.warn(s"Unexpected ws response: $a")
             }
   } yield ()).retryWhile(_.isInstanceOf[WebSocketClosed])
