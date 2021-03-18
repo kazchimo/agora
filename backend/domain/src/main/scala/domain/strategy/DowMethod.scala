@@ -1,9 +1,12 @@
 package domain.strategy
+
 import domain.chart.OHLCBar
 import domain.exchange.coincheck.CCPublicTransaction
 import zio._
 import zio.logging.{Logging, log}
 import zio.stream._
+import lib.instance.all._
+import lib.syntax.all._
 
 import DowMethod._
 
@@ -29,11 +32,11 @@ final case class DowMethod(
                             barsAreFull  =
                               barsForBuy.size == buyContinuous & barsForSell.size == sellContinuous
                             _           <- signalQueue
-                                             .offer(Buy(bar.close)).when(
+                                             .offer(Buy(bar.close.value)).when(
                                                shouldBuy(barsForBuy) & barsAreFull
                                              )
                             _           <- signalQueue
-                                             .offer(Sell(bar.close)).when(
+                                             .offer(Sell(bar.close.value)).when(
                                                shouldSell(barsForSell) & barsAreFull
                                              )
                           } yield ()
@@ -50,6 +53,8 @@ object DowMethod {
     if (old.size >= continuous) old.:+(newBar).tail
     else old.:+(newBar)
   )
+
+  Ordering
 
   /** Return true if chart is increasing. */
   def shouldBuy(bars: Chunk[OHLCBar]): Boolean =

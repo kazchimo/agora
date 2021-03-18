@@ -39,21 +39,22 @@ object TradeInDowMethodUC {
   )
 
   private def buy(signal: Signal, tradingStateRef: Ref[TradingState]) = for {
-    request <- CCOrderRequest.limitBuy(CCOrderRate(signal.at), jpy / signal.at)
-    _       <- log.info(s"Buy! ${request.show}")
-    _       <- CoincheckBroker().priceAdjustingOrder(request, interval)
-    _       <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at.value))
+    amount <- CCOrderAmount(jpy / signal.at.value)
+    request = CCOrderRequest.limitBuy(CCOrderRate(signal.at), amount)
+    _      <- log.info(s"Buy! ${request.show}")
+    _      <- CoincheckBroker().priceAdjustingOrder(request, interval)
+    _      <- tradingStateRef.update(_.toLongPosition.buyAt(signal.at.value))
   } yield ()
 
   private def sell(signal: Signal, tradingStateRef: Ref[TradingState]) = for {
     tradingState <- tradingStateRef.get
     amount       <- CCOrderAmount(jpy / tradingState.lastBuyRate)
-    request      <- CCOrderRequest.limitSell(CCOrderRate(signal.at), amount)
+    request       = CCOrderRequest.limitSell(CCOrderRate(signal.at), amount)
     _            <- log.info(s"Sell! ${request.show}")
     _            <- CoincheckBroker().priceAdjustingOrder(request, interval)
     tradingState <- tradingStateRef.get
     profit        =
-      request.limitAmount.deepInnerV * (signal.at - tradingState.lastBuyRate)
+      request.limitAmount.deepInnerV * (signal.at.value - tradingState.lastBuyRate)
     summary      <-
       tradingStateRef.updateAndGet(_.toNeutralPosition.addSummary(profit))
     _            <- log.info(
