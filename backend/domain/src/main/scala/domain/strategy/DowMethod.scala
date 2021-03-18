@@ -23,7 +23,7 @@ final case class DowMethod(
     signalQueue    <- Queue.unbounded[Signal]
     _              <- log.info("Finding signal by DowMethod...")
     _              <- tras
-                        .grouped(aggCount).map(OHLCBar.fromTransactions).tap(a =>
+                        .grouped(aggCount).mapM(toBars).tap(a =>
                           log.info(s"OHLC per ${aggCount.toString}: ${a.toString}")
                         ).foreach { bar =>
                           for {
@@ -45,6 +45,11 @@ final case class DowMethod(
 }
 
 object DowMethod {
+  def toBars(c: Chunk[CCPublicTransaction]): Task[OHLCBar] = for {
+    nonEmptyChunk <- ZIO.getOrFail(NonEmptyChunk.fromChunk(c))
+    rates          = nonEmptyChunk.map(_.rate.value)
+  } yield OHLCBar.fromRates(rates)
+
   def updateBars[A](
     barsRef: Ref[Chunk[A]],
     continuous: Int,
@@ -53,8 +58,6 @@ object DowMethod {
     if (old.size >= continuous) old.:+(newBar).tail
     else old.:+(newBar)
   )
-
-  Ordering
 
   /** Return true if chart is increasing. */
   def shouldBuy(bars: Chunk[OHLCBar]): Boolean =

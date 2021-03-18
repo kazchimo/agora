@@ -7,7 +7,7 @@ import io.estatico.newtype.macros.newtype
 import lib.instance.all._
 import lib.refined.PositiveDouble
 import lib.syntax.all._
-import zio.Chunk
+import zio.{Chunk, NonEmptyChunk, ZIO}
 
 final case class OHLCBar(open: Open, high: High, low: Low, close: Close) {
   def range: Double = high.deepInnerV - low.deepInnerV
@@ -38,13 +38,10 @@ object OHLCBar {
     Close.unsafeFrom((close))
   )
 
-  def fromTransactions(ts: Chunk[CCPublicTransaction]): OHLCBar = {
-    val rates = ts.map(_.rate.value)
-    OHLCBar(
-      Open(ts.head.rate.value),
-      High(rates.max),
-      Low(rates.min),
-      Close(ts.last.rate.value)
-    )
-  }
+  def fromRates(rates: NonEmptyChunk[PositiveDouble]): OHLCBar = OHLCBar(
+    Open(rates.head),
+    High(rates.max),
+    Low(rates.min),
+    Close(rates.last)
+  )
 }
