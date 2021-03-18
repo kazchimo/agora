@@ -1,10 +1,10 @@
 package lib.instance
 
-import lib.refined.NonNegativeDouble
+import eu.timepit.refined.api.Refined
 
 object refined extends RefinedInstances
 
 trait RefinedInstances {
-  implicit val nonNegativeDoubleOrdering: Ordering[NonNegativeDouble] =
+  implicit def refinedOrdering[A: Ordering, P]: Ordering[Refined[A, P]] =
     Ordering.by(_.value)
 }
