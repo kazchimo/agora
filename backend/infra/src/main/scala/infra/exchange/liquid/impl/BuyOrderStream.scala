@@ -10,16 +10,17 @@ import zio.logging.log
 import zio.{IO, Queue, RIO, Task, ZIO, stream}
 import zio.stream._
 import cats.syntax.traverse._
+import domain.exchange.liquid.LiquidExchange.OrderSide
 import infra.exchange.liquid.impl.BuyOrderStream.toLiquidOrders
 import zio.interop.catz.core._
 
 private[liquid] trait BuyOrderStream extends WebSocketHandler {
   self: LiquidExchange.Service =>
-  private def useWS(
-    queue: Queue[Seq[LiquidOrder]]
-  )(ws: WebSocket[RIO[AllEnv, *]]) = handleMessage(
+  private def useWS(queue: Queue[Seq[LiquidOrder]], side: OrderSide)(
+    ws: WebSocket[RIO[AllEnv, *]]
+  ) = handleMessage(
     ws,
-    s"price_ladders_cash_${BtcJpy.entryName}_buy",
+    s"price_ladders_cash_${BtcJpy.entryName}_${side.entryName}",
     "updated"
   )(d =>
     for {
@@ -28,10 +29,11 @@ private[liquid] trait BuyOrderStream extends WebSocketHandler {
     } yield ()
   ).forever
 
-  override def ordersStream
-    : RIO[AllEnv, stream.Stream[Throwable, Seq[LiquidOrder]]] = for {
+  override def ordersStream(
+    side: OrderSide
+  ): RIO[AllEnv, stream.Stream[Throwable, Seq[LiquidOrder]]] = for {
     queue <- Queue.unbounded[Seq[LiquidOrder]]
-    fiber <- sendWS(useWS(queue)).fork
+    fiber <- sendWS(useWS(queue, side)).fork
   } yield Stream.fromQueueWithShutdown(queue).interruptWhen(fiber.join)
 }
 
