@@ -16,6 +16,8 @@ package object conf {
       val ccSecretKey: Task[CCESecretKey]
       val bfAccessKey: Task[BFAccessKey]
       val bfSecretKey: Task[BFSecretKey]
+      val liquidTokenId: Task[LiquidTokenId]
+      val liquidSecret: Task[LiquidSecret]
     }
   }
 
@@ -30,4 +32,10 @@ package object conf {
 
   @newtype final case class BFSecretKey(value: NonEmptyString)
   object BFSecretKey extends VOFactory
+
+  @newtype final case class LiquidTokenId(value: NonEmptyString)
+  object LiquidTokenId extends VOFactory
+
+  @newtype final case class LiquidSecret(value: NonEmptyString)
+  object LiquidSecret extends VOFactory
 }
