@@ -60,4 +60,5 @@ object Dependencies {
   lazy val refined        = "eu.timepit"           %% "refined"          % "0.9.21"
   lazy val chimney        = "io.scalaland"         %% "chimney"          % "0.6.1"
   lazy val cats           = "org.typelevel"        %% "cats-core"        % "2.4.2"
+  lazy val jwtScala       = "com.github.jwt-scala" %% "jwt-core"         % "7.1.1"
 }
