@@ -32,9 +32,10 @@ object TradeHeadSpread {
                  case Neutral                     => for {
                      price          <- latestBuyHeadPriceRef.get.someOrFailException
                      quote          <- price.zplus(Price.unsafeFrom(1d))
-                     orderReq        =
-                       LiquidOrderRequest.limitBuy(btcJpyId, quantity, quote)
-                     order          <- LiquidExchange.createOrder(orderReq)
+                     order          <-
+                       LiquidExchange.createOrder(
+                         LiquidOrderRequest.limitBuy(btcJpyId, quantity, quote)
+                       )
                      shouldRetryRef <- Ref.make(false)
                      _              <- LiquidBroker
                                          .waitFilled(order.id).unless(order.filled).race(
@@ -50,9 +51,10 @@ object TradeHeadSpread {
                      quote   <- price.zminus(Price.unsafeFrom(1d))
                      plusOne <- previousPrice.zplus(Price.unsafeFrom(1d))
                      _       <- tradeCountRef.update(_ + 1)
-                     orderReq = LiquidOrderRequest
-                                  .limitSell(btcJpyId, quantity, quote.max(plusOne))
-                     order   <- LiquidExchange.createOrder(orderReq)
+                     order   <- LiquidExchange.createOrder(
+                                  LiquidOrderRequest
+                                    .limitSell(btcJpyId, quantity, quote.max(plusOne))
+                                )
                      _       <- LiquidBroker
                                   .waitFilledUntil(order.id, 1.minutes).zipLeft(
                                     tradeCountRef.update(_ - 1)
