@@ -13,12 +13,12 @@ package object liquid {
     import domain.AllEnv
 
     trait Service {
+      def createOrder(orderRequest: LiquidOrderRequest[_]): RIO[AllEnv, Unit]
       def ordersStream(
         side: Side
       ): RIO[AllEnv, Stream[Throwable, Seq[LiquidOrder]]]
       def productsStream: RIO[AllEnv, Stream[Throwable, LiquidProduct]]
       def executionStream: RIO[AllEnv, Stream[Throwable, LiquidExecution]]
     }
-
   }
 }
