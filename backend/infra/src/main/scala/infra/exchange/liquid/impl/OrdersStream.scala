@@ -33,7 +33,7 @@ private[liquid] trait OrdersStream extends WebSocketHandler {
 }
 
 object OrdersStream {
-  private val pricesRegex = raw"""["(.*?)","(.*?)"]""".r
+  private val pricesRegex = raw"""\["([\d\.]*)","([\d\.]*)"\]""".r
 
   def toLiquidOrders(d: String): IO[ClientDomainError, List[LiquidOrder]] =
     pricesRegex
