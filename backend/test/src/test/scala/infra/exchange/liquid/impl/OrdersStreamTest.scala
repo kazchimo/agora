@@ -1,6 +1,6 @@
 package infra.exchange.liquid.impl
 
-import domain.exchange.liquid.LiquidOrder
+import domain.exchange.liquid.{LiquidOrder, OrderOnBook}
 import domain.exchange.liquid.LiquidOrder._
 import zio.test.Assertion.equalTo
 import zio.test._
@@ -11,8 +11,8 @@ object OrdersStreamTest extends DefaultRunnableSpec {
     assertM(OrdersStream.toLiquidOrders(data))(
       equalTo(
         List(
-          LiquidOrder(Price.unsafeFrom(1.1), Quantity.unsafeFrom(2.2)),
-          LiquidOrder(Price.unsafeFrom(3.3), Quantity.unsafeFrom(4.4))
+          OrderOnBook(Price.unsafeFrom(1.1), Quantity.unsafeFrom(2.2)),
+          OrderOnBook(Price.unsafeFrom(3.3), Quantity.unsafeFrom(4.4))
         )
       )
     )
