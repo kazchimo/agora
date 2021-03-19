@@ -6,13 +6,16 @@ import enumeratum.{CirceEnum, Enum}
 import enumeratum.EnumEntry.{Lowercase, Snakecase}
 import io.estatico.newtype.macros.newtype
 import lib.enumeratum.GenericCirceEnum
-import lib.refined.PositiveDouble
+import lib.refined.{PositiveDouble, PositiveLong}
 
 final case class LiquidOrder(price: Price, quantity: Quantity, status: Status)
 
 final case class OrderOnBook(price: Price, quantity: Quantity)
 
 object LiquidOrder {
+  @newtype case class Id(value: PositiveLong)
+  object Id extends VOFactory
+
   @newtype case class Price(value: PositiveDouble)
   object Price extends VOFactory
 
