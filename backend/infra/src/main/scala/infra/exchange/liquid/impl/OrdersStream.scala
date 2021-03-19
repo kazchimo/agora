@@ -22,12 +22,7 @@ private[liquid] trait OrdersStream extends WebSocketHandler {
     ws,
     s"price_ladders_cash_${BtcJpy.entryName}_${side.entryName}",
     "updated"
-  )(d =>
-    for {
-      orders <- toLiquidOrders(d.data)
-      _      <- queue.offer(orders)
-    } yield ()
-  ).forever
+  )(d => toLiquidOrders(d.data).flatMap(queue.offer).unit).forever
 
   override def ordersStream(
     side: OrderSide
