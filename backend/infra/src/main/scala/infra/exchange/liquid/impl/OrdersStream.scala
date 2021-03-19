@@ -1,18 +1,17 @@
 package infra.exchange.liquid.impl
 
+import cats.syntax.traverse._
 import domain.AllEnv
 import domain.exchange.liquid.LiquidCurrencyPairCode.BtcJpy
+import domain.exchange.liquid.LiquidExchange.OrderSide
 import domain.exchange.liquid.LiquidOrder._
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder}
+import infra.exchange.liquid.impl.OrdersStream.toLiquidOrders
 import lib.error.ClientDomainError
 import sttp.ws.WebSocket
-import zio.logging.log
-import zio.{IO, Queue, RIO, Task, ZIO, stream}
-import zio.stream._
-import cats.syntax.traverse._
-import domain.exchange.liquid.LiquidExchange.OrderSide
-import infra.exchange.liquid.impl.OrdersStream.toLiquidOrders
 import zio.interop.catz.core._
+import zio.stream._
+import zio.{IO, Queue, RIO, stream}
 
 private[liquid] trait OrdersStream extends WebSocketHandler {
   self: LiquidExchange.Service =>

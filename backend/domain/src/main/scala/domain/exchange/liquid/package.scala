@@ -1,6 +1,6 @@
 package domain.exchange
 
-import enumeratum.EnumEntry.{Lowercase, Snakecase}
+import enumeratum.EnumEntry.Lowercase
 import enumeratum._
 import zio.macros.accessible
 import zio.stream.Stream
