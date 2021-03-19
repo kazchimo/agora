@@ -3,7 +3,7 @@ package domain.exchange
 import domain.exchange.liquid.LiquidOrder.{Id, OrderType, Side}
 import zio.macros.accessible
 import zio.stream.Stream
-import zio.{Has, RIO, ZIO}
+import zio.{Has, RIO}
 
 package object liquid {
   type LiquidExchange = Has[LiquidExchange.Service]
@@ -14,6 +14,7 @@ package object liquid {
 
     trait Service {
       def getOrder(id: Id): RIO[AllEnv, LiquidOrder]
+      def cancelOrder(id: Id): RIO[AllEnv, Unit]
       def createOrder[O <: OrderType, S <: Side](
         orderRequest: LiquidOrderRequest[O, S]
       ): RIO[AllEnv, LiquidOrder]
