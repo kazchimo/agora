@@ -11,10 +11,10 @@ import zio.{IO, Queue, RIO, Task, ZIO, stream}
 import zio.stream._
 import cats.syntax.traverse._
 import domain.exchange.liquid.LiquidExchange.OrderSide
-import infra.exchange.liquid.impl.BuyOrderStream.toLiquidOrders
+import infra.exchange.liquid.impl.OrdersStream.toLiquidOrders
 import zio.interop.catz.core._
 
-private[liquid] trait BuyOrderStream extends WebSocketHandler {
+private[liquid] trait OrdersStream extends WebSocketHandler {
   self: LiquidExchange.Service =>
   private def useWS(queue: Queue[Seq[LiquidOrder]], side: OrderSide)(
     ws: WebSocket[RIO[AllEnv, *]]
@@ -37,7 +37,7 @@ private[liquid] trait BuyOrderStream extends WebSocketHandler {
   } yield Stream.fromQueueWithShutdown(queue).interruptWhen(fiber.join)
 }
 
-object BuyOrderStream {
+object OrdersStream {
   private val pricesRegex = raw"""["(.*?)","(.*?)"]""".r
 
   def toLiquidOrders(d: String): IO[ClientDomainError, List[LiquidOrder]] =
