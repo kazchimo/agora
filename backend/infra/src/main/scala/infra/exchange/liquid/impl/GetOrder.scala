@@ -20,7 +20,8 @@ trait GetOrder extends AuthRequest { self: LiquidExchange.Service =>
 
   override def getOrder(id: Id): RIO[AllEnv, LiquidOrder] = for {
     req     <- authRequest(url(id))
-    res     <- send(req.get(uri"${url(id)}").response(asJson[OrderResponse]))
+    uri      = Endpoints.root + url(id)
+    res     <- send(req.get(uri"$uri").response(asJson[OrderResponse]))
     content <- ZIO.fromEither(res.body)
     order   <- content.toOrder
   } yield order
