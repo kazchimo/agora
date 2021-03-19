@@ -5,7 +5,7 @@ import zio.logging._
 
 object WatchOrderStreamUC {
   def watch = for {
-    stream <- LiquidExchange.buyOrderStream
+    stream <- LiquidExchange.ordersStream
     _      <- stream.foreach(o => log.info(o.toString))
   } yield ()
 }

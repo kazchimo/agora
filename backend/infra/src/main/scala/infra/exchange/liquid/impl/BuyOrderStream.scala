@@ -28,7 +28,7 @@ private[liquid] trait BuyOrderStream extends WebSocketHandler {
     } yield ()
   ).forever
 
-  override def buyOrderStream
+  override def ordersStream
     : RIO[AllEnv, stream.Stream[Throwable, Seq[LiquidOrder]]] = for {
     queue <- Queue.unbounded[Seq[LiquidOrder]]
     fiber <- sendWS(useWS(queue)).fork
