@@ -6,7 +6,7 @@ import enumeratum._
 sealed abstract class TickerSymbol(override val entryName: String)
     extends Serializable with Product with EnumEntry
 
-object TickerSymbol extends Enum[TickerSymbol] with EnumZio[TickerSymbol] {
+object TickerSymbol extends EnumZio[TickerSymbol] {
   val values: IndexedSeq[TickerSymbol] = findValues
 
   case object BitCoin extends TickerSymbol("btc")

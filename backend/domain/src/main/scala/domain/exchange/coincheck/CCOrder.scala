@@ -22,9 +22,7 @@ object CCOrder {
   sealed trait BuySide     extends CCOrderType
   sealed trait SellSide    extends CCOrderType
 
-  object CCOrderType
-      extends Enum[CCOrderType] with CirceEnum[CCOrderType]
-      with EnumZio[CCOrderType] {
+  object CCOrderType extends CirceEnum[CCOrderType] with EnumZio[CCOrderType] {
     val values: IndexedSeq[CCOrderType] = findValues
 
     case object Buy        extends LimitOrder with BuySide
@@ -39,9 +37,7 @@ object CCOrder {
   }
 
   sealed trait CCOrderPair extends Snakecase
-  object CCOrderPair
-      extends Enum[CCOrderPair] with CirceEnum[CCOrderPair]
-      with EnumZio[CCOrderPair] {
+  object CCOrderPair       extends CirceEnum[CCOrderPair] with EnumZio[CCOrderPair] {
     val values: IndexedSeq[CCOrderPair] = findValues
 
     case object BtcJpy  extends CCOrderPair

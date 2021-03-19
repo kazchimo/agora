@@ -78,8 +78,7 @@ private[coincheck] trait CCOpenOrderFactory {
 object CCOpenOrder extends CCOpenOrderFactory {
   sealed trait CCOpenOrderType extends Snakecase
 
-  object CCOpenOrderType
-      extends Enum[CCOpenOrderType] with EnumZio[CCOpenOrderType] {
+  object CCOpenOrderType extends EnumZio[CCOpenOrderType] {
     override def values: IndexedSeq[CCOpenOrderType] = findValues
 
     case object Buy  extends CCOpenOrderType

@@ -27,7 +27,7 @@ object LiquidExecution {
   sealed abstract class TakerSide(override val entryName: String)
       extends EnumEntry
 
-  object TakerSide extends Enum[TakerSide] with EnumZio[TakerSide] {
+  object TakerSide extends EnumZio[TakerSide] {
     val values: IndexedSeq[TakerSide] = findValues
 
     case object Sell extends TakerSide("sell")

@@ -32,7 +32,7 @@ object CCTransaction {
   sealed abstract class CCTraSide(override val entryName: String)
       extends Serializable with Product with EnumEntry
 
-  object CCTraSide extends Enum[CCTraSide] with EnumZio[CCTraSide] {
+  object CCTraSide extends EnumZio[CCTraSide] {
     val values: IndexedSeq[CCTraSide] = findValues
 
     case object Buy  extends CCTraSide("buy")
