@@ -11,7 +11,7 @@ import lib.error.ClientDomainError
 import sttp.ws.WebSocket
 import zio.interop.catz.core._
 import zio.stream._
-import zio.{IO, Queue, RIO, stream}
+import zio.{IO, Queue, RIO, ZIO, stream}
 
 private[liquid] trait OrdersStream extends WebSocketHandler {
   self: LiquidExchange.Service =>
@@ -37,9 +37,8 @@ object OrdersStream {
   def toLiquidOrders(d: String): IO[ClientDomainError, List[LiquidOrder]] =
     pricesRegex
       .findAllMatchIn(d).map { r =>
-        for {
-          p <- Price(r.group(1).toDouble)
-          q <- Quantity(r.group(2).toDouble)
-        } yield LiquidOrder(p, q)
+        ZIO.mapN(Price(r.group(1).toDouble), Quantity(r.group(2).toDouble))(
+          LiquidOrder.apply
+        )
       }.toList.sequence
 }
