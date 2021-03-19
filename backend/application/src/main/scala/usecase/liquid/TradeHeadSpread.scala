@@ -46,8 +46,7 @@ object TradeHeadSpread {
       state <- positionStateRef.get
       _     <- state match {
                  case Neutral                     => for {
-                     priceOpt       <- latestBuyHeadPriceRef.get
-                     price          <- ZIO.getOrFail(priceOpt)
+                     price          <- latestBuyHeadPriceRef.get.someOrFailException
                      quote          <- price.zplus(Price.unsafeFrom(1d))
                      orderReq        =
                        LiquidOrderRequest.limitBuy(btcJpyId, quantity, quote)
@@ -63,15 +62,14 @@ object TradeHeadSpread {
                                          .set(LongPosition(quote)).unlessM(shouldRetryRef.get)
                    } yield ()
                  case LongPosition(previousPrice) => for {
-                     priceOpt <- latestSellHeadPriceRef.get
-                     price    <- ZIO.getOrFail(priceOpt)
-                     quote    <- price.zminus(Price.unsafeFrom(1d))
-                     plusOne  <- previousPrice.zplus(Price.unsafeFrom(1d))
-                     orderReq  = LiquidOrderRequest
-                                   .limitSell(btcJpyId, quantity, quote.max(plusOne))
-                     order    <- LiquidExchange.createOrder(orderReq)
-                     _        <- LiquidBroker.waitFilled(order.id).unless(order.filled)
-                     _        <- positionStateRef.set(Neutral)
+                     price   <- latestSellHeadPriceRef.get.someOrFailException
+                     quote   <- price.zminus(Price.unsafeFrom(1d))
+                     plusOne <- previousPrice.zplus(Price.unsafeFrom(1d))
+                     orderReq = LiquidOrderRequest
+                                  .limitSell(btcJpyId, quantity, quote.max(plusOne))
+                     order   <- LiquidExchange.createOrder(orderReq)
+                     _       <- LiquidBroker.waitFilled(order.id).unless(order.filled)
+                     _       <- positionStateRef.set(Neutral)
                    } yield ()
                }
     } yield ()
