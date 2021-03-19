@@ -5,10 +5,13 @@ import domain.exchange.liquid.LiquidOrder.OrderType.Limit
 import domain.exchange.liquid.LiquidOrder.Side.Buy
 
 // https://developers.liquid.com/#create-an-order
-final case class LiquidOrderRequest[O <: OrderType] private (
+final case class LiquidOrderRequest[
+  O <: OrderType,
+  S <: LiquidOrder.Side
+] private (
   orderType: O,
   productId: LiquidProduct.Id,
-  side: LiquidOrder.Side,
+  side: S,
   quantity: LiquidOrder.Quantity,
   price: Option[LiquidOrder.Price] = None
 )
@@ -18,6 +21,6 @@ object LiquidOrderRequest {
     product: LiquidProduct,
     quantity: Quantity,
     price: LiquidOrder.Price
-  ): LiquidOrderRequest[OrderType.Limit] =
+  ): LiquidOrderRequest[OrderType.Limit, Buy] =
     LiquidOrderRequest(Limit, product.id, Buy, quantity, Some(price))
 }
