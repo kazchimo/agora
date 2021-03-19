@@ -13,6 +13,7 @@ package object liquid {
     import domain.AllEnv
 
     trait Service {
+      def getOrder(id: Id): RIO[AllEnv, LiquidOrder]
       def createOrder[O <: OrderType, S <: Side](
         orderRequest: LiquidOrderRequest[O, S]
       ): RIO[AllEnv, Id]
