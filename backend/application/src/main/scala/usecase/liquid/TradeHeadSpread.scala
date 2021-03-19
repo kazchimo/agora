@@ -1,5 +1,6 @@
 package usecase.liquid
 
+import domain.broker.coincheck.liquid.LiquidBroker
 import domain.exchange.liquid.LiquidOrder.{Price, Quantity}
 import domain.exchange.liquid.{
   LiquidExchange,
@@ -47,10 +48,7 @@ object TradeHeadSpread {
                      orderReq  =
                        LiquidOrderRequest.limitBuy(btcJpyId, quantity, price)
                      order    <- LiquidExchange.createOrder(orderReq)
-                     _        <- LiquidExchange
-                                   .getOrder(order.id).repeatUntil(_.filled).unless(
-                                     order.filled
-                                   )
+                     _        <- LiquidBroker.waitFilled(order.id).unless(order.filled)
                      _        <- positionStateRef.set(LongPosition)
                    } yield ()
                  case LongPosition => for {
@@ -59,10 +57,7 @@ object TradeHeadSpread {
                      orderReq  =
                        LiquidOrderRequest.limitSell(btcJpyId, quantity, price)
                      order    <- LiquidExchange.createOrder(orderReq)
-                     _        <- LiquidExchange
-                                   .getOrder(order.id).repeatUntil(_.filled).unless(
-                                     order.filled
-                                   )
+                     _        <- LiquidBroker.waitFilled(order.id).unless(order.filled)
                      _        <- positionStateRef.set(Neutral)
                    } yield ()
                }
