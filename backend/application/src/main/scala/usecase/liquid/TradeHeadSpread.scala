@@ -26,22 +26,10 @@ object TradeHeadSpread {
   type Str = Stream[Throwable, Seq[OrderOnBook]]
   private val quantity: Quantity = Quantity.unsafeFrom(0.001)
 
-  private def updatePrice(stream: Str, priceRef: Ref[Option[Price]]) =
-    stream.foreach { orders =>
-      for {
-        order <- ZIO.getOrFail(orders.headOption)
-        _     <- priceRef.set(Some(order.price))
-      } yield ()
-    }
-
   def trade = for {
-    buyStream: Str         <- LiquidExchange.ordersStream(Buy)
-    sellStream: Str        <- LiquidExchange.ordersStream(Sell)
     positionStateRef       <- Ref.make[PositionState](Neutral)
-    latestBuyHeadPriceRef  <- Ref.make[Option[Price]](None)
-    latestSellHeadPriceRef <- Ref.make[Option[Price]](None)
-    _                      <- updatePrice(buyStream, latestBuyHeadPriceRef).fork
-    _                      <- updatePrice(sellStream, latestSellHeadPriceRef).fork
+    latestBuyHeadPriceRef  <- LiquidBroker.latestHeadPriceRef(Buy)
+    latestSellHeadPriceRef <- LiquidBroker.latestHeadPriceRef(Sell)
     execute                 = for {
       state <- positionStateRef.get
       _     <- state match {
