@@ -2,9 +2,10 @@ package domain.exchange.liquid
 
 import domain.exchange.liquid.LiquidOrder._
 import domain.lib.{VOFactory, ZEnum}
-import enumeratum.Enum
+import enumeratum.{CirceEnum, Enum}
 import enumeratum.EnumEntry.{Lowercase, Snakecase}
 import io.estatico.newtype.macros.newtype
+import lib.enumeratum.GenericCirceEnum
 import lib.refined.PositiveDouble
 
 final case class LiquidOrder(price: Price, quantity: Quantity)
@@ -21,7 +22,7 @@ object LiquidOrder {
   /** Marker trait that specify a order price. */
   sealed trait Pricable
 
-  object OrderType extends ZEnum[OrderType] {
+  object OrderType extends ZEnum[OrderType] with GenericCirceEnum[OrderType] {
     override def values: IndexedSeq[OrderType] = findValues
 
     case object Limit           extends OrderType with Pricable
@@ -35,10 +36,12 @@ object LiquidOrder {
   }
 
   sealed trait Side extends Lowercase
-  object Side       extends Enum[Side] {
+  object Side       extends Enum[Side] with GenericCirceEnum[Side] {
     override def values: IndexedSeq[Side] = findValues
 
     case object Buy  extends Side
     case object Sell extends Side
+
+    type Buy = Buy.type
   }
 }
