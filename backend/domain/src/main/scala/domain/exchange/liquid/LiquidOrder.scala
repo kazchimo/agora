@@ -1,5 +1,6 @@
 package domain.exchange.liquid
 
+import domain.exchange.liquid.LiquidOrder.Status.Filled
 import domain.exchange.liquid.LiquidOrder._
 import domain.lib.{VOFactory, ZEnum}
 import enumeratum.{CirceEnum, Enum}
@@ -13,7 +14,9 @@ final case class LiquidOrder(
   price: Price,
   quantity: Quantity,
   status: Status
-)
+) {
+  def filled: Boolean = status == Filled
+}
 
 final case class OrderOnBook(price: Price, quantity: Quantity)
 
