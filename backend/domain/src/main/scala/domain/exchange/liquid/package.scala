@@ -3,7 +3,7 @@ package domain.exchange
 import domain.exchange.liquid.LiquidOrder.{OrderType, Side}
 import zio.macros.accessible
 import zio.stream.Stream
-import zio.{Has, RIO}
+import zio.{Has, RIO, ZIO}
 
 package object liquid {
   type LiquidExchange = Has[LiquidExchange.Service]
@@ -18,7 +18,7 @@ package object liquid {
       ): RIO[AllEnv, Unit]
       def ordersStream(
         side: Side
-      ): RIO[AllEnv, Stream[Throwable, Seq[LiquidOrder]]]
+      ): RIO[AllEnv, Stream[Throwable, Seq[OrderOnBook]]]
       def productsStream: RIO[AllEnv, Stream[Throwable, LiquidProduct]]
       def executionStream: RIO[AllEnv, Stream[Throwable, LiquidExecution]]
     }

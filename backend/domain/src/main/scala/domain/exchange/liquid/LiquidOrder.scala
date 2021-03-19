@@ -8,7 +8,9 @@ import io.estatico.newtype.macros.newtype
 import lib.enumeratum.GenericCirceEnum
 import lib.refined.PositiveDouble
 
-final case class LiquidOrder(price: Price, quantity: Quantity)
+final case class LiquidOrder(price: Price, quantity: Quantity, status: Status)
+
+final case class OrderOnBook(price: Price, quantity: Quantity)
 
 object LiquidOrder {
   @newtype case class Price(value: PositiveDouble)
