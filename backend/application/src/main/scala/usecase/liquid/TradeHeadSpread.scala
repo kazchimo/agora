@@ -16,10 +16,11 @@ import zio.stream.Stream
 import eu.timepit.refined.auto._
 import zio.duration._
 import lib.syntax.all._
+import lib.instance.all._
 
 sealed private trait PositionState
-private case object LongPosition extends PositionState
-private case object Neutral      extends PositionState
+private case class LongPosition(price: Price) extends PositionState
+private case object Neutral                   extends PositionState
 
 object TradeHeadSpread {
   type Str = Stream[Throwable, Seq[OrderOnBook]]
@@ -44,7 +45,7 @@ object TradeHeadSpread {
     execute                 = for {
       state <- positionStateRef.get
       _     <- state match {
-                 case Neutral      => for {
+                 case Neutral                     => for {
                      priceOpt       <- latestBuyHeadPriceRef.get
                      price          <- ZIO.getOrFail(priceOpt)
                      quote          <- price.zplus(Price.unsafeFrom(1d))
@@ -59,14 +60,15 @@ object TradeHeadSpread {
                      _              <- LiquidExchange
                                          .cancelOrder(order.id).whenM(shouldRetryRef.get).fork
                      _              <- positionStateRef
-                                         .set(LongPosition).unlessM(shouldRetryRef.get)
+                                         .set(LongPosition(quote)).unlessM(shouldRetryRef.get)
                    } yield ()
-                 case LongPosition => for {
+                 case LongPosition(previousPrice) => for {
                      priceOpt <- latestSellHeadPriceRef.get
                      price    <- ZIO.getOrFail(priceOpt)
                      quote    <- price.zminus(Price.unsafeFrom(1d))
-                     orderReq  =
-                       LiquidOrderRequest.limitSell(btcJpyId, quantity, quote)
+                     plusOne  <- previousPrice.zplus(Price.unsafeFrom(1d))
+                     orderReq  = LiquidOrderRequest
+                                   .limitSell(btcJpyId, quantity, quote.max(plusOne))
                      order    <- LiquidExchange.createOrder(orderReq)
                      _        <- LiquidBroker.waitFilled(order.id).unless(order.filled)
                      _        <- positionStateRef.set(Neutral)

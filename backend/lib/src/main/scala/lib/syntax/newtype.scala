@@ -4,6 +4,7 @@ import io.estatico.newtype.Coercible
 import io.estatico.newtype.ops._
 import lib.refined.refineVZE
 import zio.{Task, ZIO}
+import newtype._
 
 object newtype extends NewtypeSyntax
 
@@ -50,4 +51,10 @@ final class NewtypeOps[A](private val a: A) extends AnyVal {
 
   def >=[B](b: A)(implicit coe: Coercible[A, B], ord: Ordering[B]): Boolean =
     ord.gteq(a.coerce[B], b.coerce[B])
+
+  def min[B](b: A)(implicit coe: Coercible[A, B], ord: Ordering[B]): A =
+    if (a >= b) b else a
+
+  def max[B](b: A)(implicit coe: Coercible[A, B], ord: Ordering[B]): A =
+    if (a <= b) b else a
 }
