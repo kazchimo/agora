@@ -27,7 +27,7 @@ object LiquidProduct {
 
 }
 
-final case class BtcJpy(
+final case class BtcJpyProduct(
   override val lastTradedPrice: LastTradedPrice,
   override val lastTradedQuantity: LastTradedQuantity
 ) extends LiquidProduct(Id.unsafeFrom(5L), lastTradedPrice, lastTradedQuantity)

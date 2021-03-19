@@ -2,7 +2,7 @@ package infra.exchange.liquid.impl
 
 import domain.AllEnv
 import domain.exchange.liquid.LiquidCurrencyPairCode.BtcJpy
-import domain.exchange.liquid.{LiquidExchange, LiquidProduct}
+import domain.exchange.liquid.{BtcJpyProduct, LiquidExchange, LiquidProduct}
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.refined._
@@ -16,7 +16,7 @@ private[liquid] case class ProductResponse(
   last_traded_price: NonNegativeDouble,
   last_traded_quantity: NonNegativeDouble
 ) {
-  def toLiquidProduct: LiquidProduct = LiquidProduct(
+  def toLiquidProduct: LiquidProduct = BtcJpyProduct(
     LiquidProduct.LastTradedPrice(last_traded_price),
     LiquidProduct.LastTradedQuantity(last_traded_quantity)
   )
