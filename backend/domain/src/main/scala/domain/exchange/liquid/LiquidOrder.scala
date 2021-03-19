@@ -57,7 +57,7 @@ object LiquidOrder {
   }
 
   sealed trait Status extends Snakecase
-  object Status       extends Enum[Status] with GenericCirceEnum[Status] {
+  object Status       extends ZEnum[Status] with GenericCirceEnum[Status] {
     override def values: IndexedSeq[Status] = findValues
 
     case object Live            extends Status
