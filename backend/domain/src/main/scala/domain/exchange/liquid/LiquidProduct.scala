@@ -18,6 +18,7 @@ sealed abstract class LiquidProduct(
 object LiquidProduct {
   @newtype case class Id(value: PositiveLong)
   object Id extends VOFactory
+  val btcJpyId: Id = Id.unsafeFrom(5L)
 
   @newtype case class LastTradedPrice(value: NonNegativeDouble)
   object LastTradedPrice extends VOFactory
