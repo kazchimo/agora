@@ -2,7 +2,7 @@ package domain.exchange.coincheck
 
 import domain.currency.Currency
 import domain.exchange.coincheck.CCTransaction._
-import domain.lib.{ZEnum, VOFactory}
+import domain.lib.{VOFactory, ZEnum}
 import enumeratum._
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype

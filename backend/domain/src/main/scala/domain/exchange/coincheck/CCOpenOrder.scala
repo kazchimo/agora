@@ -6,7 +6,6 @@ import domain.exchange.coincheck.CCOpenOrder.CCOpenOrderType.{Buy, Sell}
 import domain.exchange.coincheck.CCOrder._
 import domain.lib.ZEnum
 import enumeratum.EnumEntry.Snakecase
-import enumeratum._
 import lib.error.{ClientDomainError, InternalDomainError}
 import zio.interop.catz.core._
 import zio.{IO, ZIO}

@@ -1,7 +1,7 @@
 package domain.exchange.liquid
 
 import domain.exchange.liquid.LiquidExecution._
-import domain.lib.{ZEnum, VOFactory}
+import domain.lib.{VOFactory, ZEnum}
 import enumeratum._
 import io.estatico.newtype.macros.newtype
 import lib.refined.{NonNegativeDouble, NonNegativeLong}

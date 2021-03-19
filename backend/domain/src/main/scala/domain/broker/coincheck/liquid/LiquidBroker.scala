@@ -3,9 +3,9 @@ package domain.broker.coincheck.liquid
 import domain.AllEnv
 import domain.exchange.liquid.LiquidOrder.{Id, Price, Side}
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder, OrderOnBook}
-import zio.{Has, RIO, Ref, ZIO}
 import zio.duration._
 import zio.stream.Stream
+import zio.{Has, RIO, Ref, ZIO}
 
 object LiquidBroker {
   def waitFilled(id: Id): ZIO[AllEnv, Throwable, LiquidOrder] = LiquidExchange

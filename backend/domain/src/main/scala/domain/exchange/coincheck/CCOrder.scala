@@ -1,9 +1,9 @@
 package domain.exchange.coincheck
 
 import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.lib.{ZEnum, VOFactory}
+import domain.lib.{VOFactory, ZEnum}
+import enumeratum.CirceEnum
 import enumeratum.EnumEntry.Snakecase
-import enumeratum.{CirceEnum, Enum}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.types.all.NonEmptyString

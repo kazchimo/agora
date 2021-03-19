@@ -2,10 +2,10 @@ package lib.instance
 
 import eu.timepit.refined.api.Refined
 import io.circe.Encoder
-import io.estatico.newtype.Coercible
-import io.estatico.newtype.ops._
 import io.circe.refined._
 import io.circe.syntax._
+import io.estatico.newtype.Coercible
+import io.estatico.newtype.ops._
 
 object newtype extends NewtypeInstances
 

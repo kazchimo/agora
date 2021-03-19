@@ -3,7 +3,8 @@ import eu.timepit.refined.api.{Refined, Validate}
 import io.estatico.newtype.Coercible
 import io.estatico.newtype.ops._
 import lib.refined.refineVZE
-import zio.{Task, ZIO}
+import zio.ZIO
+
 import newtype._
 
 object newtype extends NewtypeSyntax

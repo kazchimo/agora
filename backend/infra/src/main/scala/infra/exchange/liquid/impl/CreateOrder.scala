@@ -1,23 +1,21 @@
 package infra.exchange.liquid.impl
 
 import domain.AllEnv
-import domain.exchange.liquid.LiquidOrder.{Id, OrderType, Side}
+import domain.exchange.liquid.LiquidOrder.{OrderType, Side}
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder, LiquidOrderRequest}
 import infra.exchange.liquid.Endpoints
-import io.circe.{Encoder, Json}
-import io.circe.generic.extras.Configuration
-import sttp.client3.asynchttpclient.zio.{send, sendR}
-import sttp.model.Uri
-import zio.{RIO, ZIO}
-import io.circe.syntax._
-import io.circe.refined._
-import lib.instance.all._
-import CreateOrder._
 import infra.exchange.liquid.response.OrderResponse
-import lib.refined.PositiveLong
-import sttp.client3.UriContext
-import sttp.client3.circe.asJson
 import io.circe.generic.auto._
+import io.circe.refined._
+import io.circe.syntax._
+import io.circe.{Encoder, Json}
+import lib.instance.all._
+import sttp.client3.UriContext
+import sttp.client3.asynchttpclient.zio.send
+import sttp.client3.circe.asJson
+import zio.{RIO, ZIO}
+
+import CreateOrder._
 
 private[liquid] trait CreateOrder extends AuthRequest {
   self: LiquidExchange.Service =>

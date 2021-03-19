@@ -1,7 +1,7 @@
 package infra.exchange.liquid.impl
 
-import domain.exchange.liquid.{LiquidOrder, OrderOnBook}
 import domain.exchange.liquid.LiquidOrder._
+import domain.exchange.liquid.OrderOnBook
 import zio.test.Assertion.equalTo
 import zio.test._
 

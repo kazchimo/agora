@@ -2,6 +2,7 @@ import cats.syntax.show._
 import domain.exchange.liquid.LiquidOrder.{Price, Quantity}
 import domain.exchange.liquid.LiquidOrderRequest
 import domain.exchange.liquid.LiquidProduct.btcJpyId
+import eu.timepit.refined.auto._
 import infra.conf.ConfImpl
 import infra.exchange.{ExchangeImpl, IncreasingNonceImpl}
 import lib.error._
@@ -11,11 +12,10 @@ import usecase.coincheck.{
   SellAllCoinInCoincheckUC,
   TradeInDowMethodUC
 }
-import usecase.liquid.{CreateOrderUC, TradeHeadSpread, WatchOrderStreamUC}
+import usecase.liquid.TradeHeadSpread
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
-import eu.timepit.refined.auto._
 
 object Main extends zio.App {
   override def run(args: List[String]): URIO[ZEnv, ExitCode] = app

@@ -8,9 +8,9 @@ import domain.exchange.liquid.{LiquidExchange, OrderOnBook}
 import infra.exchange.liquid.impl.OrdersStream.toLiquidOrders
 import lib.error.ClientDomainError
 import sttp.ws.WebSocket
+import zio._
 import zio.interop.catz.core._
 import zio.stream._
-import zio.{IO, Queue, RIO, ZIO, stream}
 
 private[liquid] trait OrdersStream extends WebSocketHandler {
   self: LiquidExchange.Service =>

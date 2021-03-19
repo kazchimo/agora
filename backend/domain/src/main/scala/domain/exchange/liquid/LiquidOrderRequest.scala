@@ -1,8 +1,8 @@
 package domain.exchange.liquid
 
-import domain.exchange.liquid.LiquidOrder.{OrderType, Quantity}
 import domain.exchange.liquid.LiquidOrder.OrderType.Limit
 import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
+import domain.exchange.liquid.LiquidOrder.{OrderType, Quantity}
 
 // https://developers.liquid.com/#create-an-order
 final case class LiquidOrderRequest[
