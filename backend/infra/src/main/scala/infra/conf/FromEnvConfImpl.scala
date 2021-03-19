@@ -26,7 +26,7 @@ object FromEnvConfImpl extends Conf.Service {
     .orElseFail(InfraError("LIQUID_TOKEN_ID not found"))
     .flatMap(LiquidTokenId(_))
   private val _liquidSecret  = ZIO
-    .fromOption(sys.env.get("LIQUID_TOKEN_SECRET"))
+    .fromOption(sys.env.get("LIQUID_SECRET"))
     .orElseFail(InfraError("LIQUID_TOKEN_SECRET not found"))
     .flatMap(LiquidSecret(_))
 
