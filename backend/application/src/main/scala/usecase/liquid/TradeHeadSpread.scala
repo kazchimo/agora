@@ -10,7 +10,7 @@ import domain.exchange.liquid.{
 }
 import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
 import domain.exchange.liquid.LiquidProduct.btcJpyId
-import lib.refined.PositiveDouble
+import lib.refined.{PositiveDouble, PositiveLong}
 import zio.{Ref, ZIO}
 import zio.stream.Stream
 import eu.timepit.refined.auto._
@@ -24,12 +24,13 @@ private case object Neutral                   extends PositionState
 
 object TradeHeadSpread {
   type Str = Stream[Throwable, Seq[OrderOnBook]]
-  private val quantity: Quantity = Quantity.unsafeFrom(0.001)
+  private val quantity: Quantity = Quantity.unsafeFrom(0.0015)
 
-  def trade = for {
+  def trade(maxTradeCount: PositiveLong) = for {
     positionStateRef       <- Ref.make[PositionState](Neutral)
     latestBuyHeadPriceRef  <- LiquidBroker.latestHeadPriceRef(Buy)
     latestSellHeadPriceRef <- LiquidBroker.latestHeadPriceRef(Sell)
+    tradeCountRef          <- Ref.make(0)
     execute                 = for {
       state <- positionStateRef.get
       _     <- state match {
@@ -53,10 +54,20 @@ object TradeHeadSpread {
                      price   <- latestSellHeadPriceRef.get.someOrFailException
                      quote   <- price.zminus(Price.unsafeFrom(1d))
                      plusOne <- previousPrice.zplus(Price.unsafeFrom(1d))
+                     _       <- tradeCountRef.update(_ + 1)
                      orderReq = LiquidOrderRequest
                                   .limitSell(btcJpyId, quantity, quote.max(plusOne))
                      order   <- LiquidExchange.createOrder(orderReq)
-                     _       <- LiquidBroker.waitFilled(order.id).unless(order.filled)
+                     _       <- LiquidBroker
+                                  .waitFilledUntil(order.id, 1.minutes).zipLeft(
+                                    tradeCountRef.update(_ - 1)
+                                  ).unless(order.filled)
+                     _       <- ZIO
+                                  .sleep(1.second).whenM(
+                                    tradeCountRef.get.map(_ <= maxTradeCount.value)
+                                  ).repeatUntilM(_ =>
+                                    tradeCountRef.get.map(_ <= maxTradeCount.value)
+                                  )
                      _       <- positionStateRef.set(Neutral)
                    } yield ()
                }

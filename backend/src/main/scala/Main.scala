@@ -15,6 +15,7 @@ import usecase.liquid.{CreateOrderUC, TradeHeadSpread, WatchOrderStreamUC}
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
+import eu.timepit.refined.auto._
 
 object Main extends zio.App {
   override def run(args: List[String]): URIO[ZEnv, ExitCode] = app
@@ -47,5 +48,5 @@ object Main extends zio.App {
   )
 
   private val app =
-    log.info("start") *> TradeHeadSpread.trade *> log.info("end")
+    log.info("start") *> TradeHeadSpread.trade(3L) *> log.info("end")
 }

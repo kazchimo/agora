@@ -13,6 +13,20 @@ object LiquidBroker {
       if (o.filled) ZIO.succeed(true) else ZIO.sleep(1.seconds).as(false)
     )
 
+  def waitFilledUntil(
+    id: Id,
+    d: Duration
+  ): ZIO[Has[LiquidExchange.Service] with AllEnv, Throwable, LiquidOrder] =
+    for {
+      ref <- Ref.make(false)
+      _   <- ref.set(true).delay(d).fork
+      res <- LiquidExchange
+               .getOrder(id).repeatUntilM(o =>
+                 (if (o.filled) ZIO.succeed(true)
+                  else ZIO.sleep(1.seconds).as(false)).zipWith(ref.get)(_ || _)
+               )
+    } yield res
+
   def latestHeadPriceRef(side: Side): RIO[AllEnv, Ref[Option[Price]]] = for {
     stream: Stream[Throwable, Seq[OrderOnBook]] <-
       LiquidExchange.ordersStream(side)
