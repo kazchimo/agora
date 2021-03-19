@@ -30,6 +30,8 @@ object LiquidOrder {
     case object TrailingStop    extends OrderType
     case object LimitPostOnly   extends OrderType with Pricable
     case object Stop            extends OrderType with Pricable
+
+    type Limit = Limit.type
   }
 
   sealed trait Side extends Lowercase
