@@ -44,7 +44,8 @@ object LiquidOrder {
     case object Buy  extends Side
     case object Sell extends Side
 
-    type Buy = Buy.type
+    type Buy  = Buy.type
+    type Sell = Sell.type
   }
 
   sealed trait Status extends Snakecase

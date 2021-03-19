@@ -2,7 +2,7 @@ package domain.exchange.liquid
 
 import domain.exchange.liquid.LiquidOrder.{OrderType, Quantity}
 import domain.exchange.liquid.LiquidOrder.OrderType.Limit
-import domain.exchange.liquid.LiquidOrder.Side.Buy
+import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
 
 // https://developers.liquid.com/#create-an-order
 final case class LiquidOrderRequest[
@@ -23,4 +23,11 @@ object LiquidOrderRequest {
     price: LiquidOrder.Price
   ): LiquidOrderRequest[OrderType.Limit, Buy] =
     LiquidOrderRequest(Limit, productId, Buy, quantity, Some(price))
+
+  def limitSell(
+    productId: LiquidProduct.Id,
+    quantity: Quantity,
+    price: LiquidOrder.Price
+  ): LiquidOrderRequest[OrderType.Limit, Sell] =
+    LiquidOrderRequest(Limit, productId, Sell, quantity, Some(price))
 }
