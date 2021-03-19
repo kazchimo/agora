@@ -44,4 +44,14 @@ object LiquidOrder {
 
     type Buy = Buy.type
   }
+
+  sealed trait Status extends Snakecase
+  object Status       extends Enum[Status] with GenericCirceEnum[Status] {
+    override def values: IndexedSeq[Status] = findValues
+
+    case object Live            extends Status
+    case object Filled          extends Status
+    case object PartiallyFilled extends Status
+    case object Canceled        extends Status
+  }
 }
