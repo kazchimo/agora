@@ -17,15 +17,19 @@ object LiquidOrder {
   object Quantity extends VOFactory
 
   sealed trait OrderType extends Snakecase
-  object OrderType       extends ZEnum[OrderType] {
+
+  /** Marker trait that specify a order price. */
+  sealed trait Pricable
+
+  object OrderType extends ZEnum[OrderType] {
     override def values: IndexedSeq[OrderType] = findValues
 
-    case object Limit           extends OrderType
+    case object Limit           extends OrderType with Pricable
     case object Market          extends OrderType
-    case object MarketWithRange extends OrderType
+    case object MarketWithRange extends OrderType with Pricable
     case object TrailingStop    extends OrderType
-    case object LimitPostOnly   extends OrderType
-    case object Stop            extends OrderType
+    case object LimitPostOnly   extends OrderType with Pricable
+    case object Stop            extends OrderType with Pricable
   }
 
   sealed trait Side extends Lowercase
