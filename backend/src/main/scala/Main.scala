@@ -11,7 +11,7 @@ import usecase.coincheck.{
   SellAllCoinInCoincheckUC,
   TradeInDowMethodUC
 }
-import usecase.liquid.{CreateOrderUC, WatchOrderStreamUC}
+import usecase.liquid.{CreateOrderUC, TradeHeadSpread, WatchOrderStreamUC}
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
@@ -47,5 +47,5 @@ object Main extends zio.App {
   )
 
   private val app =
-    log.info("start") *> CreateOrderUC.create(liquidOrder) *> log.info("end")
+    log.info("start") *> TradeHeadSpread.trade *> log.info("end")
 }
