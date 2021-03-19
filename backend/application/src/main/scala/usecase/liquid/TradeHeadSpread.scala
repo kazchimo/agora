@@ -54,6 +54,8 @@ object TradeHeadSpread {
                                          .waitFilled(order.id).unless(order.filled).race(
                                            shouldRetryRef.set(true).delay(10.seconds)
                                          )
+                     _              <- LiquidExchange
+                                         .cancelOrder(order.id).whenM(shouldRetryRef.get).fork
                      _              <- positionStateRef
                                          .set(LongPosition).unlessM(shouldRetryRef.get)
                    } yield ()
