@@ -1,3 +1,3 @@
 package lib.instance
 
-object all extends RefinedInstances
+object all extends RefinedInstances with NewtypeInstances
