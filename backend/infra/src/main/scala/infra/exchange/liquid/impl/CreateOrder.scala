@@ -13,6 +13,7 @@ import io.circe.syntax._
 import io.circe.refined._
 import lib.instance.all._
 import CreateOrder._
+import sttp.client3.UriContext
 import sttp.client3.circe.asJson
 
 private[liquid] trait CreateOrder extends AuthRequest {
@@ -24,7 +25,7 @@ private[liquid] trait CreateOrder extends AuthRequest {
     req <- authRequest(Endpoints.ordersPath)
     _   <- send(
              req
-               .post(Uri(Endpoints.orders)).body(
+               .post(uri"${Endpoints.orders}").body(
                  orderRequest.asJson.noSpaces
                ).response(asJson[Map[String, String]])
            )
