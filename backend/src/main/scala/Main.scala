@@ -8,7 +8,7 @@ import usecase.coincheck.{
   SellAllCoinInCoincheckUC,
   TradeInDowMethodUC
 }
-import usecase.liquid.WatchExecutionStreamUC
+import usecase.liquid.WatchOrderStreamUC
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
@@ -38,5 +38,5 @@ object Main extends zio.App {
   val settleAll  = sellAll <&> cancelAll
 
   private val app =
-    log.info("start") *> WatchExecutionStreamUC.watch *> log.info("end")
+    log.info("start") *> WatchOrderStreamUC.watch *> log.info("end")
 }
