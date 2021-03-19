@@ -3,7 +3,7 @@ import enumeratum._
 import lib.error.ClientDomainError
 import zio.{IO, ZIO}
 
-trait EnumZio[A <: EnumEntry] extends Enum[A] {
+trait ZEnum[A <: EnumEntry] extends Enum[A] {
   final def withNameZio(entryName: String): IO[ClientDomainError, A] = ZIO
     .fromEither(withNameEither(entryName)).mapError(e =>
       ClientDomainError(

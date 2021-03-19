@@ -2,7 +2,7 @@ package domain.exchange.coincheck
 
 import domain.currency.Currency
 import domain.exchange.coincheck.CCTransaction._
-import domain.lib.{EnumZio, VOFactory}
+import domain.lib.{ZEnum, VOFactory}
 import enumeratum._
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
@@ -32,7 +32,7 @@ object CCTransaction {
   sealed abstract class CCTraSide(override val entryName: String)
       extends Serializable with Product with EnumEntry
 
-  object CCTraSide extends EnumZio[CCTraSide] {
+  object CCTraSide extends ZEnum[CCTraSide] {
     val values: IndexedSeq[CCTraSide] = findValues
 
     case object Buy  extends CCTraSide("buy")

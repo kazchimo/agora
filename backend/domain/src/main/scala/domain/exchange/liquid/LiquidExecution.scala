@@ -1,7 +1,7 @@
 package domain.exchange.liquid
 
 import domain.exchange.liquid.LiquidExecution._
-import domain.lib.{EnumZio, VOFactory}
+import domain.lib.{ZEnum, VOFactory}
 import enumeratum._
 import io.estatico.newtype.macros.newtype
 import lib.refined.{NonNegativeDouble, NonNegativeLong}
@@ -27,7 +27,7 @@ object LiquidExecution {
   sealed abstract class TakerSide(override val entryName: String)
       extends EnumEntry
 
-  object TakerSide extends EnumZio[TakerSide] {
+  object TakerSide extends ZEnum[TakerSide] {
     val values: IndexedSeq[TakerSide] = findValues
 
     case object Sell extends TakerSide("sell")

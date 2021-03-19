@@ -1,7 +1,7 @@
 package domain.exchange.coincheck
 
 import domain.exchange.coincheck.CCOrder.CCOrderId
-import domain.lib.{EnumZio, VOFactory}
+import domain.lib.{ZEnum, VOFactory}
 import enumeratum.EnumEntry.Snakecase
 import enumeratum.{CirceEnum, Enum}
 import eu.timepit.refined.api.Refined
@@ -22,7 +22,7 @@ object CCOrder {
   sealed trait BuySide     extends CCOrderType
   sealed trait SellSide    extends CCOrderType
 
-  object CCOrderType extends CirceEnum[CCOrderType] with EnumZio[CCOrderType] {
+  object CCOrderType extends CirceEnum[CCOrderType] with ZEnum[CCOrderType] {
     val values: IndexedSeq[CCOrderType] = findValues
 
     case object Buy        extends LimitOrder with BuySide
@@ -37,7 +37,7 @@ object CCOrder {
   }
 
   sealed trait CCOrderPair extends Snakecase
-  object CCOrderPair       extends CirceEnum[CCOrderPair] with EnumZio[CCOrderPair] {
+  object CCOrderPair       extends CirceEnum[CCOrderPair] with ZEnum[CCOrderPair] {
     val values: IndexedSeq[CCOrderPair] = findValues
 
     case object BtcJpy  extends CCOrderPair

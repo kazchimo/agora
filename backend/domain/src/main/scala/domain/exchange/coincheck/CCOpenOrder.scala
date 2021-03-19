@@ -4,7 +4,7 @@ import cats.syntax.traverse._
 import domain.exchange.coincheck.CCOpenOrder.CCOpenOrderType
 import domain.exchange.coincheck.CCOpenOrder.CCOpenOrderType.{Buy, Sell}
 import domain.exchange.coincheck.CCOrder._
-import domain.lib.EnumZio
+import domain.lib.ZEnum
 import enumeratum.EnumEntry.Snakecase
 import enumeratum._
 import lib.error.{ClientDomainError, InternalDomainError}
@@ -78,7 +78,7 @@ private[coincheck] trait CCOpenOrderFactory {
 object CCOpenOrder extends CCOpenOrderFactory {
   sealed trait CCOpenOrderType extends Snakecase
 
-  object CCOpenOrderType extends EnumZio[CCOpenOrderType] {
+  object CCOpenOrderType extends ZEnum[CCOpenOrderType] {
     override def values: IndexedSeq[CCOpenOrderType] = findValues
 
     case object Buy  extends CCOpenOrderType
