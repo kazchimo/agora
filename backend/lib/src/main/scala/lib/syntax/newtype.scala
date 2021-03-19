@@ -1,7 +1,9 @@
 package lib.syntax
-import eu.timepit.refined.api.Refined
+import eu.timepit.refined.api.{Refined, Validate}
 import io.estatico.newtype.Coercible
 import io.estatico.newtype.ops._
+import lib.refined.refineVZE
+import zio.{Task, ZIO}
 
 object newtype extends NewtypeSyntax
 
@@ -16,6 +18,24 @@ trait NewtypeSyntax {
 final class RefinedNewtypeOps[A](private val a: A) extends AnyVal {
   def deepInnerV[T, P](implicit ev: Coercible[A, Refined[T, P]]): T =
     a.coerce[Refined[T, P]].value
+
+  def zplus[T, P](b: A)(implicit
+    ev: Coercible[A, Refined[T, P]],
+    ev2: Coercible[Refined[T, P], A],
+    num: Numeric[T],
+    v: Validate[T, P]
+  ): ZIO[Any, Throwable, A] = refineVZE[P, T](
+    num.plus(a.coerce[Refined[T, P]].value, b.coerce[Refined[T, P]].value)
+  ).map(_.coerce[A])
+
+  def zminus[T, P](b: A)(implicit
+    ev: Coercible[A, Refined[T, P]],
+    ev2: Coercible[Refined[T, P], A],
+    num: Numeric[T],
+    v: Validate[T, P]
+  ): ZIO[Any, Throwable, A] = refineVZE[P, T](
+    num.minus(a.coerce[Refined[T, P]].value, b.coerce[Refined[T, P]].value)
+  ).map(_.coerce[A])
 }
 
 final class NewtypeOps[A](private val a: A) extends AnyVal {
