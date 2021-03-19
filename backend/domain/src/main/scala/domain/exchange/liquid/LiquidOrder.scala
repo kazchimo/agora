@@ -8,7 +8,12 @@ import io.estatico.newtype.macros.newtype
 import lib.enumeratum.GenericCirceEnum
 import lib.refined.{PositiveDouble, PositiveLong}
 
-final case class LiquidOrder(price: Price, quantity: Quantity, status: Status)
+final case class LiquidOrder(
+  id: Id,
+  price: Price,
+  quantity: Quantity,
+  status: Status
+)
 
 final case class OrderOnBook(price: Price, quantity: Quantity)
 

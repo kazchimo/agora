@@ -4,7 +4,7 @@ import cats.syntax.traverse._
 import domain.AllEnv
 import domain.exchange.liquid.LiquidCurrencyPairCode.BtcJpy
 import domain.exchange.liquid.LiquidOrder._
-import domain.exchange.liquid.{LiquidExchange, LiquidOrder, OrderOnBook}
+import domain.exchange.liquid.{LiquidExchange, OrderOnBook}
 import infra.exchange.liquid.impl.OrdersStream.toLiquidOrders
 import lib.error.ClientDomainError
 import sttp.ws.WebSocket
