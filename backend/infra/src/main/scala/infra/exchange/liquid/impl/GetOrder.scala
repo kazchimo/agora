@@ -4,6 +4,7 @@ import domain.AllEnv
 import domain.exchange.liquid.LiquidOrder.{Id, Price, Quantity, Status}
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder}
 import infra.exchange.liquid.Endpoints
+import infra.exchange.liquid.response.OrderResponse
 import lib.refined.{PositiveDouble, PositiveLong}
 import lib.syntax.all._
 import sttp.client3.UriContext
@@ -13,18 +14,6 @@ import zio.{IO, RIO, ZIO}
 import io.circe.generic.auto._
 import io.circe.refined._
 import lib.error.ClientDomainError
-
-final private case class OrderResponse(
-  id: PositiveLong,
-  price: PositiveDouble,
-  quantity: PositiveDouble,
-  status: String
-) {
-  def toOrder: IO[ClientDomainError, LiquidOrder] = Status
-    .withNameZio(status).map(
-      LiquidOrder(Id(id), Price(price), Quantity(price), _)
-    )
-}
 
 trait GetOrder extends AuthRequest { self: LiquidExchange.Service =>
   private def url(id: Id) = Endpoints.ordersPath + s"/${id.deepInnerV.toString}"
