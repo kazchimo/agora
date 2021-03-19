@@ -1,13 +1,13 @@
 package usecase.liquid
 
 import domain.exchange.liquid.LiquidExchange
-import domain.exchange.liquid.LiquidExchange.OrderSide
+import domain.exchange.liquid.LiquidOrder.Side
 import zio.logging._
 
 object WatchOrderStreamUC {
   def watch = for {
-    buyStream  <- LiquidExchange.ordersStream(OrderSide.Buy)
-    sellStream <- LiquidExchange.ordersStream(OrderSide.Sell)
+    buyStream  <- LiquidExchange.ordersStream(Side.Buy)
+    sellStream <- LiquidExchange.ordersStream(Side.Sell)
     buyFiber   <- buyStream.foreach(o => log.info(o.toString)).fork
     sellFiber  <- sellStream.foreach(o => log.info(o.toString)).fork
     _          <- buyFiber.join

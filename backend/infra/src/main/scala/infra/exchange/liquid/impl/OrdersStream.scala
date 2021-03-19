@@ -3,7 +3,6 @@ package infra.exchange.liquid.impl
 import cats.syntax.traverse._
 import domain.AllEnv
 import domain.exchange.liquid.LiquidCurrencyPairCode.BtcJpy
-import domain.exchange.liquid.LiquidExchange.OrderSide
 import domain.exchange.liquid.LiquidOrder._
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder}
 import infra.exchange.liquid.impl.OrdersStream.toLiquidOrders
@@ -15,7 +14,7 @@ import zio.{IO, Queue, RIO, ZIO, stream}
 
 private[liquid] trait OrdersStream extends WebSocketHandler {
   self: LiquidExchange.Service =>
-  private def useWS(queue: Queue[Seq[LiquidOrder]], side: OrderSide)(
+  private def useWS(queue: Queue[Seq[LiquidOrder]], side: Side)(
     ws: WebSocket[RIO[AllEnv, *]]
   ) = handleMessage(
     ws,
@@ -24,7 +23,7 @@ private[liquid] trait OrdersStream extends WebSocketHandler {
   )(d => toLiquidOrders(d.data).flatMap(queue.offer).unit).forever
 
   override def ordersStream(
-    side: OrderSide
+    side: Side
   ): RIO[AllEnv, stream.Stream[Throwable, Seq[LiquidOrder]]] = for {
     queue <- Queue.unbounded[Seq[LiquidOrder]]
     fiber <- sendWS(useWS(queue, side)).fork
