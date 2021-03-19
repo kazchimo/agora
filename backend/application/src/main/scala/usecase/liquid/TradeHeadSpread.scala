@@ -14,6 +14,7 @@ import lib.refined.PositiveDouble
 import zio.{Ref, ZIO}
 import zio.stream.Stream
 import eu.timepit.refined.auto._
+import zio.duration._
 
 sealed private trait PositionState
 private case object LongPosition extends PositionState
@@ -43,13 +44,18 @@ object TradeHeadSpread {
       state <- positionStateRef.get
       _     <- state match {
                  case Neutral      => for {
-                     priceOpt <- latestBuyHeadPriceRef.get
-                     price    <- ZIO.getOrFail(priceOpt)
-                     orderReq  =
+                     priceOpt       <- latestBuyHeadPriceRef.get
+                     price          <- ZIO.getOrFail(priceOpt)
+                     orderReq        =
                        LiquidOrderRequest.limitBuy(btcJpyId, quantity, price)
-                     order    <- LiquidExchange.createOrder(orderReq)
-                     _        <- LiquidBroker.waitFilled(order.id).unless(order.filled)
-                     _        <- positionStateRef.set(LongPosition)
+                     order          <- LiquidExchange.createOrder(orderReq)
+                     shouldRetryRef <- Ref.make(false)
+                     _              <- LiquidBroker
+                                         .waitFilled(order.id).unless(order.filled).race(
+                                           shouldRetryRef.set(true).delay(10.seconds)
+                                         )
+                     _              <- positionStateRef
+                                         .set(LongPosition).unlessM(shouldRetryRef.get)
                    } yield ()
                  case LongPosition => for {
                      priceOpt <- latestSellHeadPriceRef.get
