@@ -1,4 +1,7 @@
 import cats.syntax.show._
+import domain.exchange.liquid.LiquidOrder.{Price, Quantity}
+import domain.exchange.liquid.LiquidOrderRequest
+import domain.exchange.liquid.LiquidProduct.btcJpyId
 import infra.conf.ConfImpl
 import infra.exchange.{ExchangeImpl, IncreasingNonceImpl}
 import lib.error._
@@ -8,7 +11,7 @@ import usecase.coincheck.{
   SellAllCoinInCoincheckUC,
   TradeInDowMethodUC
 }
-import usecase.liquid.WatchOrderStreamUC
+import usecase.liquid.{CreateOrderUC, WatchOrderStreamUC}
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
@@ -37,6 +40,12 @@ object Main extends zio.App {
   val cancelAll  = CancelAllInCoincheckUC.cancelAll
   val settleAll  = sellAll <&> cancelAll
 
+  val liquidOrder = LiquidOrderRequest.limitBuy(
+    btcJpyId,
+    Quantity.unsafeFrom(0.001),
+    Price.unsafeFrom(6369581d)
+  )
+
   private val app =
-    log.info("start") *> WatchOrderStreamUC.watch *> log.info("end")
+    log.info("start") *> CreateOrderUC.create(liquidOrder) *> log.info("end")
 }
