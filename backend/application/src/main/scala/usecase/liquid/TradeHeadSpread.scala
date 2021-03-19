@@ -21,6 +21,48 @@ object TradeHeadSpread {
   type Str = Stream[Throwable, Seq[OrderOnBook]]
   private val quantity: Quantity = Quantity.unsafeFrom(0.0015)
 
+  private def neutralOpe(
+    positionRef: Ref[PositionState],
+    buyHeadRef: Ref[Option[Price]]
+  ) = for {
+    price          <- buyHeadRef.get.someOrFailException
+    quote          <- price.zplus(Price.unsafeFrom(1d))
+    order          <- LiquidExchange.createOrder(
+                        LiquidOrderRequest.limitBuy(btcJpyId, quantity, quote)
+                      )
+    shouldRetryRef <- Ref.make(false)
+    _              <- LiquidBroker
+                        .waitFilled(order.id).unless(order.filled).race(
+                          shouldRetryRef.set(true).delay(10.seconds)
+                        )
+    _              <- LiquidExchange.cancelOrder(order.id).whenM(shouldRetryRef.get).fork
+    _              <- positionRef.set(LongPosition(quote)).unlessM(shouldRetryRef.get)
+  } yield ()
+
+  private def longOpe(
+    tradeCountRef: Ref[Int],
+    maxTradeCount: Long,
+    positionRef: Ref[PositionState],
+    sellHeadRef: Ref[Option[Price]],
+    previousPrice: Price
+  ) = for {
+    price       <- sellHeadRef.get.someOrFailException
+    quote       <- price.zminus(Price.unsafeFrom(1d))
+    plusOne     <- previousPrice.zplus(Price.unsafeFrom(1d))
+    _           <- tradeCountRef.update(_ + 1)
+    order       <-
+      LiquidExchange.createOrder(
+        LiquidOrderRequest.limitSell(btcJpyId, quantity, quote.max(plusOne))
+      )
+    _           <- LiquidBroker
+                     .waitFilledUntil(order.id, 1.minutes).zipLeft(
+                       tradeCountRef.update(_ - 1)
+                     ).unless(order.filled)
+    countLessRef = tradeCountRef.get.map(_ <= maxTradeCount)
+    _           <- ZIO.sleep(1.second).whenM(countLessRef).repeatUntilM(_ => countLessRef)
+    _           <- positionRef.set(Neutral)
+  } yield ()
+
   def trade(maxTradeCount: PositiveLong) = for {
     positionStateRef       <- Ref.make[PositionState](Neutral)
     latestBuyHeadPriceRef  <- LiquidBroker.latestHeadPriceRef(Buy)
@@ -29,44 +71,14 @@ object TradeHeadSpread {
     execute                 = for {
       state <- positionStateRef.get
       _     <- state match {
-                 case Neutral                     => for {
-                     price          <- latestBuyHeadPriceRef.get.someOrFailException
-                     quote          <- price.zplus(Price.unsafeFrom(1d))
-                     order          <-
-                       LiquidExchange.createOrder(
-                         LiquidOrderRequest.limitBuy(btcJpyId, quantity, quote)
-                       )
-                     shouldRetryRef <- Ref.make(false)
-                     _              <- LiquidBroker
-                                         .waitFilled(order.id).unless(order.filled).race(
-                                           shouldRetryRef.set(true).delay(10.seconds)
-                                         )
-                     _              <- LiquidExchange
-                                         .cancelOrder(order.id).whenM(shouldRetryRef.get).fork
-                     _              <- positionStateRef
-                                         .set(LongPosition(quote)).unlessM(shouldRetryRef.get)
-                   } yield ()
-                 case LongPosition(previousPrice) => for {
-                     price   <- latestSellHeadPriceRef.get.someOrFailException
-                     quote   <- price.zminus(Price.unsafeFrom(1d))
-                     plusOne <- previousPrice.zplus(Price.unsafeFrom(1d))
-                     _       <- tradeCountRef.update(_ + 1)
-                     order   <- LiquidExchange.createOrder(
-                                  LiquidOrderRequest
-                                    .limitSell(btcJpyId, quantity, quote.max(plusOne))
-                                )
-                     _       <- LiquidBroker
-                                  .waitFilledUntil(order.id, 1.minutes).zipLeft(
-                                    tradeCountRef.update(_ - 1)
-                                  ).unless(order.filled)
-                     _       <- ZIO
-                                  .sleep(1.second).whenM(
-                                    tradeCountRef.get.map(_ <= maxTradeCount.value)
-                                  ).repeatUntilM(_ =>
-                                    tradeCountRef.get.map(_ <= maxTradeCount.value)
-                                  )
-                     _       <- positionStateRef.set(Neutral)
-                   } yield ()
+                 case Neutral                     => neutralOpe(positionStateRef, latestBuyHeadPriceRef)
+                 case LongPosition(previousPrice) => longOpe(
+                     tradeCountRef,
+                     maxTradeCount.value,
+                     positionStateRef,
+                     latestSellHeadPriceRef,
+                     previousPrice
+                   )
                }
     } yield ()
     _                      <- execute
