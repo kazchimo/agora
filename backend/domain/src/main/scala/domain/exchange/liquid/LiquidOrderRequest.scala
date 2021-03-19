@@ -9,13 +9,15 @@ final case class LiquidOrderRequest[O <: OrderType] private (
   orderType: O,
   productId: LiquidProduct.Id,
   side: LiquidOrder.Side,
-  quantity: Option[LiquidOrder.Quantity] = None
+  quantity: LiquidOrder.Quantity,
+  price: Option[LiquidOrder.Price] = None
 )
 
 object LiquidOrderRequest {
   def limitBuy(
     product: LiquidProduct,
-    quantity: Quantity
+    quantity: Quantity,
+    price: LiquidOrder.Price
   ): LiquidOrderRequest[OrderType.Limit] =
-    LiquidOrderRequest(Limit, product.id, Buy, Some(quantity))
+    LiquidOrderRequest(Limit, product.id, Buy, quantity, Some(price))
 }
