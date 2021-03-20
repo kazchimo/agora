@@ -3,13 +3,13 @@ package infra.exchange.liquid.impl
 import domain.AllEnv
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder}
 import infra.exchange.liquid.response.OrderResponse
-import sttp.ws.WebSocket
-import zio.{Queue, RIO, ZIO, stream}
-import zio.stream.Stream
+import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.refined._
-import io.circe.generic.auto._
+import sttp.ws.WebSocket
 import zio.logging.log
+import zio.stream.Stream
+import zio.{Queue, RIO, ZIO, stream}
 
 private[liquid] trait OrdersStream extends WebSocketHandler {
   self: LiquidExchange.Service =>

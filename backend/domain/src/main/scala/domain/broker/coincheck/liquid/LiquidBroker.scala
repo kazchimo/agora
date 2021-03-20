@@ -5,7 +5,6 @@ import domain.exchange.liquid.LiquidOrder.{Id, Price, Side}
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder, OrderOnBook}
 import lib.zio.EStream
 import zio.duration._
-import zio.stream.Stream
 import zio.{RIO, Ref, ZIO}
 
 object LiquidBroker {

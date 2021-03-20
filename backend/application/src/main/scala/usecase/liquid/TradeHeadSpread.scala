@@ -4,15 +4,13 @@ import domain.broker.coincheck.liquid.LiquidBroker
 import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
 import domain.exchange.liquid.LiquidOrder.{Price, Quantity}
 import domain.exchange.liquid.LiquidProduct.btcJpyId
-import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest, OrderOnBook}
+import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest}
 import eu.timepit.refined.auto._
 import lib.instance.all._
-import lib.refined.PositiveLong
 import lib.syntax.all._
 import zio.duration._
-import zio.stream.Stream
-import zio.{Ref, ZIO}
 import zio.logging._
+import zio.{Ref, ZIO}
 
 sealed private trait PositionState
 private case class LongPosition(price: Price) extends PositionState

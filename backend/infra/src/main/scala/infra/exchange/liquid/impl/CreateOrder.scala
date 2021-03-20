@@ -11,9 +11,8 @@ import io.circe.syntax._
 import io.circe.{Encoder, Json}
 import lib.instance.all._
 import sttp.client3.UriContext
-import sttp.client3.asynchttpclient.zio.send
 import sttp.client3.circe.asJson
-import zio.{RIO, ZIO}
+import zio.RIO
 
 import CreateOrder._
 

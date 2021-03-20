@@ -9,9 +9,8 @@ import io.circe.generic.auto._
 import io.circe.refined._
 import lib.syntax.all._
 import sttp.client3.UriContext
-import sttp.client3.asynchttpclient.zio.send
 import sttp.client3.circe.asJson
-import zio.{RIO, ZIO}
+import zio.RIO
 
 trait GetOrder extends AuthRequest { self: LiquidExchange.Service =>
   private def url(id: Id) = Endpoints.ordersPath + s"/${id.deepInnerV.toString}"

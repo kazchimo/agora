@@ -1,14 +1,12 @@
 package infra.exchange.liquid.impl
 
+import cats.syntax.either._
 import domain.AllEnv
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder}
 import infra.exchange.liquid.Endpoints
-import sttp.client3.UriContext
-import sttp.client3.asynchttpclient.zio.send
-import sttp.client3.circe.asJson
-import zio.RIO
-import cats.syntax.either._
 import lib.error.InternalInfraError
+import sttp.client3.UriContext
+import zio.RIO
 
 trait CancelOrder extends AuthRequest { self: LiquidExchange.Service =>
   override def cancelOrder(id: LiquidOrder.Id): RIO[AllEnv, Unit] = for {

@@ -13,10 +13,10 @@ import usecase.coincheck.{
   TradeInDowMethodUC
 }
 import usecase.liquid.TradeHeadSpread
+import zio.duration._
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
-import zio.duration._
 
 object Main extends zio.App {
   override def run(args: List[String]): URIO[ZEnv, ExitCode] = app
