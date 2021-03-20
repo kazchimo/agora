@@ -67,7 +67,7 @@ object TradeHeadSpread {
     _           <- log
                      .info("Trade count are full. Waiting settled...").delay(
                        5.second
-                     ).whenM(countLessRef).repeatUntilM(_ => countLessRef)
+                     ).unlessM(countLessRef).repeatUntilM(_ => countLessRef)
     _           <- positionRef.set(Neutral)
   } yield ()
 
