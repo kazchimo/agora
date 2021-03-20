@@ -46,23 +46,22 @@ object TradeHeadSpread {
     sellHeadRef: Ref[Option[Price]],
     previousPrice: Price
   ) = for {
-    price         <- sellHeadRef.get.someOrFailException
-    quote         <- price.zminus(Price.unsafeFrom(1d))
-    plusOne       <- previousPrice.zplus(Price.unsafeFrom(1d))
-    _             <- tradeCountRef.update(_ + 1)
-    order         <-
+    price        <- sellHeadRef.get.someOrFailException
+    quote        <- price.zminus(Price.unsafeFrom(1d))
+    plusOne      <- previousPrice.zplus(Price.unsafeFrom(1d))
+    _            <- tradeCountRef.update(_ + 1)
+    order        <-
       LiquidExchange.createOrder(
         LiquidOrderRequest.limitSell(btcJpyId, quantity, quote.max(plusOne))
       )
-    shouldForkRef <- Ref.make(false)
-    decTradeCount  = tradeCountRef.update(_ - 1)
-    wait           =
-      LiquidBroker.waitFilled(order.id).unless(order.filled) *> decTradeCount
-    _             <- wait.race(shouldForkRef.set(true).delay(1.minutes))
-    _             <- wait.fork.whenM(shouldForkRef.get)
-    countLessRef   = tradeCountRef.get.map(_ <= maxTradeCount)
-    _             <- ZIO.sleep(1.second).whenM(countLessRef).repeatUntilM(_ => countLessRef)
-    _             <- positionRef.set(Neutral)
+    decTradeCount = tradeCountRef.update(_ - 1)
+    _            <-
+      (LiquidBroker
+        .waitFilled(order.id).unless(order.filled) *> decTradeCount).fork *> ZIO
+        .sleep(1.minutes)
+    countLessRef  = tradeCountRef.get.map(_ <= maxTradeCount)
+    _            <- ZIO.sleep(1.second).whenM(countLessRef).repeatUntilM(_ => countLessRef)
+    _            <- positionRef.set(Neutral)
   } yield ()
 
   def trade(maxTradeCount: PositiveLong) = for {
