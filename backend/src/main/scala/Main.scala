@@ -16,6 +16,7 @@ import usecase.liquid.TradeHeadSpread
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
 import zio.{ExitCode, URIO, ZEnv, ZIO}
+import zio.duration._
 
 object Main extends zio.App {
   override def run(args: List[String]): URIO[ZEnv, ExitCode] = app
@@ -47,6 +48,12 @@ object Main extends zio.App {
     Price.unsafeFrom(6369581d)
   )
 
-  private val app =
-    log.info("start") *> TradeHeadSpread.trade(3L) *> log.info("end")
+  val headSpreadTrade = ZIO.collectAllPar_(
+    List
+      .fill(3)(TradeHeadSpread.trade).zipWithIndex.map(a =>
+        a._1.delay((a._2 * 10).seconds)
+      )
+  )
+
+  private val app = log.info("start") *> headSpreadTrade *> log.info("end")
 }
