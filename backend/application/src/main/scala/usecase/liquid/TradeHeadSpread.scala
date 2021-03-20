@@ -46,19 +46,7 @@ object TradeHeadSpread {
     _              <- positionRef.set(LongPosition(quote)).unlessM(shouldRetryRef.get)
   } yield ()
 
-  private def checkTradeCount(countRef: Ref[Int], maxCount: Long) = {
-    val info = countRef.get.flatMap(c =>
-      log.info(
-        s"Trade count are full. TradeCount=${c.toString}. Waiting settled..."
-      )
-    ) *> ZIO.sleep(5.seconds)
-
-    val isOver = countRef.map(_ >= maxCount).get
-    info.whenM(isOver).repeatWhileM(_ => isOver)
-  }
-
   private def longOpe(
-    tradeCountRef: Ref[Int],
     positionRef: Ref[PositionState],
     sellHeadRef: Ref[Option[Price]],
     previousPrice: Price
@@ -66,32 +54,25 @@ object TradeHeadSpread {
     price   <- sellHeadRef.get.someOrFailException
     quote   <- price.zminus(Price.unsafeFrom(1d))
     plusOne <- previousPrice.zplus(Price.unsafeFrom(1d))
-    _       <- tradeCountRef.update(_ + 1)
     q        = quote.max(plusOne)
     order   <- sell(q) <* log.info(s"Created sell order at ${q.deepInnerV}")
-    wait     =
-      LiquidBroker.waitFilled(order.id).when(order.notFilled) *> tradeCountRef
-        .update(_ - 1) *> log.info(s"Sell order settled at ${q.deepInnerV}")
+    wait     = LiquidBroker.waitFilled(order.id).when(order.notFilled) *> log.info(
+                 s"Sell order settled at ${q.deepInnerV}"
+               )
     _       <- wait.race(wait.fork.delay(1.minutes))
     _       <- positionRef.set(Neutral)
   } yield ()
 
-  def trade(maxTradeCount: PositiveLong) = for {
+  def trade = for {
     positionStateRef       <- Ref.make[PositionState](Neutral)
     latestBuyHeadPriceRef  <- LiquidBroker.latestHeadPriceRef(Buy)
     latestSellHeadPriceRef <- LiquidBroker.latestHeadPriceRef(Sell)
-    tradeCountRef          <- Ref.make(0)
     execute                 = for {
       state <- positionStateRef.get
-      _     <- checkTradeCount(tradeCountRef, maxTradeCount)
       _     <- state match {
                  case Neutral                     => neutralOpe(positionStateRef, latestBuyHeadPriceRef)
-                 case LongPosition(previousPrice) => longOpe(
-                     tradeCountRef,
-                     positionStateRef,
-                     latestSellHeadPriceRef,
-                     previousPrice
-                   )
+                 case LongPosition(previousPrice) =>
+                   longOpe(positionStateRef, latestSellHeadPriceRef, previousPrice)
                }
     } yield ()
     priceInitialized        = ZIO.mapN(
