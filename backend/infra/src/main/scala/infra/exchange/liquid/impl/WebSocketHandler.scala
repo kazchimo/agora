@@ -1,8 +1,6 @@
 package infra.exchange.liquid.impl
 
 import domain.AllEnv
-import domain.conf.Conf
-import domain.exchange.Nonce
 import domain.exchange.liquid.LiquidExchange
 import infra.exchange.liquid.Endpoints
 import io.circe.Json
@@ -14,9 +12,6 @@ import sttp.client3.{Response, UriContext, asWebSocketAlways, basicRequest}
 import sttp.ws.{WebSocket, WebSocketClosed, WebSocketFrame}
 import zio.logging.log
 import zio.{RIO, ZIO}
-import lib.instance.all._
-import pdi.jwt.Jwt
-import lib.syntax.all._
 
 private[liquid] case class WSMessage(event: String)
 private[liquid] case class DataMessage(event: String, data: String)
@@ -32,25 +27,17 @@ private[liquid] trait WebSocketHandler extends AuthRequest {
   )
 
   private def authText = for {
-    tokenId <- Conf.liquidTokenId
-    sec     <- Conf.liquidSecret
-    nonce   <- Nonce.getNonce
-    payload  = Json
-                 .obj(
-                   "token_id" -> tokenId.asJson,
-                   "path"     -> "/realtime".asJson,
-                   "nonce"    -> nonce.asJson
-                 ).noSpaces
-    text     = Json.obj(
-                 "event" -> "quoine:auth_request".asJson,
-                 "data"  -> Json.obj(
-                   "headers" -> Json.obj(
-                     "X-Quoine-Auth"
-                       -> Jwt.encode(payload, sec.deepInnerV).asJson,
-                     "path" -> "/realtime".asJson
-                   )
-                 )
+    sig <- createSig("/realtime")
+    text = Json.obj(
+             "event" -> "quoine:auth_request".asJson,
+             "data"  -> Json.obj(
+               "headers" -> Json.obj(
+                 "X-Quoine-Auth"
+                   -> sig.asJson,
+                 "path" -> "/realtime".asJson
                )
+             )
+           )
   } yield WebSocketFrame.text(text.noSpaces)
 
   protected def handleMessage(
