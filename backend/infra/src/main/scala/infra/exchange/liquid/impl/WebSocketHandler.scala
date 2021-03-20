@@ -74,7 +74,7 @@ private[liquid] trait WebSocketHandler extends AuthRequest {
               case "quoine:auth_success"                    => log.info("Authenticated!") *> ws.send(
                   subscribeText(subscribeChannel)
                 )
-              case "quoine:auth_failure"                    => log.error("Auth failed!")
+              case "quoine:auth_failure"                    => log.error(s"Auth failed! msg: $msg")
               case "pusher_internal:subscription_succeeded" =>
                 log.debug("Subscribed ws!")
               case "pusher_internal:subscription_succeeded" =>
