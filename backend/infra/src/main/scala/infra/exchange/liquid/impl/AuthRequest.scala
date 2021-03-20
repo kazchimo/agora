@@ -8,8 +8,11 @@ import io.circe.syntax._
 import lib.sttp.jsonRequest
 import lib.syntax.all._
 import pdi.jwt.{Jwt, JwtAlgorithm}
-import sttp.client3.{Empty, RequestT}
-import zio.{RIO, ZIO}
+import sttp.capabilities.zio.ZioStreams
+import sttp.capabilities.{Effect, WebSockets}
+import sttp.client3.{Empty, Request, RequestT}
+import zio.{RIO, Task, ZIO}
+import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 
 private[liquid] trait AuthRequest {
   def createSig(path: String): ZIO[AllEnv, Throwable, String] = for {
@@ -30,4 +33,14 @@ private[liquid] trait AuthRequest {
       jsonRequest
         .header("X-Quoine-API-Version", "2").header("X-Quoine-Auth", sig)
     )
+
+  private case object ShouldRetry extends Exception
+
+  def recover401Send[L <: Throwable, R](
+    req: Request[Either[L, R], Effect[Task] with ZioStreams with WebSockets]
+  ): ZIO[SttpClient, Throwable, R] = (for {
+    res     <- send(req)
+    _       <- ZIO.fail(ShouldRetry).when(res.code.code == 401)
+    content <- ZIO.fromEither(res.body)
+  } yield content).retryWhileEquals(ShouldRetry)
 }

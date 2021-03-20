@@ -23,15 +23,14 @@ private[liquid] trait CreateOrder extends AuthRequest {
   override def createOrder[O <: OrderType, S <: Side](
     orderRequest: LiquidOrderRequest[O, S]
   ): RIO[AllEnv, LiquidOrder] = for {
-    req       <- authRequest(Endpoints.ordersPath)
-    resEither <- send(
-                   req
-                     .post(uri"${Endpoints.orders}").body(
-                       orderRequest.asJson.noSpaces
-                     ).response(asJson[OrderResponse])
-                 )
-    res       <- ZIO.fromEither(resEither.body)
-    order     <- res.toOrder
+    req   <- authRequest(Endpoints.ordersPath)
+    res   <- recover401Send(
+               req
+                 .post(uri"${Endpoints.orders}").body(
+                   orderRequest.asJson.noSpaces
+                 ).response(asJson[OrderResponse])
+             )
+    order <- res.toOrder
   } yield order
 }
 
