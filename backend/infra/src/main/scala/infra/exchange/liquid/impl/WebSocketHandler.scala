@@ -31,11 +31,8 @@ private[liquid] trait WebSocketHandler extends AuthRequest {
     text = Json.obj(
              "event" -> "quoine:auth_request".asJson,
              "data"  -> Json.obj(
-               "headers" -> Json.obj(
-                 "X-Quoine-Auth"
-                   -> sig.asJson,
-                 "path" -> "/realtime".asJson
-               )
+               "headers" -> Json.obj("X-Quoine-Auth" -> sig.asJson),
+               "path"    -> "/realtime".asJson
              )
            )
   } yield WebSocketFrame.text(text.noSpaces)

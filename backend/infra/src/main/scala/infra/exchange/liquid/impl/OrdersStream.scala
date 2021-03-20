@@ -9,6 +9,7 @@ import zio.stream.Stream
 import io.circe.parser.decode
 import io.circe.refined._
 import io.circe.generic.auto._
+import zio.logging.log
 
 private[liquid] trait OrdersStream extends WebSocketHandler {
   self: LiquidExchange.Service =>
@@ -17,9 +18,10 @@ private[liquid] trait OrdersStream extends WebSocketHandler {
       for {
         res   <- ZIO.fromEither(decode[OrderResponse](d.data))
         order <- res.toOrder
+        _     <- log.trace(order.toString)
         _     <- queue.offer(order)
       } yield ()
-    }
+    }.forever
 
   override def ordersStream
     : RIO[AllEnv, stream.Stream[Throwable, LiquidOrder]] = for {
