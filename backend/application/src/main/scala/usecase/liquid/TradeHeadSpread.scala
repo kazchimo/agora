@@ -53,7 +53,8 @@ object TradeHeadSpread {
       )
     ) *> ZIO.sleep(5.seconds)
 
-    info.repeatWhileM(_ => countRef.map(_ >= maxCount).get)
+    val isOver = countRef.map(_ >= maxCount).get
+    info.whenM(isOver).repeatWhileM(_ => isOver)
   }
 
   private def longOpe(
