@@ -68,6 +68,6 @@ object LiquidOrder {
     case object Live            extends Status
     case object Filled          extends Status
     case object PartiallyFilled extends Status
-    case object Canceled        extends Status
+    case object Cancelled       extends Status
   }
 }
