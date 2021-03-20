@@ -21,15 +21,21 @@ object TradeHeadSpread {
   type Str = Stream[Throwable, Seq[OrderOnBook]]
   private val quantity: Quantity = Quantity.unsafeFrom(0.0015)
 
+  private def buy(price: Price) = LiquidExchange.createOrder(
+    LiquidOrderRequest.limitBuy(btcJpyId, quantity, price)
+  )
+
+  private def sell(price: Price) = LiquidExchange.createOrder(
+    LiquidOrderRequest.limitSell(btcJpyId, quantity, price)
+  )
+
   private def neutralOpe(
     positionRef: Ref[PositionState],
     buyHeadRef: Ref[Option[Price]]
   ) = for {
     price          <- buyHeadRef.get.someOrFailException
     quote          <- price.zplus(Price.unsafeFrom(1d))
-    order          <- LiquidExchange.createOrder(
-                        LiquidOrderRequest.limitBuy(btcJpyId, quantity, quote)
-                      )
+    order          <- buy(quote)
     shouldRetryRef <- Ref.make(false)
     _              <- LiquidBroker
                         .waitFilled(order.id).unless(order.filled).race(
@@ -50,10 +56,7 @@ object TradeHeadSpread {
     quote       <- price.zminus(Price.unsafeFrom(1d))
     plusOne     <- previousPrice.zplus(Price.unsafeFrom(1d))
     _           <- tradeCountRef.update(_ + 1)
-    order       <-
-      LiquidExchange.createOrder(
-        LiquidOrderRequest.limitSell(btcJpyId, quantity, quote.max(plusOne))
-      )
+    order       <- sell(quote.max(plusOne))
     _           <-
       (LiquidBroker.waitFilled(order.id).unless(order.filled) *> tradeCountRef
         .update(_ - 1)).fork *> ZIO.sleep(1.minutes)
