@@ -13,8 +13,8 @@ import zio.{RIO, ZIO}
 
 private[liquid] trait AuthRequest {
   def createSig(path: String): ZIO[AllEnv, Throwable, String] = for {
-    nonce   <- Nonce.getNonce
     tokenId <- Conf.liquidTokenId
+    nonce    = System.currentTimeMillis
     secret  <- Conf.liquidSecret
     payload  = Map(
                  "path"     -> path,
