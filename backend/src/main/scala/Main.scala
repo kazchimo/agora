@@ -23,7 +23,9 @@ object Main extends zio.App {
     .foldM(
       {
         case e: Error => log.error(e.show)
-        case e        => log.error(e.getMessage)
+        case e        => log.error(e.getMessage) *> log.debug(
+            e.getStackTrace.map(_.toString).mkString("\n")
+          )
       },
       _ => ZIO.unit
     )
@@ -32,7 +34,7 @@ object Main extends zio.App {
       ExchangeImpl.coinCheckExchange,
       ExchangeImpl.liquidExchange,
       AsyncHttpClientZioBackend.layer(),
-      Logging.console(logLevel = LogLevel.Info),
+      Logging.console(logLevel = LogLevel.Debug),
       IncreasingNonceImpl.layer(System.currentTimeMillis())
     )
     .exitCode
