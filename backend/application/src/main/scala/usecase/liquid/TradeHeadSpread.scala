@@ -59,11 +59,10 @@ object TradeHeadSpread {
     _           <- tradeCountRef.update(_ + 1)
     q            = quote.max(plusOne)
     order       <- sell(q) <* log.info(s"Created sell order at ${q.deepInnerV}")
-    _           <-
-      (LiquidBroker.waitFilled(order.id).unless(order.filled) *> tradeCountRef
-        .update(_ - 1) *> log.info(
-        s"Sell order settled at ${q.deepInnerV}"
-      )).fork *> ZIO.sleep(1.minutes)
+    wait         =
+      LiquidBroker.waitFilled(order.id).unless(order.filled) *> tradeCountRef
+        .update(_ - 1) *> log.info(s"Sell order settled at ${q.deepInnerV}")
+    _           <- wait.race(wait.fork.delay(1.minutes))
     countLessRef = tradeCountRef.get.map(_ <= maxTradeCount)
     _           <- log
                      .info("Trade count are full. Waiting settled...").delay(
