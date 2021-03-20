@@ -12,6 +12,7 @@ import lib.syntax.all._
 import zio.duration._
 import zio.stream.Stream
 import zio.{Ref, ZIO}
+import zio.logging._
 
 sealed private trait PositionState
 private case class LongPosition(price: Price) extends PositionState
@@ -34,13 +35,14 @@ object TradeHeadSpread {
   ) = for {
     price          <- buyHeadRef.get.someOrFailException
     quote          <- price.zplus(Price.unsafeFrom(1d))
-    order          <- buy(quote)
+    order          <- buy(quote) <* log.info(s"Create buy order at ${quote.deepInnerV}")
     shouldRetryRef <- Ref.make(false)
     _              <- LiquidBroker
-                        .waitFilled(order.id).unless(order.filled).race(
-                          shouldRetryRef.set(true).delay(10.seconds)
-                        )
-    _              <- LiquidExchange.cancelOrder(order.id).whenM(shouldRetryRef.get).fork
+                        .waitFilled(order.id).unless(order.filled).zipRight(
+                          log.info(s"Buy order settled at ${quote.deepInnerV}")
+                        ).race(shouldRetryRef.set(true).delay(10.seconds))
+    _              <- (LiquidExchange.cancelOrder(order.id) *> log.info(s"Reordering buy"))
+                        .whenM(shouldRetryRef.get).fork
     _              <- positionRef.set(LongPosition(quote)).unlessM(shouldRetryRef.get)
   } yield ()
 
@@ -55,12 +57,17 @@ object TradeHeadSpread {
     quote       <- price.zminus(Price.unsafeFrom(1d))
     plusOne     <- previousPrice.zplus(Price.unsafeFrom(1d))
     _           <- tradeCountRef.update(_ + 1)
-    order       <- sell(quote.max(plusOne))
+    order       <- sell(quote.max(plusOne)) <* log.info("Created sell order")
     _           <-
       (LiquidBroker.waitFilled(order.id).unless(order.filled) *> tradeCountRef
-        .update(_ - 1)).fork *> ZIO.sleep(1.minutes)
+        .update(_ - 1) *> log.info("Sell order settled")).fork *> ZIO.sleep(
+        1.minutes
+      )
     countLessRef = tradeCountRef.get.map(_ <= maxTradeCount)
-    _           <- ZIO.sleep(1.second).whenM(countLessRef).repeatUntilM(_ => countLessRef)
+    _           <- log
+                     .info("Trade count are full. Waiting settled...").delay(
+                       5.second
+                     ).whenM(countLessRef).repeatUntilM(_ => countLessRef)
     _           <- positionRef.set(Neutral)
   } yield ()
 
