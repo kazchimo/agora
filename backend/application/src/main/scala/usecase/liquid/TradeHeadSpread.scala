@@ -18,7 +18,6 @@ private case class LongPosition(price: Price) extends PositionState
 private case object Neutral                   extends PositionState
 
 object TradeHeadSpread {
-  type Str = Stream[Throwable, Seq[OrderOnBook]]
   private val quantity: Quantity = Quantity.unsafeFrom(0.0015)
 
   private def buy(price: Price) = LiquidExchange.createOrder(
