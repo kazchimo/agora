@@ -46,6 +46,16 @@ object TradeHeadSpread {
     _              <- positionRef.set(LongPosition(quote)).unlessM(shouldRetryRef.get)
   } yield ()
 
+  private def checkTradeCount(countRef: Ref[Int], maxCount: Long) = {
+    val info = countRef.get.flatMap(c =>
+      log.info(
+        s"Trade count are full. TradeCount=${c.toString}. Waiting settled..."
+      )
+    ) *> ZIO.sleep(5.seconds)
+
+    info.repeatWhileM(_ => countRef.map(_ >= maxCount).get)
+  }
+
   private def longOpe(
     tradeCountRef: Ref[Int],
     maxTradeCount: Long,
@@ -53,22 +63,18 @@ object TradeHeadSpread {
     sellHeadRef: Ref[Option[Price]],
     previousPrice: Price
   ) = for {
-    price       <- sellHeadRef.get.someOrFailException
-    quote       <- price.zminus(Price.unsafeFrom(1d))
-    plusOne     <- previousPrice.zplus(Price.unsafeFrom(1d))
-    _           <- tradeCountRef.update(_ + 1)
-    q            = quote.max(plusOne)
-    order       <- sell(q) <* log.info(s"Created sell order at ${q.deepInnerV}")
-    wait         =
+    price   <- sellHeadRef.get.someOrFailException
+    quote   <- price.zminus(Price.unsafeFrom(1d))
+    plusOne <- previousPrice.zplus(Price.unsafeFrom(1d))
+    _       <- tradeCountRef.update(_ + 1)
+    q        = quote.max(plusOne)
+    order   <- sell(q) <* log.info(s"Created sell order at ${q.deepInnerV}")
+    wait     =
       LiquidBroker.waitFilled(order.id).unless(order.filled) *> tradeCountRef
         .update(_ - 1) *> log.info(s"Sell order settled at ${q.deepInnerV}")
-    _           <- wait.race(wait.fork.delay(1.minutes))
-    countLessRef = tradeCountRef.get.map(_ <= maxTradeCount)
-    _           <- log
-                     .info("Trade count are full. Waiting settled...").delay(
-                       5.second
-                     ).unlessM(countLessRef).repeatUntilM(_ => countLessRef)
-    _           <- positionRef.set(Neutral)
+    _       <- wait.race(wait.fork.delay(1.minutes))
+    _       <- checkTradeCount(tradeCountRef, maxTradeCount)
+    _       <- positionRef.set(Neutral)
   } yield ()
 
   def trade(maxTradeCount: PositiveLong) = for {
