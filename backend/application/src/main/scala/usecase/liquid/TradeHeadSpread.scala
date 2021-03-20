@@ -83,10 +83,10 @@ object TradeHeadSpread {
     } yield ()
     _                      <- execute
                                 .whenM(
-                                  latestBuyHeadPriceRef.get
-                                    .map(_.nonEmpty).zipWith(
-                                      latestSellHeadPriceRef.get.map(_.nonEmpty)
-                                    )(_ && _)
+                                  ZIO.mapN(
+                                    latestBuyHeadPriceRef.get.map(_.nonEmpty),
+                                    latestSellHeadPriceRef.get.map(_.nonEmpty)
+                                  )(_ && _)
                                 ).forever
   } yield ()
 }
