@@ -22,6 +22,7 @@ package object liquid {
         side: Side
       ): RIO[AllEnv, Stream[Throwable, Seq[OrderOnBook]]]
       def productsStream: RIO[AllEnv, Stream[Throwable, LiquidProduct]]
+      def ordersStream: RIO[AllEnv, Stream[Throwable, LiquidOrder]]
       def executionStream: RIO[AllEnv, Stream[Throwable, LiquidExecution]]
     }
   }
