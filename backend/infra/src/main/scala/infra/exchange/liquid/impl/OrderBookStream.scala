@@ -5,14 +5,14 @@ import domain.AllEnv
 import domain.exchange.liquid.LiquidCurrencyPairCode.BtcJpy
 import domain.exchange.liquid.LiquidOrder._
 import domain.exchange.liquid.{LiquidExchange, OrderOnBook}
-import infra.exchange.liquid.impl.OrdersStream.toLiquidOrders
+import infra.exchange.liquid.impl.OrderBookStream.toLiquidOrders
 import lib.error.ClientDomainError
 import sttp.ws.WebSocket
 import zio._
 import zio.interop.catz.core._
 import zio.stream._
 
-private[liquid] trait OrdersStream extends WebSocketHandler {
+private[liquid] trait OrderBookStream extends WebSocketHandler {
   self: LiquidExchange.Service =>
   private def useWS(queue: Queue[Seq[OrderOnBook]], side: Side)(
     ws: WebSocket[RIO[AllEnv, *]]
@@ -22,7 +22,7 @@ private[liquid] trait OrdersStream extends WebSocketHandler {
     "updated"
   )(d => toLiquidOrders(d.data).flatMap(queue.offer).unit).forever
 
-  override def ordersStream(
+  override def orderBookStream(
     side: Side
   ): RIO[AllEnv, stream.Stream[Throwable, Seq[OrderOnBook]]] = for {
     queue <- Queue.unbounded[Seq[OrderOnBook]]
@@ -30,7 +30,7 @@ private[liquid] trait OrdersStream extends WebSocketHandler {
   } yield Stream.fromQueueWithShutdown(queue).interruptWhen(fiber.join)
 }
 
-object OrdersStream {
+object OrderBookStream {
   private val pricesRegex = raw"""\["([\d\.]*)","([\d\.]*)"\]""".r
 
   def toLiquidOrders(d: String): IO[ClientDomainError, List[OrderOnBook]] =

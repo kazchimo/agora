@@ -6,8 +6,8 @@ import zio.logging._
 
 object WatchOrderStreamUC {
   def watch = for {
-    buyStream  <- LiquidExchange.ordersStream(Side.Buy)
-    sellStream <- LiquidExchange.ordersStream(Side.Sell)
+    buyStream  <- LiquidExchange.orderBookStream(Side.Buy)
+    sellStream <- LiquidExchange.orderBookStream(Side.Sell)
     buyFiber   <- buyStream.foreach(o => log.info(o.toString)).fork
     sellFiber  <- sellStream.foreach(o => log.info(o.toString)).fork
     _          <- buyFiber.join

@@ -18,7 +18,7 @@ package object liquid {
       def createOrder[O <: OrderType, S <: Side](
         orderRequest: LiquidOrderRequest[O, S]
       ): RIO[AllEnv, LiquidOrder]
-      def ordersStream(
+      def orderBookStream(
         side: Side
       ): RIO[AllEnv, Stream[Throwable, Seq[OrderOnBook]]]
       def productsStream: RIO[AllEnv, Stream[Throwable, LiquidProduct]]

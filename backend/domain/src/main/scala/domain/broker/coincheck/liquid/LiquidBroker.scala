@@ -29,7 +29,7 @@ object LiquidBroker {
 
   def latestHeadPriceRef(side: Side): RIO[AllEnv, Ref[Option[Price]]] = for {
     stream: Stream[Throwable, Seq[OrderOnBook]] <-
-      LiquidExchange.ordersStream(side)
+      LiquidExchange.orderBookStream(side)
     ref                                         <- Ref.make[Option[Price]](None)
     _                                           <- stream.foreach { os =>
                                                      ZIO
