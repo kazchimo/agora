@@ -59,7 +59,6 @@ object TradeHeadSpread {
 
   private def longOpe(
     tradeCountRef: Ref[Int],
-    maxTradeCount: Long,
     positionRef: Ref[PositionState],
     sellHeadRef: Ref[Option[Price]],
     previousPrice: Price
@@ -74,7 +73,6 @@ object TradeHeadSpread {
       LiquidBroker.waitFilled(order.id).when(order.notFilled) *> tradeCountRef
         .update(_ - 1) *> log.info(s"Sell order settled at ${q.deepInnerV}")
     _       <- wait.race(wait.fork.delay(1.minutes))
-    _       <- checkTradeCount(tradeCountRef, maxTradeCount)
     _       <- positionRef.set(Neutral)
   } yield ()
 
@@ -85,11 +83,11 @@ object TradeHeadSpread {
     tradeCountRef          <- Ref.make(0)
     execute                 = for {
       state <- positionStateRef.get
+      _     <- checkTradeCount(tradeCountRef, maxTradeCount)
       _     <- state match {
                  case Neutral                     => neutralOpe(positionStateRef, latestBuyHeadPriceRef)
                  case LongPosition(previousPrice) => longOpe(
                      tradeCountRef,
-                     maxTradeCount.value,
                      positionStateRef,
                      latestSellHeadPriceRef,
                      previousPrice
