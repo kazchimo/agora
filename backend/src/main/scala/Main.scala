@@ -48,12 +48,13 @@ object Main extends zio.App {
     Price.unsafeFrom(6369581d)
   )
 
-  val headSpreadTrade = ZIO.collectAllPar_(
-    List
-      .fill(3)(TradeHeadSpread.trade).zipWithIndex.map(a =>
-        a._1.delay((a._2 * 10).seconds)
-      )
-  )
+  val headSpreadTrade = ZIO
+    .forkAll(
+      List
+        .fill(3)(TradeHeadSpread.trade).zipWithIndex.map(a =>
+          a._1.delay((a._2 * 10).seconds)
+        )
+    ).flatMap(_.join)
 
   private val app = log.info("start") *> headSpreadTrade *> log.info("end")
 }
