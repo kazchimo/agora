@@ -17,7 +17,7 @@ private case class LongPosition(price: Price) extends PositionState
 private case object Neutral                   extends PositionState
 
 object TradeHeadSpread {
-  private val quantity: Quantity = Quantity.unsafeFrom(0.0015)
+  private val quantity: Quantity = Quantity.unsafeFrom(0.001)
 
   private def buy(price: Price) = LiquidExchange.createOrder(
     LiquidOrderRequest.limitBuy(btcJpyId, quantity, price)
