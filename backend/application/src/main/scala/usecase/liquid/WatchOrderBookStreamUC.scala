@@ -4,7 +4,7 @@ import domain.exchange.liquid.LiquidExchange
 import domain.exchange.liquid.LiquidOrder.Side
 import zio.logging._
 
-object WatchOrderStreamUC {
+object WatchOrderBookStreamUC {
   def watch = for {
     buyStream  <- LiquidExchange.orderBookStream(Side.Buy)
     sellStream <- LiquidExchange.orderBookStream(Side.Sell)
