@@ -56,10 +56,9 @@ object TradeHeadSpread {
     plusOne <- previousPrice.zplus(Price.unsafeFrom(1d))
     q        = quote.max(plusOne)
     order   <- sell(q) <* log.info(s"Created sell order at ${q.deepInnerV}")
-    wait     = LiquidBroker.waitFilled(order.id).when(order.notFilled) *> log.info(
+    _       <- LiquidBroker.waitFilled(order.id).when(order.notFilled) *> log.info(
                  s"Sell order settled at ${q.deepInnerV}"
                )
-    _       <- wait.race(wait.fork.delay(1.minutes))
     _       <- positionRef.set(Neutral)
   } yield ()
 
