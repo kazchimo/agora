@@ -70,7 +70,7 @@ object TradeHeadSpread {
     q        = quote.max(plusOne)
     order   <- sell(q) <* log.info(s"Created sell order at ${q.deepInnerV}")
     wait     =
-      LiquidBroker.waitFilled(order.id).unless(order.filled) *> tradeCountRef
+      LiquidBroker.waitFilled(order.id).when(order.notFilled) *> tradeCountRef
         .update(_ - 1) *> log.info(s"Sell order settled at ${q.deepInnerV}")
     _       <- wait.race(wait.fork.delay(1.minutes))
     _       <- checkTradeCount(tradeCountRef, maxTradeCount)

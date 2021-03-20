@@ -16,6 +16,8 @@ final case class LiquidOrder(
   status: Status
 ) {
   def filled: Boolean = status == Filled
+
+  def notFilled: Boolean = !filled
 }
 
 final case class OrderOnBook(price: Price, quantity: Quantity)
