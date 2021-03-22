@@ -54,7 +54,8 @@ object Dependencies {
 
   lazy val tapirDeps      = Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core",
-    "com.softwaremill.sttp.tapir" %% "tapir-akka-http-server"
+    "com.softwaremill.sttp.tapir" %% "tapir-akka-http-server",
+    "com.softwaremill.sttp.tapir" %% "tapir-json-circe"
   ).map(_ % Versions.tapir)
 
   lazy val scalaTest      = "org.scalatest"        %% "scalatest"        % "3.2.2"
