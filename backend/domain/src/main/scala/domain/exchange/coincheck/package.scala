@@ -9,7 +9,7 @@ package object coincheck {
   type CoincheckExchange = Has[CoincheckExchange.Service]
 
   @accessible
-  object CoincheckExchange {
+  object CoincheckExchange extends Exchange {
     import domain.AllEnv
     trait Service {
       def transactions: RIO[AllEnv, Seq[CCTransaction]]
