@@ -85,15 +85,15 @@ usefulTasks := Seq(
 
 lazy val root = project
   .in(file("."))
-  .aggregate(domain, infra, lib, test, application, interface)
-  .dependsOn(domain, infra, lib, test, application, interface)
+  .aggregate(domain, infra, lib, test, application, api)
+  .dependsOn(domain, infra, lib, test, application, api)
   .settings(name := "agora", commonSettings)
 
-lazy val interface = project
-  .in(file("interface")).settings(
+lazy val api = project
+  .in(file("api")).settings(
     commonSettings,
     libraryDependencies ++= tapirDeps
-  ).settings(name := "interface", name := "interface").dependsOn(
+  ).settings(name := "api", name := "api").dependsOn(
     domain,
     infra,
     lib,
@@ -127,4 +127,4 @@ lazy val test = project
   .in(file("test"))
   .settings(commonSettings)
   .settings(moduleName := "test", name := "test")
-  .dependsOn(lib, infra, domain, application, interface)
+  .dependsOn(lib, infra, domain, application, api)
