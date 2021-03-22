@@ -1,5 +1,5 @@
 const CriptoCharts = () => {
-    return "hello"
-}
+  return "hello";
+};
 
-export default CriptoCharts
+export default CriptoCharts;
