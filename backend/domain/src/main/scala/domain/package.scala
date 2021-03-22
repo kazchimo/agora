@@ -10,4 +10,8 @@ package object domain {
   type AllEnv = ZEnv
     with Conf with CoincheckExchange with LiquidExchange with Logging with Nonce
     with SttpClient
+
+  type AppEnv = Conf
+    with CoincheckExchange with LiquidExchange with Logging with Nonce
+    with SttpClient
 }
