@@ -90,10 +90,15 @@ lazy val root = project
   .settings(name := "agora", commonSettings)
 
 lazy val interface = project
-  .in(file("interface")).settings(commonSettings).settings(
-    name := "interface",
-    name := "interface"
-  ).dependsOn(domain, infra, lib, application)
+  .in(file("interface")).settings(
+    commonSettings,
+    libraryDependencies ++= tapirDeps
+  ).settings(name := "interface", name := "interface").dependsOn(
+    domain,
+    infra,
+    lib,
+    application
+  )
 
 lazy val domain = project
   .in(file("domain"))

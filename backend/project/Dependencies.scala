@@ -7,6 +7,7 @@ object Dependencies {
     val circe      = "0.13.0"
     val monocle    = "2.1.0"
     val enumeratum = "1.6.1"
+    val tapir      = "0.17.19"
   }
 
   lazy val monocleDeps = Seq(
@@ -50,6 +51,11 @@ object Dependencies {
   lazy val enumeratumDeps =
     Seq("com.beachape" %% "enumeratum", "com.beachape" %% "enumeratum-circe")
       .map(_ % Versions.enumeratum)
+
+  lazy val tapirDeps      = Seq(
+    "com.softwaremill.sttp.tapir" %% "tapir-core",
+    "com.softwaremill.sttp.tapir" %% "tapir-akka-http-server"
+  ).map(_ % Versions.tapir)
 
   lazy val scalaTest      = "org.scalatest"        %% "scalatest"        % "3.2.2"
   lazy val zioCats        = "dev.zio"              %% "zio-interop-cats" % "2.3.1.0"
