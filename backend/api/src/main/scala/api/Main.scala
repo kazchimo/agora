@@ -1,11 +1,12 @@
+package api
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
-import routes.Prices
+import api.routes.Prices
+import sttp.tapir._
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
-import sttp.tapir.{Endpoint, endpoint, query, stringBody}
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 object Main extends App {
@@ -15,6 +16,7 @@ object Main extends App {
     )
 
   implicit val actorSystem: ActorSystem = ActorSystem()
+
   import actorSystem.dispatcher
 
   val routes = AkkaHttpServerInterpreter.toRoute(List(Prices.ep, helloEp))
