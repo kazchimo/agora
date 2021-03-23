@@ -54,7 +54,8 @@ object Dependencies {
 
   lazy val tapirDeps      = Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core",
-    "com.softwaremill.sttp.tapir" %% "tapir-akka-http-server",
+    "com.softwaremill.sttp.tapir" %% "tapir-http4s-server",
+    "com.softwaremill.sttp.tapir" %% "tapir-zio-http4s-server",
     "com.softwaremill.sttp.tapir" %% "tapir-json-circe"
   ).map(_ % Versions.tapir)
 
@@ -67,5 +68,6 @@ object Dependencies {
   lazy val refined        = "eu.timepit"           %% "refined"          % "0.9.21"
   lazy val chimney        = "io.scalaland"         %% "chimney"          % "0.6.1"
   lazy val cats           = "org.typelevel"        %% "cats-core"        % "2.4.2"
+  lazy val catsEffect     = "org.typelevel"        %% "cats-effect"      % "2.4.0"
   lazy val jwtScala       = "com.github.jwt-scala" %% "jwt-core"         % "7.1.1"
 }
