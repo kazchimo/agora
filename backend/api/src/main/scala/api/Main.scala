@@ -1,7 +1,9 @@
 package api
 
+import api.routes.Prices
 import cats.effect._
 import cats.syntax.all._
+import domain.AllEnv
 import org.http4s.HttpRoutes
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
@@ -21,20 +23,17 @@ object Main extends App {
     endpoint.get.in("hello").in(query[String]("name")).out(stringBody)
 
   // mandatory implicits
-  implicit val ec: ExecutionContext           =
-    scala.concurrent.ExecutionContext.Implicits.global
+  val ec: ExecutionContext                    = scala.concurrent.ExecutionContext.Implicits.global
   implicit val contextShift: ContextShift[IO] = IO.contextShift(ec)
   implicit val timer: Timer[IO]               = IO.timer(ec)
 
-  val helloWorldRoutes = ZHttp4sServerInterpreter
-    .from(helloWorld)(name => ZIO.succeed(s"hello, $name")).toRoutes
-
-  val serve = ZIO.runtime[Clock].flatMap { implicit runtime =>
-    BlazeServerBuilder(runtime.platform.executor.asEC)
-      .bindHttp(8080, "localhost").withHttpApp(
-        Router("/" -> helloWorldRoutes).orNotFound
-      ).serve.compile.drain
-  }
+  val serve = ZIO
+    .runtime[AllEnv].flatMap { implicit runtime =>
+      BlazeServerBuilder(runtime.platform.executor.asEC)
+        .bindHttp(8080, "localhost").withHttpApp(
+          Router("/" -> Prices.routes).orNotFound
+        ).serve.compile.drain
+    }.provideCustomLayer(layers.all)
 
   override def run(args: List[String]) = serve.exitCode
 }
