@@ -80,7 +80,12 @@ usefulTasks := Seq(
   UsefulTask("t", "test", "Test"),
   UsefulTask("r", "reload", "Reload projects"),
   UsefulTask("lint", "lint:compile", "Check lint of Wartremover"),
-  UsefulTask("fmt", "scalafmtAll; scalafixAll;", "Format code")
+  UsefulTask("fmt", "scalafmtAll; scalafixAll;", "Format code"),
+  UsefulTask(
+    "apiDevRun",
+    "project api; ~reStart run; project root;",
+    "Run api in Dev mode"
+  )
 )
 
 lazy val root = project
