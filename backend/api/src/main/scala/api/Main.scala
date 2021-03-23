@@ -2,19 +2,13 @@ package api
 
 import api.routes.Prices
 import cats.effect._
-import cats.syntax.all._
 import domain.AllEnv
-import org.http4s.HttpRoutes
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
-import sttp.client3._
 import sttp.tapir.ztapir._
-import sttp.tapir.server.http4s.Http4sServerInterpreter
-import sttp.tapir.server.http4s.ztapir.ZHttp4sServerInterpreter
-import zio.{App, RIO, URIO, ZEnv, ZIO}
 import zio.interop.catz._
-import zio.clock.Clock
+import zio.{App, ZIO}
 
 import scala.concurrent.ExecutionContext
 
