@@ -1,3 +1,5 @@
 package domain.exchange
 
-trait Exchange
+sealed trait Exchange
+trait Coincheck
+trait Liquid

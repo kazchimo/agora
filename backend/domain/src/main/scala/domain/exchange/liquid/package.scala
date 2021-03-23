@@ -9,7 +9,7 @@ package object liquid {
   type LiquidExchange = Has[LiquidExchange.Service]
 
   @accessible
-  object LiquidExchange extends Exchange {
+  object LiquidExchange extends Liquid {
     import domain.AllEnv
 
     trait Service {
