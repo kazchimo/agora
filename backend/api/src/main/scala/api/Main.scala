@@ -1,37 +1,40 @@
 package api
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import api.routes.Prices
-import sttp.tapir._
-import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
+import cats.effect._
+import cats.syntax.all._
+import org.http4s.HttpRoutes
+import org.http4s.server.Router
+import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.syntax.kleisli._
+import sttp.client3._
+import sttp.tapir.ztapir._
+import sttp.tapir.server.http4s.Http4sServerInterpreter
+import sttp.tapir.server.http4s.ztapir.ZHttp4sServerInterpreter
+import zio.{App, RIO, URIO, ZEnv, ZIO}
+import zio.interop.catz._
+import zio.clock.Clock
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext
 
 object Main extends App {
-  val helloEp = endpoint.get
-    .in("hello").in(query[String]("name")).out(stringBody).serverLogic[Future](
-      name => Future.successful(Right(s"Hello, $name!"))
-    )
+  val helloWorld =
+    endpoint.get.in("hello").in(query[String]("name")).out(stringBody)
 
-  implicit val actorSystem: ActorSystem = ActorSystem()
+  // mandatory implicits
+  implicit val ec: ExecutionContext           =
+    scala.concurrent.ExecutionContext.Implicits.global
+  implicit val contextShift: ContextShift[IO] = IO.contextShift(ec)
+  implicit val timer: Timer[IO]               = IO.timer(ec)
 
-  import actorSystem.dispatcher
+  val helloWorldRoutes = ZHttp4sServerInterpreter
+    .from(helloWorld)(name => ZIO.succeed(s"hello, $name")).toRoutes
 
-  val routes = AkkaHttpServerInterpreter.toRoute(List(Prices.ep, helloEp))
+  val serve = ZIO.runtime[Clock].flatMap { implicit runtime =>
+    BlazeServerBuilder(runtime.platform.executor.asEC)
+      .bindHttp(8080, "localhost").withHttpApp(
+        Router("/" -> helloWorldRoutes).orNotFound
+      ).serve.compile.drain
+  }
 
-  val bindAndCheck =
-    Http().newServerAt("localhost", 8080).bindFlow(routes).map { _ =>
-      println("Go to: http://localhost:8080")
-      println("Press any key to exit ...")
-      scala.io.StdIn.readLine()
-    }
-
-  Await.result(
-    bindAndCheck.transformWith { r =>
-      actorSystem.terminate().transform(_ => r)
-    },
-    Duration.Inf
-  )
+  override def run(args: List[String]) = serve.exitCode
 }
