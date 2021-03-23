@@ -1,11 +1,13 @@
-package routes
+package api.routes
 
-import akka.stream.scaladsl.Flow
+import api.layers
 import io.circe.generic.auto._
 import sttp.capabilities.akka.AkkaStreams
 import sttp.tapir._
 import sttp.tapir.generic.auto._
 import sttp.tapir.json.circe._
+import usecase.liquid.WatchExecutionStreamUC
+import zio._
 
 import scala.concurrent.Future
 
@@ -19,7 +21,9 @@ object Prices {
         AkkaStreams
       )
     ).serverLogic[Future] { _ =>
-      Future.successful(Right(Flow.fromFunction(in => Response(in))))
+      Runtime.default.unsafeRunToFuture(
+        WatchExecutionStreamUC.watch.provideCustomLayer(layers.all)
+      )
     }
 
 }
