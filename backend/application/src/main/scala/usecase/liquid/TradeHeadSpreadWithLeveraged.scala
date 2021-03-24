@@ -34,7 +34,7 @@ object TradeHeadSpreadWithLeveraged {
       sellPrice <- latestSellHeadPriceRef.get.someOrFailException
       plusOne   <- refineVZE[Positive, Double](buyPrice.deepInnerV + 1)
       quote      = Ordering[PositiveDouble].max(sellPrice.value, plusOne)
-      stopLoss  <- StopLoss(buyPrice.value * 0.95)
+      stopLoss  <- StopLoss(buyPrice.value * 0.99)
       request    = LiquidOrderRequest.leveraged(
                      btcJpyId,
                      Buy,
