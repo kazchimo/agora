@@ -41,9 +41,9 @@ object LiquidOrderRequest {
     side: S,
     quantity: Quantity,
     price: Price,
-    leverageLevel: LeverageLevel = LeverageLevel.unsafeApply(2L),
     takeProfit: TakeProfit,
-    stopLoss: StopLoss
+    stopLoss: StopLoss,
+    leverageLevel: LeverageLevel = LeverageLevel.unsafeApply(2L)
   ): LiquidOrderRequest[Limit.type, S] = LiquidOrderRequest(
     Limit,
     productId,
