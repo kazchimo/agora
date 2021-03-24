@@ -2,9 +2,9 @@ package domain.exchange.liquid
 
 import domain.lib.ZEnum
 import enumeratum.CirceEnum
-import enumeratum.EnumEntry.Lowercase
+import enumeratum.EnumEntry.Uppercase
 
-sealed trait FundingCurrency extends Lowercase
+sealed trait FundingCurrency extends Uppercase
 
 object FundingCurrency
     extends ZEnum[FundingCurrency] with CirceEnum[FundingCurrency] {
