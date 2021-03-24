@@ -80,5 +80,6 @@ object LiquidBroker {
   ): RIO[AllEnv, Boolean] = for {
     order  <- LiquidExchange.createOrder(orderRequest)
     filled <- waitFilledUntil(order.id, d)
+    _      <- LiquidExchange.cancelOrder(order.id).unless(filled)
   } yield filled
 }
