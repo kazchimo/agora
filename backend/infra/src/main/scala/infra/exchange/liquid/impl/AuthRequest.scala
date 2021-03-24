@@ -41,6 +41,7 @@ private[liquid] trait AuthRequest {
     _       <- log.debug(req.body.show)
     res     <- send(req)
     _       <- ZIO.fail(ShouldRetry).when(res.code.code == 401)
+    _       <- log.debug(res.show())
     content <- ZIO.fromEither(res.body)
   } yield content).retryWhileEquals(ShouldRetry)
 }
