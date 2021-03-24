@@ -111,4 +111,12 @@ object LiquidOrder {
 
   @newtype case class StopLoss(value: PositiveDouble)
   object StopLoss extends VOFactory
+
+  sealed trait MarginType extends Snakecase
+  object MarginType       extends ZEnum[MarginType] {
+    override def values: IndexedSeq[MarginType] = findValues
+
+    case object Cross    extends MarginType
+    case object Isolated extends MarginType
+  }
 }
