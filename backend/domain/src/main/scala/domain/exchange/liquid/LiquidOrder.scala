@@ -97,15 +97,6 @@ object LiquidOrder {
     case object Netout       extends OrderDirection
   }
 
-  sealed trait TradingType extends Snakecase
-  object TradingType       extends ZEnum[TradingType] with CirceEnum[TradingType] {
-    override def values: IndexedSeq[TradingType] = findValues
-
-    case object Cfd       extends TradingType
-    case object Margin    extends TradingType
-    case object Perpetual extends TradingType
-  }
-
   @newtype case class TakeProfit(value: PositiveDouble)
   object TakeProfit extends VOFactory
 

@@ -3,6 +3,7 @@ package domain.exchange.liquid
 import domain.exchange.liquid.Trade.Status.Closed
 import domain.exchange.liquid.Trade._
 import domain.lib.{VOFactory, ZEnum}
+import enumeratum.CirceEnum
 import enumeratum.EnumEntry.Snakecase
 import io.estatico.newtype.macros.newtype
 import lib.refined.PositiveLong
@@ -21,5 +22,22 @@ object Trade {
 
     case object Open   extends Status
     case object Closed extends Status
+  }
+
+  sealed trait Side extends Snakecase
+  object Side       extends ZEnum[Side] {
+    override def values: IndexedSeq[Side] = findValues
+
+    case object Long  extends Side
+    case object Short extends Side
+  }
+
+  sealed trait TradingType extends Snakecase
+  object TradingType       extends ZEnum[TradingType] with CirceEnum[TradingType] {
+    override def values: IndexedSeq[TradingType] = findValues
+
+    case object Cfd       extends TradingType
+    case object Margin    extends TradingType
+    case object Perpetual extends TradingType
   }
 }
