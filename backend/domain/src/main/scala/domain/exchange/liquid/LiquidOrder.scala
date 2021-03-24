@@ -7,7 +7,9 @@ import enumeratum.Enum
 import enumeratum.EnumEntry.{Lowercase, Snakecase}
 import io.estatico.newtype.macros.newtype
 import lib.enumeratum.GenericCirceEnum
+import lib.error.ClientDomainError
 import lib.refined.{PositiveDouble, PositiveLong}
+import zio.{IO, ZIO}
 
 final case class LiquidOrder(
   id: Id,
@@ -69,5 +71,17 @@ object LiquidOrder {
     case object Filled          extends Status
     case object PartiallyFilled extends Status
     case object Cancelled       extends Status
+  }
+
+  @newtype case class LeverageLevel private (value: PositiveLong)
+  object LeverageLevel {
+    def apply(value: PositiveLong): IO[ClientDomainError, LeverageLevel] = ZIO
+      .fail(
+        ClientDomainError(
+          "Liquid leverage_level should be one of 2, 4, 5, 10, 25"
+        )
+      ).unless(Seq(2, 4, 5, 10, 25).contains(value.value)).as(
+        new LeverageLevel(value)
+      )
   }
 }
