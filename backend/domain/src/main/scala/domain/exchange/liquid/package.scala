@@ -19,6 +19,13 @@ package object liquid {
       def createOrder[O <: OrderType, S <: Side](
         orderRequest: LiquidOrderRequest[O, S]
       ): RIO[AllEnv, LiquidOrder]
+      def getTrades(
+        productId: Option[LiquidProduct.Id] = None,
+        fundingCurrency: Option[FundingCurrency] = None,
+        status: Option[Trade.Status] = None,
+        side: Option[Trade.Side] = None,
+        tradingType: Option[Trade.TradingType] = None
+      ): RIO[AllEnv, Seq[Trade]]
 
       // websocket apis
       def orderBookStream(side: Side): RIO[AllEnv, EStream[Seq[OrderOnBook]]]
