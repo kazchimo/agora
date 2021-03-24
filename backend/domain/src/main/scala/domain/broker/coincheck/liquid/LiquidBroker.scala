@@ -1,16 +1,22 @@
 package domain.broker.coincheck.liquid
 
 import domain.AllEnv
+import domain.exchange.liquid.FundingCurrency.Jpy
 import domain.exchange.liquid.LiquidOrder.{Id, OrderType, Price, Side}
+import domain.exchange.liquid.LiquidProduct.btcJpyId
+import domain.exchange.liquid.Trade.Status.Open
+import domain.exchange.liquid.Trade.TradingType.Cfd
 import domain.exchange.liquid.{
+  GetTradesParams,
   LiquidExchange,
   LiquidOrder,
   LiquidOrderRequest,
-  OrderOnBook
+  OrderOnBook,
+  Trade
 }
-import lib.zio.EStream
+import lib.zio.{EStream, UReadOnlyRef}
 import zio.duration._
-import zio.{Has, RIO, Ref, ZIO}
+import zio.{Has, RIO, Ref, ZIO, ZRef}
 
 object LiquidBroker {
 
@@ -42,6 +48,24 @@ object LiquidBroker {
                                              .flatMap(order => ref.set(Some(order.price)))
                                          }.fork
   } yield ref
+
+  def openTradeCountRef(side: Trade.Side): RIO[AllEnv, UReadOnlyRef[Int]] =
+    for {
+      trades              <- LiquidExchange.getTrades(
+                               GetTradesParams(
+                                 Some(btcJpyId),
+                                 Some(Jpy),
+                                 Some(Open),
+                                 Some(side),
+                                 Some(Cfd)
+                               )
+                             )
+      ref                 <- Ref.make(trades.size)
+      str: EStream[Trade] <- LiquidExchange.tradesStream
+      _                   <- str.foreach { t =>
+                               if (t.closed) ref.update(_ - 1) else ref.update(_ + 1)
+                             }
+    } yield ref.readOnly
 
   def createOrderWithWait[O <: OrderType, S <: Side](
     orderRequest: LiquidOrderRequest[O, S]
