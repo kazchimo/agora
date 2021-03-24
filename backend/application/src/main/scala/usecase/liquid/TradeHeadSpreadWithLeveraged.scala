@@ -10,6 +10,7 @@ import eu.timepit.refined.numeric.Positive
 import lib.instance.all._
 import lib.refined.{PositiveDouble, refineVZE}
 import lib.syntax.all._
+import zio.ZIO
 
 import scala.math.Numeric._
 
@@ -36,6 +37,12 @@ object TradeHeadSpreadWithLeveraged {
                    )
       _         <- LiquidBroker.createOrderWithWait(request)
     } yield ()
-    _                      <- requestOrder.forever
+    _                      <- requestOrder
+                                .whenM(
+                                  ZIO.mapN(
+                                    latestBuyHeadPriceRef.get.map(_.nonEmpty),
+                                    latestSellHeadPriceRef.get.map(_.nonEmpty)
+                                  )(_ && _)
+                                ).forever
   } yield ()
 }
