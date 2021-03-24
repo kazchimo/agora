@@ -8,8 +8,9 @@ import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest}
 import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric.Positive
 import lib.instance.all._
-import lib.refined.{PositiveDouble, refineVZE}
+import lib.refined.{PositiveDouble, PositiveInt, refineVZE}
 import lib.syntax.all._
+import zio.{Ref, ZIO}
 import zio.duration._
 import zio.logging.log
 
@@ -36,9 +37,7 @@ object TradeHeadSpreadWithLeveraged {
                      TakeProfit(quote),
                      stopLoss
                    )
-      order     <- LiquidExchange.createOrder(request)
-      _         <- log.debug(order.toString)
-      _         <- LiquidBroker.timeoutedOrder(order.id, 10.seconds)
+      _         <- LiquidBroker.timeoutedOrder(request, 10.seconds)
     } yield ()
     _                      <- requestOrder
                                 .whenM(
