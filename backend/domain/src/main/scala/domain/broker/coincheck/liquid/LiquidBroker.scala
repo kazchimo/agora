@@ -64,7 +64,7 @@ object LiquidBroker {
       str: EStream[Trade] <- LiquidExchange.tradesStream
       _                   <- str.foreach { t =>
                                if (t.closed) ref.update(_ - 1) else ref.update(_ + 1)
-                             }
+                             }.fork
     } yield ref.readOnly
 
   def createOrderWithWait[O <: OrderType, S <: Side](
