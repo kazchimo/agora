@@ -3,10 +3,9 @@ package domain.exchange.liquid
 import domain.exchange.liquid.LiquidOrder.Status.Filled
 import domain.exchange.liquid.LiquidOrder._
 import domain.lib.{VOFactory, ZEnum}
-import enumeratum.Enum
+import enumeratum.{CirceEnum, Enum}
 import enumeratum.EnumEntry.{Lowercase, Snakecase}
 import io.estatico.newtype.macros.newtype
-import lib.enumeratum.GenericCirceEnum
 import lib.error.ClientDomainError
 import lib.refined.{PositiveDouble, PositiveLong}
 import zio.{IO, ZIO}
@@ -39,7 +38,7 @@ object LiquidOrder {
   /** Marker trait that specify a order price. */
   sealed trait Pricable
 
-  object OrderType extends ZEnum[OrderType] with GenericCirceEnum[OrderType] {
+  object OrderType extends ZEnum[OrderType] with CirceEnum[OrderType] {
     override def values: IndexedSeq[OrderType] = findValues
 
     case object Limit           extends OrderType with Pricable
@@ -53,7 +52,7 @@ object LiquidOrder {
   }
 
   sealed trait Side extends Lowercase
-  object Side       extends Enum[Side] with GenericCirceEnum[Side] {
+  object Side       extends Enum[Side] with CirceEnum[Side] {
     override def values: IndexedSeq[Side] = findValues
 
     case object Buy  extends Side
@@ -64,7 +63,7 @@ object LiquidOrder {
   }
 
   sealed trait Status extends Snakecase
-  object Status       extends ZEnum[Status] with GenericCirceEnum[Status] {
+  object Status       extends ZEnum[Status] with CirceEnum[Status] {
     override def values: IndexedSeq[Status] = findValues
 
     case object Live            extends Status
@@ -89,7 +88,8 @@ object LiquidOrder {
   }
 
   sealed trait OrderDirection extends Snakecase
-  object OrderDirection       extends ZEnum[OrderDirection] {
+  object OrderDirection
+      extends ZEnum[OrderDirection] with CirceEnum[OrderDirection] {
     override def values: IndexedSeq[OrderDirection] = findValues
 
     case object OneDirection extends OrderDirection
@@ -98,7 +98,7 @@ object LiquidOrder {
   }
 
   sealed trait TradingType extends Snakecase
-  object TradingType       extends ZEnum[TradingType] {
+  object TradingType       extends ZEnum[TradingType] with CirceEnum[TradingType] {
     override def values: IndexedSeq[TradingType] = findValues
 
     case object Cfd       extends TradingType
@@ -113,7 +113,7 @@ object LiquidOrder {
   object StopLoss extends VOFactory
 
   sealed trait MarginType extends Snakecase
-  object MarginType       extends ZEnum[MarginType] {
+  object MarginType       extends ZEnum[MarginType] with CirceEnum[MarginType] {
     override def values: IndexedSeq[MarginType] = findValues
 
     case object Cross    extends MarginType
