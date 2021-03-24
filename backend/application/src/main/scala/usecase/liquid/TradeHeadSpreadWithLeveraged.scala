@@ -3,8 +3,8 @@ package usecase.liquid
 import domain.broker.coincheck.liquid.LiquidBroker
 import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
 import domain.exchange.liquid.LiquidOrder.{Quantity, StopLoss, TakeProfit}
+import domain.exchange.liquid.LiquidOrderRequest
 import domain.exchange.liquid.LiquidProduct.btcJpyId
-import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest}
 import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric.Positive
 import lib.instance.all._
@@ -34,8 +34,7 @@ object TradeHeadSpreadWithLeveraged {
                      TakeProfit(quote),
                      stopLoss
                    )
-      order     <- LiquidExchange.createOrder(request)
-      _         <- LiquidBroker.waitFilled(order.id)
+      _         <- LiquidBroker.createOrderWithWait(request)
     } yield ()
     _                      <- requestOrder.forever
   } yield ()

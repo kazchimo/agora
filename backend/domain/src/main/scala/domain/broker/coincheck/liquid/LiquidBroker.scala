@@ -1,8 +1,13 @@
 package domain.broker.coincheck.liquid
 
 import domain.AllEnv
-import domain.exchange.liquid.LiquidOrder.{Id, Price, Side}
-import domain.exchange.liquid.{LiquidExchange, LiquidOrder, OrderOnBook}
+import domain.exchange.liquid.LiquidOrder.{Id, OrderType, Price, Side}
+import domain.exchange.liquid.{
+  LiquidExchange,
+  LiquidOrder,
+  LiquidOrderRequest,
+  OrderOnBook
+}
 import lib.zio.EStream
 import zio.duration._
 import zio.{RIO, Ref, ZIO}
@@ -32,4 +37,11 @@ object LiquidBroker {
                                              .flatMap(order => ref.set(Some(order.price)))
                                          }.fork
   } yield ref
+
+  def createOrderWithWait[O <: OrderType, S <: Side](
+    orderRequest: LiquidOrderRequest[O, S]
+  ): RIO[AllEnv, Unit] = for {
+    order <- LiquidExchange.createOrder(orderRequest)
+    _     <- waitFilled(order.id)
+  } yield ()
 }
