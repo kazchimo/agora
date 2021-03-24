@@ -3,28 +3,21 @@ package usecase.liquid
 import domain.broker.coincheck.liquid.LiquidBroker
 import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
 import domain.exchange.liquid.LiquidOrder.{Quantity, StopLoss, TakeProfit}
-import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest, Trade}
 import domain.exchange.liquid.LiquidProduct.btcJpyId
+import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest}
 import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric.Positive
 import lib.instance.all._
 import lib.refined.{PositiveDouble, refineVZE}
 import lib.syntax.all._
-import lib.zio.EStream
-import zio.ZIO
 import zio.duration._
 import zio.logging.log
-import zio.stream._
 
 import scala.math.Numeric._
 
 object TradeHeadSpreadWithLeveraged {
   val quantity: Quantity  = Quantity.unsafeFrom(0.001)
   val one: PositiveDouble = 1d
-
-  sealed private trait ShouldRetry
-  private object Should    extends ShouldRetry
-  private object ShouldNot extends ShouldRetry
 
   def trade = for {
     latestBuyHeadPriceRef  <- LiquidBroker.latestHeadPriceRef(Buy)
