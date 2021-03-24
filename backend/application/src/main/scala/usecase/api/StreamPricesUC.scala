@@ -8,7 +8,7 @@ import lib.syntax.all._
 import zio.stream.{Stream, UStream}
 import zio.{Queue, ZIO}
 
-final case class ExecutedOrder[Of <: Exchange](
+final case class ExecutedOrder[+Of <: Exchange](
   price: Double,
   time: Long,
   exchange: Of
@@ -30,14 +30,18 @@ object ExecutedOrder {
 object StreamPricesUC {
   private type Str = Stream[Throwable, LiquidExecution]
 
-  def getStream: ZIO[AllEnv, Throwable, UStream[ExecutedOrder[_]]] = for {
-    coincheckStream   <- CoincheckExchange.publicTransactions
-    liquidStream: Str <- LiquidExchange.executionStream
-    queue             <- Queue.unbounded[ExecutedOrder[_ <: Exchange]]
-    coincheckFiber    <-
-      coincheckStream
-        .foreach(t => queue.offer(ExecutedOrder.ofCoincheck(t))).fork
-    liquidFiber       <-
-      liquidStream.foreach(e => queue.offer(ExecutedOrder.ofLiquid(e))).fork
-  } yield Stream.fromQueueWithShutdown(queue).interruptWhen(coincheckFiber.await.race(liquidFiber.await))
+  def getStream: ZIO[AllEnv, Throwable, UStream[ExecutedOrder[Exchange]]] =
+    for {
+      coincheckStream   <- CoincheckExchange.publicTransactions
+      liquidStream: Str <- LiquidExchange.executionStream
+      queue             <- Queue.unbounded[ExecutedOrder[Exchange]]
+      coincheckFiber    <-
+        coincheckStream
+          .foreach(t => queue.offer(ExecutedOrder.ofCoincheck(t))).fork
+      liquidFiber       <-
+        liquidStream.foreach(e => queue.offer(ExecutedOrder.ofLiquid(e))).fork
+    } yield Stream
+      .fromQueueWithShutdown(queue).interruptWhen(
+        coincheckFiber.await.race(liquidFiber.await)
+      )
 }
