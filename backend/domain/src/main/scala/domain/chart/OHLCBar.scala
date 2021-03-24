@@ -5,10 +5,10 @@ import domain.lib.VOFactory
 import io.estatico.newtype.macros.newtype
 import lib.instance.all._
 import lib.refined.PositiveDouble
-import lib.syntax.all._
 import zio.NonEmptyChunk
 
 final case class OHLCBar(open: Open, high: High, low: Low, close: Close) {
+  import lib.syntax.all._
   def range: Double = high.deepInnerV - low.deepInnerV
 }
 
