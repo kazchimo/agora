@@ -14,19 +14,24 @@ import zio.{Has, RIO, Ref, ZIO}
 
 object LiquidBroker {
 
-  def waitFilled(id: Id): ZIO[AllEnv, Throwable, Unit] =
+  def waitFilled(id: Id): ZIO[AllEnv, Throwable, Boolean] =
     waitFilledUntil(id, Duration.Infinity)
 
-  def waitFilledUntil(id: Id, d: Duration): ZIO[AllEnv, Throwable, Unit] = for {
-    stream: EStream[LiquidOrder] <- LiquidExchange.ordersStream
-    _                            <- stream
-                                      .interruptAfter(d).foreachWhile(o =>
-                                        ZIO.succeed(
+  /** @return whether the order is filled or not.
+    */
+  def waitFilledUntil(id: Id, d: Duration): ZIO[AllEnv, Throwable, Boolean] =
+    for {
+      stream: EStream[LiquidOrder] <- LiquidExchange.ordersStream
+      filledRef                    <- Ref.make(false)
+      _                            <- stream.interruptAfter(d).foreachWhile { o =>
+                                        val filled = ZIO.succeed(
                                           o.notFilled
                                             || o.id != id
                                         )
-                                      )
-  } yield ()
+                                        filledRef.set(true).whenM(filled) *> filled
+                                      }
+      filled                       <- filledRef.get
+    } yield filled
 
   def latestHeadPriceRef(side: Side): RIO[AllEnv, Ref[Option[Price]]] = for {
     stream: EStream[Seq[OrderOnBook]] <- LiquidExchange.orderBookStream(side)
@@ -45,13 +50,11 @@ object LiquidBroker {
     _     <- waitFilled(order.id)
   } yield order
 
-  sealed private trait ShouldBreak
-  private object Should    extends ShouldBreak
-  private object ShouldNot extends ShouldBreak
-
-  def timeoutedOrder(id: Id, d: Duration): RIO[AllEnv, Unit] = waitFilled(id)
-    .as(ShouldNot).race(ZIO.succeed(Should).delay(d)).tap {
-      case Should    => LiquidExchange.cancelOrder(id)
-      case ShouldNot => ZIO.unit
-    }.unit
+  def timeoutedOrder[O <: OrderType, S <: Side](
+    orderRequest: LiquidOrderRequest[O, S],
+    d: Duration
+  ): RIO[AllEnv, Boolean] = for {
+    order  <- LiquidExchange.createOrder(orderRequest)
+    filled <- waitFilledUntil(order.id, d)
+  } yield filled
 }
