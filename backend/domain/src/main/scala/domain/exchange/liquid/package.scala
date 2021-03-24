@@ -1,6 +1,7 @@
 package domain.exchange
 
 import domain.exchange.liquid.LiquidOrder.{Id, OrderType, Side}
+import lib.zio.EStream
 import zio.macros.accessible
 import zio.stream.Stream
 import zio.{Has, RIO}
@@ -20,13 +21,11 @@ package object liquid {
       ): RIO[AllEnv, LiquidOrder]
 
       // websocket apis
-      def orderBookStream(
-        side: Side
-      ): RIO[AllEnv, Stream[Throwable, Seq[OrderOnBook]]]
-      def productsStream: RIO[AllEnv, Stream[Throwable, LiquidProduct]]
-      def ordersStream: RIO[AllEnv, Stream[Throwable, LiquidOrder]]
-      def executionStream: RIO[AllEnv, Stream[Throwable, LiquidExecution]]
-      def tradesStream: RIO[AllEnv, Stream[Throwable, Trade]]
+      def orderBookStream(side: Side): RIO[AllEnv, EStream[Seq[OrderOnBook]]]
+      def productsStream: RIO[AllEnv, EStream[LiquidProduct]]
+      def ordersStream: RIO[AllEnv, EStream[LiquidOrder]]
+      def executionStream: RIO[AllEnv, EStream[LiquidExecution]]
+      def tradesStream: RIO[AllEnv, EStream[Trade]]
     }
   }
 }
