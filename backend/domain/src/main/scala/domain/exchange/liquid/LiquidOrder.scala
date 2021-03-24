@@ -74,14 +74,17 @@ object LiquidOrder {
   }
 
   @newtype case class LeverageLevel private (value: PositiveLong)
+
   object LeverageLevel {
-    def apply(value: PositiveLong): IO[ClientDomainError, LeverageLevel] = ZIO
+    def unsafeApply(value: PositiveLong): LeverageLevel = LeverageLevel(value)
+
+    def create(value: PositiveLong): IO[ClientDomainError, LeverageLevel] = ZIO
       .fail(
         ClientDomainError(
           "Liquid leverage_level should be one of 2, 4, 5, 10, 25"
         )
       ).unless(Seq(2, 4, 5, 10, 25).contains(value.value)).as(
-        new LeverageLevel(value)
+        LeverageLevel(value)
       )
   }
 }
