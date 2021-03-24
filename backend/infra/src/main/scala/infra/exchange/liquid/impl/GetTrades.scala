@@ -9,7 +9,7 @@ import domain.exchange.liquid.{
   Trade
 }
 import infra.exchange.liquid.Endpoints
-import infra.exchange.liquid.response.TradeResponse
+import infra.exchange.liquid.response.{PaginationContainer, TradeResponse}
 import zio.RIO
 import lib.syntax.all._
 import sttp.client3.UriContext
@@ -17,7 +17,8 @@ import sttp.client3.circe.asJson
 import io.circe.generic.auto._
 import io.circe.refined._
 import cats.syntax.traverse._
-import zio.interop.catz._
+import zio.interop.catz.core._
+import zio.logging.log
 
 private[liquid] trait GetTrades extends AuthRequest {
   self: LiquidExchange.Service =>
@@ -38,7 +39,11 @@ private[liquid] trait GetTrades extends AuthRequest {
       req    <- authRequest(url(params))
       uri     = Endpoints.root + url(params)
       res    <-
-        recover401Send(req.get(uri"$uri").response(asJson[Seq[TradeResponse]]))
-      trades <- res.map(_.toTrade).sequence
+        recover401Send(
+          req
+            .get(uri"$uri").response(asJson[PaginationContainer[TradeResponse]])
+        )
+      _      <- log.debug(res.toString)
+      trades <- res.models.map(_.toTrade).sequence
     } yield trades
 }
