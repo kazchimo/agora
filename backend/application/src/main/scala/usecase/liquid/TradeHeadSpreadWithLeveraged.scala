@@ -50,15 +50,7 @@ object TradeHeadSpreadWithLeveraged {
                        ZIO.succeed(Should).delay(10.seconds)
                      ).tap {
                        case Should    => LiquidExchange.cancelOrder(order.id)
-                       case ShouldNot => for {
-                           str: EStream[Trade] <- LiquidExchange.tradesStream
-                           _                   <- str.foreachWhile(t =>
-                                                    log
-                                                      .debug(t.toString).as(
-                                                        t.id.value == order.id.value && t.closed
-                                                      )
-                                                  )
-                         } yield ()
+                       case ShouldNot => ZIO.unit
                      }
     } yield ()
     _                      <- requestOrder
