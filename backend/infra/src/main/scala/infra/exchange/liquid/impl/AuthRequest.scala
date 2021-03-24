@@ -8,8 +8,9 @@ import lib.syntax.all._
 import pdi.jwt.{Jwt, JwtAlgorithm}
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
-import sttp.client3.asynchttpclient.zio.{SttpClient, send}
+import sttp.client3.asynchttpclient.zio.{SttpClient, send, sendR}
 import sttp.client3.{Empty, Request, RequestT}
+import zio.logging.{Logging, log}
 import zio.{RIO, Task, ZIO}
 
 private[liquid] trait AuthRequest {
@@ -36,7 +37,8 @@ private[liquid] trait AuthRequest {
 
   def recover401Send[L <: Throwable, R](
     req: Request[Either[L, R], Effect[Task] with ZioStreams with WebSockets]
-  ): ZIO[SttpClient, Throwable, R] = (for {
+  ): ZIO[AllEnv, Throwable, R] = (for {
+    _       <- log.debug(req.body.show)
     res     <- send(req)
     _       <- ZIO.fail(ShouldRetry).when(res.code.code == 401)
     content <- ZIO.fromEither(res.body)
