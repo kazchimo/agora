@@ -10,29 +10,30 @@ import newtype._
 object newtype extends NewtypeSyntax
 
 trait NewtypeSyntax {
-  implicit final def libSyntaxRefinedNewtype[A](a: A): RefinedNewtypeOps[A] =
-    new RefinedNewtypeOps(a)
+  implicit final def libSyntaxRefinedNewtype[T, P, A: Coercible[
+    *,
+    Refined[T, P]
+  ]](a: A): RefinedNewtypeOps[T, P, A] = new RefinedNewtypeOps(a)
 
   implicit final def libSyntaxNewtype[A](a: A): NewtypeOps[A] =
     new NewtypeOps(a)
 }
 
-final class RefinedNewtypeOps[A](private val a: A) extends AnyVal {
-  def deepInnerV[T, P](implicit ev: Coercible[A, Refined[T, P]]): T =
-    a.coerce[Refined[T, P]].value
+final class RefinedNewtypeOps[T, P, A: Coercible[*, Refined[T, P]]](
+  private val a: A
+) {
+  def deepInnerV: T = a.coerce[Refined[T, P]].value
 
-  def zplus[T, P](b: A)(implicit
-    ev: Coercible[A, Refined[T, P]],
-    ev2: Coercible[Refined[T, P], A],
+  def zplus(b: A)(implicit
+    ev: Coercible[Refined[T, P], A],
     num: Numeric[T],
     v: Validate[T, P]
   ): ZIO[Any, Throwable, A] = refineVZE[P, T](
     num.plus(a.coerce[Refined[T, P]].value, b.coerce[Refined[T, P]].value)
   ).map(_.coerce[A])
 
-  def zminus[T, P](b: A)(implicit
-    ev: Coercible[A, Refined[T, P]],
-    ev2: Coercible[Refined[T, P], A],
+  def zminus(b: A)(implicit
+    ev: Coercible[Refined[T, P], A],
     num: Numeric[T],
     v: Validate[T, P]
   ): ZIO[Any, Throwable, A] = refineVZE[P, T](
