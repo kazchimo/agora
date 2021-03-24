@@ -3,15 +3,18 @@ package usecase.liquid
 import domain.broker.coincheck.liquid.LiquidBroker
 import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
 import domain.exchange.liquid.LiquidOrder.{Quantity, StopLoss, TakeProfit}
-import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest}
+import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest, Trade}
 import domain.exchange.liquid.LiquidProduct.btcJpyId
 import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric.Positive
 import lib.instance.all._
 import lib.refined.{PositiveDouble, refineVZE}
 import lib.syntax.all._
+import lib.zio.EStream
 import zio.ZIO
 import zio.duration._
+import zio.logging.log
+import zio.stream._
 
 import scala.math.Numeric._
 
@@ -41,12 +44,20 @@ object TradeHeadSpreadWithLeveraged {
                      stopLoss
                    )
       order     <- LiquidExchange.createOrder(request)
+      _         <- log.debug(order.toString)
       _         <- LiquidBroker
                      .waitFilled(order.id).as(ShouldNot).race(
                        ZIO.succeed(Should).delay(10.seconds)
                      ).tap {
                        case Should    => LiquidExchange.cancelOrder(order.id)
-                       case ShouldNot => ZIO.unit
+                       case ShouldNot => for {
+                           str: EStream[Trade] <- LiquidExchange.tradesStream
+                           _                   <- str.foreachWhile(t =>
+                                                    ZIO.succeed(
+                                                      t.id.value == order.id.value && t.closed
+                                                    ) <* log.debug(t.toString)
+                                                  )
+                         } yield ()
                      }
     } yield ()
     _                      <- requestOrder
