@@ -34,7 +34,7 @@ object TradeHeadSpreadWithLeveraged {
       sellPrice <- latestSellHeadPriceRef.get.someOrFailException
       plusOne   <- refineVZE[Positive, Double](buyPrice.deepInnerV + 1)
       quote      = Ordering[PositiveDouble].max(sellPrice.value, plusOne)
-      stopLoss  <- StopLoss(buyPrice.value * 0.99)
+      stopLoss  <- StopLoss(buyPrice.value * 0.995)
       request    = LiquidOrderRequest.leveraged(
                      btcJpyId,
                      Buy,
@@ -45,13 +45,7 @@ object TradeHeadSpreadWithLeveraged {
                    )
       order     <- LiquidExchange.createOrder(request)
       _         <- log.debug(order.toString)
-      _         <- LiquidBroker
-                     .waitFilled(order.id).as(ShouldNot).race(
-                       ZIO.succeed(Should).delay(10.seconds)
-                     ).tap {
-                       case Should    => LiquidExchange.cancelOrder(order.id)
-                       case ShouldNot => ZIO.unit
-                     }
+      _         <- LiquidBroker.timeoutedOrder(order.id, 10.seconds)
     } yield ()
     _                      <- requestOrder
                                 .whenM(

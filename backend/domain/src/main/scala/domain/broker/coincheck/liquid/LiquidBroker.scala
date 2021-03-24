@@ -10,7 +10,7 @@ import domain.exchange.liquid.{
 }
 import lib.zio.EStream
 import zio.duration._
-import zio.{RIO, Ref, ZIO}
+import zio.{Has, RIO, Ref, ZIO}
 
 object LiquidBroker {
 
@@ -44,4 +44,14 @@ object LiquidBroker {
     order <- LiquidExchange.createOrder(orderRequest)
     _     <- waitFilled(order.id)
   } yield order
+
+  sealed private trait ShouldBreak
+  private object Should    extends ShouldBreak
+  private object ShouldNot extends ShouldBreak
+
+  def timeoutedOrder(id: Id, d: Duration): RIO[AllEnv, Unit] = waitFilled(id)
+    .as(ShouldNot).race(ZIO.succeed(Should).delay(d)).tap {
+      case Should    => LiquidExchange.cancelOrder(id)
+      case ShouldNot => ZIO.unit
+    }.unit
 }
