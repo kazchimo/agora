@@ -39,10 +39,8 @@ object TradeHeadSpreadWithLeveraged {
     } yield ()
     _                      <- requestOrder
                                 .whenM(
-                                  ZIO.mapN(
-                                    latestBuyHeadPriceRef.get.map(_.nonEmpty),
+                                  latestBuyHeadPriceRef.get.map(_.nonEmpty) &&
                                     latestSellHeadPriceRef.get.map(_.nonEmpty)
-                                  )(_ && _)
                                 ).forever
   } yield ()
 }
