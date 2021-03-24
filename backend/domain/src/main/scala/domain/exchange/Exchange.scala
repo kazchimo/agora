@@ -1,5 +1,5 @@
 package domain.exchange
 
 sealed trait Exchange
-trait Coincheck
-trait Liquid
+trait Coincheck extends Exchange
+trait Liquid    extends Exchange
