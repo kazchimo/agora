@@ -12,7 +12,7 @@ import usecase.coincheck.{
   SellAllCoinInCoincheckUC,
   TradeInDowMethodUC
 }
-import usecase.liquid.TradeHeadSpread
+import usecase.liquid.{TradeHeadSpread, TradeHeadSpreadWithLeveraged}
 import zio.duration._
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
@@ -20,15 +20,7 @@ import zio.{ExitCode, URIO, ZEnv, ZIO}
 
 object Main extends zio.App {
   override def run(args: List[String]): URIO[ZEnv, ExitCode] = app
-    .foldM(
-      {
-        case e: Error => log.error(e.show)
-        case e        => log.error(e.getMessage) *> log.debug(
-            e.getStackTrace.map(_.toString).mkString("\n")
-          )
-      },
-      _ => ZIO.unit
-    )
+    .foldCauseM(c => log.error(c.prettyPrint), _ => ZIO.unit)
     .provideCustomMagicLayer(
       ConfImpl.layer,
       ExchangeImpl.coinCheckExchange,
@@ -50,13 +42,6 @@ object Main extends zio.App {
     Price.unsafeFrom(6369581d)
   )
 
-  val headSpreadTrade = ZIO
-    .forkAll(
-      List
-        .fill(3)(TradeHeadSpread.trade).zipWithIndex.map(a =>
-          a._1.delay((a._2 * 10).seconds)
-        )
-    ).flatMap(_.join)
-
-  private val app = log.info("start") *> headSpreadTrade *> log.info("end")
+  private val app =
+    log.info("start") *> TradeHeadSpreadWithLeveraged.trade *> log.info("end")
 }
