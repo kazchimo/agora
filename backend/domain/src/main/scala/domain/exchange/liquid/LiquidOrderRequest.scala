@@ -5,8 +5,9 @@ import domain.exchange.liquid.LiquidOrder.MarginType.Cross
 import domain.exchange.liquid.LiquidOrder.OrderDirection.Netout
 import domain.exchange.liquid.LiquidOrder.OrderType.Limit
 import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
-import domain.exchange.liquid.LiquidOrder.TradingType.Cfd
 import domain.exchange.liquid.LiquidOrder._
+import domain.exchange.liquid.Trade.TradingType
+import domain.exchange.liquid.Trade.TradingType.Cfd
 import eu.timepit.refined.auto._
 
 // https://developers.liquid.com/#create-an-order
