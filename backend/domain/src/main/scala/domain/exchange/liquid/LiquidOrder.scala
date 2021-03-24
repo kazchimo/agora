@@ -105,4 +105,8 @@ object LiquidOrder {
     case object Margin    extends TradingType
     case object Perpetual extends TradingType
   }
+
+  @newtype case class TakeProfit(value: PositiveLong)
+
+  @newtype case class StopLoss(value: PositiveLong)
 }
