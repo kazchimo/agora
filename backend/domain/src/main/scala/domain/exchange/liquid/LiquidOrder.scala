@@ -87,4 +87,13 @@ object LiquidOrder {
         LeverageLevel(value)
       )
   }
+
+  sealed trait OrderDirection extends Snakecase
+  object OrderDirection       extends ZEnum[OrderDirection] {
+    override def values: IndexedSeq[OrderDirection] = findValues
+
+    case object OneDirection extends OrderDirection
+    case object TwoDirection extends OrderDirection
+    case object Netout       extends OrderDirection
+  }
 }
