@@ -53,9 +53,10 @@ object TradeHeadSpreadWithLeveraged {
                        case ShouldNot => for {
                            str: EStream[Trade] <- LiquidExchange.tradesStream
                            _                   <- str.foreachWhile(t =>
-                                                    ZIO.succeed(
-                                                      t.id.value == order.id.value && t.closed
-                                                    ) <* log.debug(t.toString)
+                                                    log
+                                                      .debug(t.toString).as(
+                                                        t.id.value == order.id.value && t.closed
+                                                      )
                                                   )
                          } yield ()
                      }
