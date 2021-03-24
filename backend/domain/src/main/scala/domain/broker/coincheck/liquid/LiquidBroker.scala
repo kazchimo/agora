@@ -40,8 +40,8 @@ object LiquidBroker {
 
   def createOrderWithWait[O <: OrderType, S <: Side](
     orderRequest: LiquidOrderRequest[O, S]
-  ): RIO[AllEnv, Unit] = for {
+  ): RIO[AllEnv, LiquidOrder] = for {
     order <- LiquidExchange.createOrder(orderRequest)
     _     <- waitFilled(order.id)
-  } yield ()
+  } yield order
 }
