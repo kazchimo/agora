@@ -38,11 +38,16 @@ private[liquid] object CreateOrder {
     : Encoder[LiquidOrderRequest[O, S]] = Encoder.instance(req =>
     Json
       .obj(
-        "order_type" -> req.orderType.asJson,
-        "product_id" -> req.productId.asJson,
-        "side"       -> req.side.asJson,
-        "quantity"   -> req.quantity.asJson,
-        "price"      -> req.price.asJson
+        "side"             -> (req.side: Side).asJson,
+        "order_type"       -> (req.orderType: OrderType).asJson,
+        "product_id"       -> req.productId.asJson,
+        "quantity"         -> req.quantity.asJson,
+        "price"            -> req.price.asJson,
+        "leverage_level"   -> req.leverageLevel.asJson,
+        "funding_currency" -> req.fundingCurrency.asJson,
+        "trading_type"     -> req.tradingType.asJson,
+        "take_profit"      -> req.takeProfit.asJson,
+        "stop_loss"        -> req.stopLoss.asJson
       ).dropNullValues
   )
 }

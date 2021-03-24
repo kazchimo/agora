@@ -1,6 +1,8 @@
 package domain.exchange.liquid
 
 import domain.exchange.liquid.FundingCurrency.Jpy
+import domain.exchange.liquid.LiquidOrder.MarginType.Cross
+import domain.exchange.liquid.LiquidOrder.OrderDirection.Netout
 import domain.exchange.liquid.LiquidOrder.OrderType.Limit
 import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
 import domain.exchange.liquid.LiquidOrder.TradingType.Cfd
@@ -18,7 +20,9 @@ final case class LiquidOrderRequest[O <: OrderType, S <: Side] private (
   fundingCurrency: Option[FundingCurrency] = None,
   tradingType: Option[TradingType] = None,
   takeProfit: Option[TakeProfit] = None,
-  stopLoss: Option[StopLoss] = None
+  stopLoss: Option[StopLoss] = None,
+  orderDirection: Option[OrderDirection] = None,
+  marginType: Option[MarginType] = None
 )
 
 object LiquidOrderRequest {
@@ -54,6 +58,8 @@ object LiquidOrderRequest {
     Some(Jpy),
     Some(Cfd),
     Some(takeProfit),
-    Some(stopLoss)
+    Some(stopLoss),
+    Some(Netout),
+    Some(Cross)
   )
 }
