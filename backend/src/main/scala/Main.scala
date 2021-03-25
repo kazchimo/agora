@@ -1,18 +1,16 @@
-import cats.syntax.show._
 import domain.exchange.liquid.LiquidOrder.{Price, Quantity}
 import domain.exchange.liquid.LiquidOrderRequest
 import domain.exchange.liquid.LiquidProduct.btcJpyId
 import eu.timepit.refined.auto._
 import infra.conf.ConfImpl
 import infra.exchange.{ExchangeImpl, IncreasingNonceImpl}
-import lib.error._
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import usecase.coincheck.{
   CancelAllInCoincheckUC,
   SellAllCoinInCoincheckUC,
   TradeInDowMethodUC
 }
-import usecase.liquid.{TradeHeadSpread, TradeHeadSpreadWithLeveraged}
+import usecase.liquid.{SettleWorstTrade, TradeHeadSpreadWithLeveraged}
 import zio.duration._
 import zio.logging.{LogLevel, Logging, log}
 import zio.magic._
@@ -36,12 +34,13 @@ object Main extends zio.App {
   val cancelAll  = CancelAllInCoincheckUC.cancelAll
   val settleAll  = sellAll <&> cancelAll
 
-  val liquidOrder = LiquidOrderRequest.limitBuy(
+  val liquidOrder       = LiquidOrderRequest.limitBuy(
     btcJpyId,
     Quantity.unsafeFrom(0.001),
     Price.unsafeFrom(6369581d)
   )
+  val liquidSpreadTrade = TradeHeadSpreadWithLeveraged.trade(20)
 
-  private val app =
-    log.info("start") *> TradeHeadSpreadWithLeveraged.trade *> log.info("end")
+  private val app = log.info("start") *> (liquidSpreadTrade &> SettleWorstTrade
+    .settle(30.seconds)) *> log.info("end")
 }
