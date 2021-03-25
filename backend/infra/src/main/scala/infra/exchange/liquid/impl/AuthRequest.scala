@@ -39,11 +39,11 @@ private[liquid] trait AuthRequest {
   def recover401Send[L <: Throwable, R](
     req: Request[Either[L, R], Effect[Task] with ZioStreams with WebSockets]
   ): ZIO[AllEnv, Throwable, R] = (for {
-    _       <- log.debug(s"url=${req.uri.toString} body=${req.body.show}")
+    _       <- log.debug(s"Request: url=${req.uri.toString} body=${req.body.show}")
     res     <- send(req)
     _       <- ZIO.fail(ShouldRetry).when(res.code.code == 401)
     _       <- ZIO.fail(NotEnoughBalance).when(res.code.code == 422)
-    _       <- log.debug(res.show())
+    _       <- log.debug(s"Response: url=${req.uri.toString} body=${res.show()}")
     content <- ZIO.fromEither(res.body)
   } yield content).retryWhileEquals(ShouldRetry)
 }
