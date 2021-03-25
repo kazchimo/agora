@@ -3,6 +3,7 @@ package infra.exchange.liquid.impl
 import domain.AllEnv
 import domain.conf.Conf
 import io.circe.syntax._
+import lib.error.{ClientErr, ClientInfraError, InfraError}
 import lib.sttp.jsonRequest
 import lib.syntax.all._
 import pdi.jwt.{Jwt, JwtAlgorithm}
@@ -12,6 +13,9 @@ import sttp.client3.asynchttpclient.zio.{SttpClient, send, sendR}
 import sttp.client3.{Empty, Request, RequestT}
 import zio.logging.{Logging, log}
 import zio.{RIO, Task, ZIO}
+
+object NotEnoughBalance
+    extends InfraError("Not enough balance", None, ClientErr)
 
 private[liquid] trait AuthRequest {
   def createSig(path: String): ZIO[AllEnv, Throwable, String] = for {
@@ -33,7 +37,7 @@ private[liquid] trait AuthRequest {
         .header("X-Quoine-API-Version", "2").header("X-Quoine-Auth", sig)
     )
 
-  private case object ShouldRetry extends Exception
+  private object ShouldRetry extends Exception
 
   def recover401Send[L <: Throwable, R](
     req: Request[Either[L, R], Effect[Task] with ZioStreams with WebSockets]
@@ -41,6 +45,7 @@ private[liquid] trait AuthRequest {
     _       <- log.debug(req.body.show)
     res     <- send(req)
     _       <- ZIO.fail(ShouldRetry).when(res.code.code == 401)
+    _       <- ZIO.fail(NotEnoughBalance).when(res.code.code == 422)
     _       <- log.debug(res.show())
     content <- ZIO.fromEither(res.body)
   } yield content).retryWhileEquals(ShouldRetry)

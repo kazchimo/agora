@@ -1,6 +1,6 @@
 package lib.error
 
-sealed abstract class InfraError(
+abstract class InfraError(
   override val msg: String,
   override val cause: Option[Throwable] = None,
   override val code: ErrorCode
