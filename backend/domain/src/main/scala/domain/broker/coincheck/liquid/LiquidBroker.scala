@@ -6,6 +6,7 @@ import domain.exchange.liquid.LiquidOrder.{Id, OrderType, Price, Side}
 import domain.exchange.liquid.LiquidProduct.btcJpyId
 import domain.exchange.liquid.Trade.Status.Open
 import domain.exchange.liquid.Trade.TradingType.Cfd
+import domain.exchange.liquid.errors.NotEnoughBalance
 import domain.exchange.liquid.{
   GetTradesParams,
   LiquidExchange,
@@ -15,9 +16,10 @@ import domain.exchange.liquid.{
   Trade
 }
 import lib.zio.{EStream, UReadOnlyRef}
+import zio.clock.Clock
 import zio.duration._
 import zio.logging.log
-import zio.{Has, RIO, Ref, ZIO, ZRef}
+import zio.{Has, RIO, Ref, Schedule, ZIO, ZRef}
 
 object LiquidBroker {
 
@@ -78,11 +80,24 @@ object LiquidBroker {
     _     <- waitFilled(order.id)
   } yield order
 
+  def retryNotEnoughBalanceOrder[O <: OrderType, S <: Side](
+    orderRequest: LiquidOrderRequest[O, S],
+    retryInterval: Duration
+  ): RIO[AllEnv, LiquidOrder] = LiquidExchange
+    .createOrder(orderRequest).retry(
+      Schedule.fixed(retryInterval) && Schedule
+        .recurWhileEquals[Throwable](NotEnoughBalance)
+    )
+
   def timeoutedOrder[O <: OrderType, S <: Side](
     orderRequest: LiquidOrderRequest[O, S],
-    d: Duration
+    d: Duration,
+    retryNotEnoughBalance: Boolean = false,
+    retryInterval: Duration = 10.seconds
   ): RIO[AllEnv, Boolean] = for {
-    order  <- LiquidExchange.createOrder(orderRequest)
+    order  <- if (retryNotEnoughBalance)
+                retryNotEnoughBalanceOrder(orderRequest, retryInterval)
+              else LiquidExchange.createOrder(orderRequest)
     filled <- waitFilledUntil(order.id, d)
     _      <- LiquidExchange.cancelOrder(order.id).unless(filled)
   } yield filled

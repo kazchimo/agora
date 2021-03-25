@@ -48,11 +48,7 @@ object TradeHeadSpreadWithLeveraged {
                       stopLoss,
                       LeverageLevel.unsafeApply(2L)
                     )
-      _          <- LiquidBroker
-                      .timeoutedOrder(request, 10.seconds).retry(
-                        Schedule.fixed(10.seconds) && Schedule
-                          .recurWhileEquals[Throwable](NotEnoughBalance)
-                      )
+      _          <- LiquidBroker.timeoutedOrder(request, 10.seconds, true)
     } yield ()
     _                      <- requestOrder
                                 .whenM(
