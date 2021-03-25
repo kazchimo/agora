@@ -19,6 +19,7 @@ package object liquid {
         orderRequest: LiquidOrderRequest[O, S]
       ): RIO[AllEnv, LiquidOrder]
       def getTrades(params: GetTradesParams): RIO[AllEnv, Seq[Trade]]
+      def closeTrade(id: Trade.Id): RIO[AllEnv, Unit]
 
       // websocket apis
       def orderBookStream(side: Side): RIO[AllEnv, EStream[Seq[OrderOnBook]]]
