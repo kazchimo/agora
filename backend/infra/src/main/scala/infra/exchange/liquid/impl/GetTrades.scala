@@ -22,7 +22,8 @@ private[liquid] trait GetTrades extends AuthRequest {
       params.productId.map(p => s"product_id=${p.deepInnerV.toString}"),
       params.side.map(s => s"side=${s.entryName}"),
       params.status.map(s => s"status=${s.entryName}"),
-      params.tradingType.map(s => s"tradingType=${s.entryName}")
+      params.tradingType.map(s => s"tradingType=${s.entryName}"),
+      params.limit.map(s => s"limit=${s.deepInnerV.toString}")
     ).collect { case Some(s) => s }
 
     "/trades" + (if (ps.isEmpty) "" else "?" + ps.mkString("&"))

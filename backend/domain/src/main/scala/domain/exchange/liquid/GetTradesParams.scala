@@ -5,5 +5,6 @@ final case class GetTradesParams(
   fundingCurrency: Option[FundingCurrency] = None,
   status: Option[Trade.Status] = None,
   side: Option[Trade.Side] = None,
-  tradingType: Option[Trade.TradingType] = None
+  tradingType: Option[Trade.TradingType] = None,
+  limit: Option[Pagination.Limit] = None
 )
