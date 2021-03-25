@@ -32,5 +32,5 @@ final private[liquid] case class TradeResponse(
 final private[liquid] case class PaginationContainer[R](
   models: Seq[R],
   current_page: NonNegativeLong,
-  total_pages: PositiveLong
+  total_pages: NonNegativeLong
 )
