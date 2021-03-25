@@ -32,15 +32,8 @@ object TradeHeadSpreadWithLeveraged {
       buyPrice <- latestBuyHeadPriceRef.get.someOrFailException
       quote    <- TakeProfit(buyPrice.deepInnerV * 1.0005)
       stopLoss <- StopLoss(buyPrice.value * 0.995)
-      request   = LiquidOrderRequest.leveraged(
-                    btcJpyId,
-                    Buy,
-                    quantity,
-                    buyPrice,
-                    quote,
-                    stopLoss,
-                    LeverageLevel.unsafeApply(2L)
-                  )
+      request   = LiquidOrderRequest
+                    .leveraged(btcJpyId, Buy, quantity, buyPrice, quote, stopLoss)
       _        <- LiquidBroker.timeoutedOrder(request, 10.seconds, true)
     } yield ()
     _                     <- requestOrder.whenM(latestBuyHeadPriceRef.get.map(_.nonEmpty)).forever
