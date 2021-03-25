@@ -6,9 +6,9 @@ import domain.lib.{VOFactory, ZEnum}
 import enumeratum.CirceEnum
 import enumeratum.EnumEntry.Snakecase
 import io.estatico.newtype.macros.newtype
-import lib.refined.PositiveLong
+import lib.refined.{NonNegativeDouble, PositiveLong}
 
-final case class Trade(id: Id, status: Status) {
+final case class Trade(id: Id, status: Status, pnl: Pnl) {
   def closed: Boolean = status == Closed
 }
 
@@ -31,6 +31,8 @@ object Trade {
     case object Long  extends Side
     case object Short extends Side
   }
+
+  case class Pnl(value: Double) extends AnyVal
 
   sealed trait TradingType extends Snakecase
   object TradingType       extends ZEnum[TradingType] with CirceEnum[TradingType] {

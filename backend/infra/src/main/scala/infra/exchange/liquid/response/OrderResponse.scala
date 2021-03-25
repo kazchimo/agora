@@ -21,12 +21,13 @@ final private[liquid] case class OrderResponse(
 
 final private[liquid] case class TradeResponse(
   id: PositiveLong,
-  status: String
+  status: String,
+  pnl: Double
 ) {
   import domain.exchange.liquid.Trade._
 
   def toTrade: IO[ClientDomainError, Trade] =
-    Status.withNameZio(status).map(Trade(Id(id), _))
+    Status.withNameZio(status).map(Trade(Id(id), _, Pnl(pnl)))
 }
 
 final private[liquid] case class PaginationContainer[R](
