@@ -16,14 +16,13 @@ private[liquid] trait TradesStream extends WebSocketHandler {
   self: LiquidExchange.Service =>
 
   private def useWS(queue: Queue[Trade])(ws: WebSocket[RIO[AllEnv, *]]) =
-    handleAuthMessage(ws, f"user_account_${Jpy.entryName}_trades", "updated") {
-      d =>
-        for {
-          res   <- ZIO.fromEither(decode[TradeResponse](d.data))
-          trade <- res.toTrade
-          _     <- log.trace(trade.toString)
-          _     <- queue.offer(trade)
-        } yield ()
+    handleAuthMessage(ws, f"user_account_jpy_trades", "pnl_updated") { d =>
+      for {
+        res   <- ZIO.fromEither(decode[TradeResponse](d.data))
+        trade <- res.toTrade
+        _     <- log.trace(trade.toString)
+        _     <- queue.offer(trade)
+      } yield ()
     }.forever
 
   override def tradesStream: RIO[AllEnv, stream.Stream[Throwable, Trade]] =
