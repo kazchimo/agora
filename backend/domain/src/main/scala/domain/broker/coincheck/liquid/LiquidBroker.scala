@@ -4,6 +4,7 @@ import domain.AllEnv
 import domain.exchange.liquid.FundingCurrency.Jpy
 import domain.exchange.liquid.LiquidOrder.{Id, OrderType, Price, Side}
 import domain.exchange.liquid.LiquidProduct.btcJpyId
+import domain.exchange.liquid.Pagination.Limit
 import domain.exchange.liquid.Trade.Status.Open
 import domain.exchange.liquid.Trade.TradingType.Cfd
 import domain.exchange.liquid._
@@ -12,6 +13,7 @@ import lib.zio.{EStream, UReadOnlyRef}
 import zio.duration._
 import zio.logging.log
 import zio.{RIO, Ref, Schedule, ZIO}
+import eu.timepit.refined.auto._
 
 object LiquidBroker {
 
@@ -45,25 +47,24 @@ object LiquidBroker {
                                          }.fork
   } yield ref
 
-  def openTradeCountRef(side: Trade.Side): RIO[AllEnv, UReadOnlyRef[Int]] =
+  def openTradeCountRef(side: Trade.Side): RIO[AllEnv, UReadOnlyRef[Int]] = {
+    val getTrades = LiquidExchange.getTrades(
+      GetTradesParams(
+        Some(btcJpyId),
+        Some(Jpy),
+        Some(Open),
+        Some(side),
+        Some(Cfd),
+        Some(Limit(1000))
+      )
+    )
+
     for {
-      trades              <- LiquidExchange.getTrades(
-                               GetTradesParams(
-                                 Some(btcJpyId),
-                                 Some(Jpy),
-                                 Some(Open),
-                                 Some(side),
-                                 Some(Cfd)
-                               )
-                             )
-      ref                 <- Ref.make(trades.size)
-      str: EStream[Trade] <- LiquidExchange.tradesStream
-      _                   <- str.foreach { t =>
-                               log.debug("New trade result: " + t.toString) *>
-                                 (if (t.closed) ref.update(_ - 1)
-                                  else ref.update(_ + 1))
-                             }.fork
+      trades <- getTrades
+      ref    <- Ref.make(trades.size)
+      _      <- getTrades.repeat(Schedule.fixed(5.seconds)).fork
     } yield ref.readOnly
+  }
 
   def createOrderWithWait[O <: OrderType, S <: Side](
     orderRequest: LiquidOrderRequest[O, S]
