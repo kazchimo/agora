@@ -6,7 +6,7 @@ import domain.lib.{VOFactory, ZEnum}
 import enumeratum.CirceEnum
 import enumeratum.EnumEntry.Snakecase
 import io.estatico.newtype.macros.newtype
-import lib.refined.{NonNegativeDouble, PositiveLong}
+import lib.refined.PositiveLong
 
 final case class Trade(id: Id, status: Status, pnl: Pnl) {
   def closed: Boolean = status == Closed

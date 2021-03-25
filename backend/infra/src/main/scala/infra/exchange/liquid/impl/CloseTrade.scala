@@ -3,10 +3,10 @@ package infra.exchange.liquid.impl
 import domain.AllEnv
 import domain.exchange.liquid.{LiquidExchange, Trade}
 import infra.exchange.liquid.Endpoints
-import zio.RIO
 import lib.syntax.all._
 import sttp.client3.UriContext
 import sttp.client3.circe.asJson
+import zio.RIO
 
 private[liquid] trait CloseTrade extends AuthRequest {
   self: LiquidExchange.Service =>

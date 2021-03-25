@@ -9,11 +9,11 @@ import domain.exchange.liquid.Trade.Status.Open
 import domain.exchange.liquid.Trade.TradingType.Cfd
 import domain.exchange.liquid._
 import domain.exchange.liquid.errors.NotEnoughBalance
+import eu.timepit.refined.auto._
 import lib.zio.{EStream, UReadOnlyRef}
 import zio.duration._
 import zio.logging.log
 import zio.{RIO, Ref, Schedule, ZIO}
-import eu.timepit.refined.auto._
 
 object LiquidBroker {
 

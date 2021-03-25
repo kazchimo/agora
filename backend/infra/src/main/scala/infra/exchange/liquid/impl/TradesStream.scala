@@ -1,7 +1,6 @@
 package infra.exchange.liquid.impl
 
 import domain.AllEnv
-import domain.exchange.liquid.FundingCurrency.Jpy
 import domain.exchange.liquid.{LiquidExchange, Trade}
 import infra.exchange.liquid.response.TradeResponse
 import io.circe.generic.auto._

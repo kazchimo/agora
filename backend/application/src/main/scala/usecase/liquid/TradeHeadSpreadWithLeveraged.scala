@@ -15,7 +15,6 @@ import lib.refined.{PositiveDouble, PositiveInt}
 import lib.syntax.all._
 import zio.ZIO
 import zio.duration._
-import zio.logging.log
 
 import scala.math.Numeric._
 
