@@ -2,20 +2,17 @@ package infra.exchange.liquid.impl
 
 import domain.AllEnv
 import domain.conf.Conf
+import domain.exchange.liquid.errors.NotEnoughBalance
 import io.circe.syntax._
-import lib.error.{ClientErr, ClientInfraError, InfraError}
 import lib.sttp.jsonRequest
 import lib.syntax.all._
 import pdi.jwt.{Jwt, JwtAlgorithm}
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
-import sttp.client3.asynchttpclient.zio.{SttpClient, send, sendR}
+import sttp.client3.asynchttpclient.zio.send
 import sttp.client3.{Empty, Request, RequestT}
-import zio.logging.{Logging, log}
+import zio.logging.log
 import zio.{RIO, Task, ZIO}
-
-object NotEnoughBalance
-    extends InfraError("Not enough balance", None, ClientErr)
 
 private[liquid] trait AuthRequest {
   def createSig(path: String): ZIO[AllEnv, Throwable, String] = for {
