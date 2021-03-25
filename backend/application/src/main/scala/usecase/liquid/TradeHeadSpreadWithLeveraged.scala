@@ -27,25 +27,23 @@ object TradeHeadSpreadWithLeveraged {
     latestBuyHeadPriceRef  <- LiquidBroker.latestHeadPriceRef(Buy)
     latestSellHeadPriceRef <- LiquidBroker.latestHeadPriceRef(Sell)
     countRef               <- LiquidBroker.openTradeCountRef(Trade.Side.Long)
+    countIsOver             = countRef.map(_ >= tradeCount.value)
     requestOrder            = for {
-      c          <- countRef.get
-      _          <- log.debug(c.toString)
-      countIsOver = countRef.map(_ >= tradeCount.value)
-      _          <- (countIsOver.get <* ZIO.sleep(1.seconds))
-                      .repeatWhileEquals(true).whenM(countIsOver.get)
-      buyPrice   <- latestBuyHeadPriceRef.get.someOrFailException
-      quote      <- TakeProfit(buyPrice.deepInnerV * 1.0005)
-      stopLoss   <- StopLoss(buyPrice.value * 0.995)
-      request     = LiquidOrderRequest.leveraged(
-                      btcJpyId,
-                      Buy,
-                      quantity,
-                      buyPrice,
-                      quote,
-                      stopLoss,
-                      LeverageLevel.unsafeApply(2L)
-                    )
-      _          <- LiquidBroker.timeoutedOrder(request, 10.seconds, true)
+      _        <- (countIsOver.get <* ZIO.sleep(1.seconds))
+                    .repeatWhileEquals(true).whenM(countIsOver.get)
+      buyPrice <- latestBuyHeadPriceRef.get.someOrFailException
+      quote    <- TakeProfit(buyPrice.deepInnerV * 1.0005)
+      stopLoss <- StopLoss(buyPrice.value * 0.995)
+      request   = LiquidOrderRequest.leveraged(
+                    btcJpyId,
+                    Buy,
+                    quantity,
+                    buyPrice,
+                    quote,
+                    stopLoss,
+                    LeverageLevel.unsafeApply(2L)
+                  )
+      _        <- LiquidBroker.timeoutedOrder(request, 10.seconds, true)
     } yield ()
     _                      <- requestOrder
                                 .whenM(

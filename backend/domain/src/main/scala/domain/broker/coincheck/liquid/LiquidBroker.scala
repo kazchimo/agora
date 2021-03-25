@@ -62,7 +62,11 @@ object LiquidBroker {
     for {
       trades <- getTrades
       ref    <- Ref.make(trades.size)
-      _      <- getTrades.repeat(Schedule.fixed(5.seconds)).fork
+      _      <- getTrades
+                  .flatMap(t =>
+                    log.debug(s"Trade count is ${t.size}") *> ref.set(t.size)
+                  ).repeat(Schedule.fixed(5.seconds))
+                  .fork
     } yield ref.readOnly
   }
 
