@@ -3,10 +3,13 @@ package infra.exchange.liquid.impl
 import domain.AllEnv
 import domain.exchange.liquid.{LiquidExchange, Trade}
 import infra.exchange.liquid.Endpoints
+import infra.exchange.liquid.response.TradeResponse
 import lib.syntax.all._
 import sttp.client3.UriContext
 import sttp.client3.circe.asJson
 import zio.RIO
+import io.circe.generic.auto._
+import io.circe.refined._
 
 private[liquid] trait CloseTrade extends AuthRequest {
   self: LiquidExchange.Service =>
@@ -16,8 +19,7 @@ private[liquid] trait CloseTrade extends AuthRequest {
 
     for {
       req <- authRequest(path)
-      _   <-
-        recover401Send(req.put(uri"$uri").response(asJson[Map[String, String]]))
+      _   <- recover401Send(req.put(uri"$uri").response(asJson[TradeResponse]))
     } yield ()
   }
 }
