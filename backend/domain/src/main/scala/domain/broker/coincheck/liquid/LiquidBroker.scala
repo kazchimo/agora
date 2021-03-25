@@ -11,7 +11,7 @@ import domain.exchange.liquid._
 import domain.exchange.liquid.errors.NotEnoughBalance
 import eu.timepit.refined.auto._
 import lib.refined.PositiveInt
-import lib.zio.{EStream, UReadOnlyRef}
+import lib.zio.{EStream, UpdatingRef}
 import zio.duration._
 import zio.logging.log
 import zio.{RIO, Ref, Schedule, ZIO}
@@ -48,7 +48,7 @@ object LiquidBroker {
                                          }.fork
   } yield ref
 
-  def openTradeCountRef(side: Trade.Side): RIO[AllEnv, UReadOnlyRef[Int]] = {
+  def openTradeCountRef(side: Trade.Side) = {
     val getTrades = LiquidExchange.getTrades(
       GetTradesParams(
         Some(btcJpyId),
@@ -63,12 +63,12 @@ object LiquidBroker {
     for {
       trades <- getTrades
       ref    <- Ref.make(trades.size)
-      _      <- getTrades
+      fiber  <- getTrades
                   .flatMap(t =>
                     log.debug(s"Trade count is ${t.size}") *> ref.set(t.size)
                   ).repeat(Schedule.fixed(5.seconds))
                   .fork
-    } yield ref.readOnly
+    } yield UpdatingRef(ref, fiber)
   }
 
   def waitIfTradeCountIsOver(side: Trade.Side, threshold: PositiveInt) = for {
@@ -76,6 +76,7 @@ object LiquidBroker {
     countIsOver = ref.map(_ >= threshold.value)
     _          <- (countIsOver.get <* ZIO.sleep(1.seconds))
                     .repeatWhileEquals(true).whenM(countIsOver.get)
+    _          <- ref.interruptUpdate
   } yield ()
 
   def createOrderWithWait[O <: OrderType, S <: Side](
