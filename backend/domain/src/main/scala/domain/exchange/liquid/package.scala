@@ -3,7 +3,6 @@ package domain.exchange
 import domain.exchange.liquid.LiquidOrder.{Id, OrderType, Side}
 import lib.zio.EStream
 import zio.macros.accessible
-import zio.stream.Stream
 import zio.{Has, RIO}
 
 package object liquid {

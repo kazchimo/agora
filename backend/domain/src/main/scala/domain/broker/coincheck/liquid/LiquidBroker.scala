@@ -6,20 +6,12 @@ import domain.exchange.liquid.LiquidOrder.{Id, OrderType, Price, Side}
 import domain.exchange.liquid.LiquidProduct.btcJpyId
 import domain.exchange.liquid.Trade.Status.Open
 import domain.exchange.liquid.Trade.TradingType.Cfd
+import domain.exchange.liquid._
 import domain.exchange.liquid.errors.NotEnoughBalance
-import domain.exchange.liquid.{
-  GetTradesParams,
-  LiquidExchange,
-  LiquidOrder,
-  LiquidOrderRequest,
-  OrderOnBook,
-  Trade
-}
 import lib.zio.{EStream, UReadOnlyRef}
-import zio.clock.Clock
 import zio.duration._
 import zio.logging.log
-import zio.{Has, RIO, Ref, Schedule, ZIO, ZRef}
+import zio.{RIO, Ref, Schedule, ZIO}
 
 object LiquidBroker {
 

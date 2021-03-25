@@ -1,22 +1,16 @@
 package infra.exchange.liquid.impl
 
+import cats.syntax.traverse._
 import domain.AllEnv
-import domain.exchange.liquid.{
-  FundingCurrency,
-  GetTradesParams,
-  LiquidExchange,
-  LiquidProduct,
-  Trade
-}
+import domain.exchange.liquid.{GetTradesParams, LiquidExchange, Trade}
 import infra.exchange.liquid.Endpoints
 import infra.exchange.liquid.response.{PaginationContainer, TradeResponse}
-import zio.RIO
+import io.circe.generic.auto._
+import io.circe.refined._
 import lib.syntax.all._
 import sttp.client3.UriContext
 import sttp.client3.circe.asJson
-import io.circe.generic.auto._
-import io.circe.refined._
-import cats.syntax.traverse._
+import zio.RIO
 import zio.interop.catz.core._
 import zio.logging.log
 

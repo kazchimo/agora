@@ -9,14 +9,11 @@ import domain.exchange.liquid.LiquidOrder.{
   TakeProfit
 }
 import domain.exchange.liquid.LiquidProduct.btcJpyId
-import domain.exchange.liquid.errors.NotEnoughBalance
-import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest, Trade}
+import domain.exchange.liquid.{LiquidOrderRequest, Trade}
 import eu.timepit.refined.auto._
-import eu.timepit.refined.numeric.Positive
-import lib.instance.all._
-import lib.refined.{PositiveDouble, PositiveInt, refineVZE}
+import lib.refined.{PositiveDouble, PositiveInt}
 import lib.syntax.all._
-import zio.{Ref, Schedule, ZIO}
+import zio.ZIO
 import zio.duration._
 import zio.logging.log
 

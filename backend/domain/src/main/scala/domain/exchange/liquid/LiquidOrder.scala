@@ -3,8 +3,8 @@ package domain.exchange.liquid
 import domain.exchange.liquid.LiquidOrder.Status.Filled
 import domain.exchange.liquid.LiquidOrder._
 import domain.lib.{VOFactory, ZEnum}
-import enumeratum.{CirceEnum, Enum}
 import enumeratum.EnumEntry.{Lowercase, Snakecase}
+import enumeratum.{CirceEnum, Enum}
 import io.estatico.newtype.macros.newtype
 import lib.error.ClientDomainError
 import lib.refined.{PositiveDouble, PositiveLong}
