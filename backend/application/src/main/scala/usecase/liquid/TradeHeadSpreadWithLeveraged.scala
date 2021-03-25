@@ -9,13 +9,14 @@ import domain.exchange.liquid.LiquidOrder.{
   TakeProfit
 }
 import domain.exchange.liquid.LiquidProduct.btcJpyId
+import domain.exchange.liquid.errors.NotEnoughBalance
 import domain.exchange.liquid.{LiquidExchange, LiquidOrderRequest, Trade}
 import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric.Positive
 import lib.instance.all._
 import lib.refined.{PositiveDouble, PositiveInt, refineVZE}
 import lib.syntax.all._
-import zio.{Ref, ZIO}
+import zio.{Ref, Schedule, ZIO}
 import zio.duration._
 import zio.logging.log
 
@@ -47,7 +48,11 @@ object TradeHeadSpreadWithLeveraged {
                       stopLoss,
                       LeverageLevel.unsafeApply(2L)
                     )
-      _          <- LiquidBroker.timeoutedOrder(request, 10.seconds)
+      _          <- LiquidBroker
+                      .timeoutedOrder(request, 10.seconds).retry(
+                        Schedule.fixed(10.seconds) && Schedule
+                          .recurWhileEquals[Throwable](NotEnoughBalance)
+                      )
     } yield ()
     _                      <- requestOrder
                                 .whenM(
