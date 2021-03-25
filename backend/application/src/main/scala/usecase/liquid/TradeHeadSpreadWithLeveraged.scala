@@ -23,11 +23,10 @@ object TradeHeadSpreadWithLeveraged {
   val one: PositiveDouble = 1d
 
   def trade(tradeCount: PositiveInt) = for {
-    latestBuyHeadPriceRef  <- LiquidBroker.latestHeadPriceRef(Buy)
-    latestSellHeadPriceRef <- LiquidBroker.latestHeadPriceRef(Sell)
-    countRef               <- LiquidBroker.openTradeCountRef(Trade.Side.Long)
-    countIsOver             = countRef.map(_ >= tradeCount.value)
-    requestOrder            = for {
+    latestBuyHeadPriceRef <- LiquidBroker.latestHeadPriceRef(Buy)
+    countRef              <- LiquidBroker.openTradeCountRef(Trade.Side.Long)
+    countIsOver            = countRef.map(_ >= tradeCount.value)
+    requestOrder           = for {
       _        <- (countIsOver.get <* ZIO.sleep(1.seconds))
                     .repeatWhileEquals(true).whenM(countIsOver.get)
       buyPrice <- latestBuyHeadPriceRef.get.someOrFailException
@@ -44,10 +43,6 @@ object TradeHeadSpreadWithLeveraged {
                   )
       _        <- LiquidBroker.timeoutedOrder(request, 10.seconds, true)
     } yield ()
-    _                      <- requestOrder
-                                .whenM(
-                                  latestBuyHeadPriceRef.get.map(_.nonEmpty) &&
-                                    latestSellHeadPriceRef.get.map(_.nonEmpty)
-                                ).forever
+    _                     <- requestOrder.whenM(latestBuyHeadPriceRef.get.map(_.nonEmpty)).forever
   } yield ()
 }
