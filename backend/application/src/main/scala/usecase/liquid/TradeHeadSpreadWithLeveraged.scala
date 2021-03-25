@@ -1,19 +1,13 @@
 package usecase.liquid
 
 import domain.broker.coincheck.liquid.LiquidBroker
-import domain.exchange.liquid.LiquidOrder.Side.{Buy, Sell}
-import domain.exchange.liquid.LiquidOrder.{
-  LeverageLevel,
-  Quantity,
-  StopLoss,
-  TakeProfit
-}
+import domain.exchange.liquid.LiquidOrder.Side.Buy
+import domain.exchange.liquid.LiquidOrder.{Quantity, StopLoss, TakeProfit}
 import domain.exchange.liquid.LiquidProduct.btcJpyId
 import domain.exchange.liquid.{LiquidOrderRequest, Trade}
 import eu.timepit.refined.auto._
 import lib.refined.{PositiveDouble, PositiveInt}
 import lib.syntax.all._
-import zio.ZIO
 import zio.duration._
 
 import scala.math.Numeric._

@@ -7,8 +7,8 @@ import domain.exchange.liquid.Trade.Status.Open
 import domain.exchange.liquid.Trade.TradingType.Cfd
 import domain.exchange.liquid.{GetTradesParams, LiquidExchange}
 import eu.timepit.refined.auto._
-import zio.{Schedule, ZIO}
 import zio.duration.Duration
+import zio.{Schedule, ZIO}
 
 object SettleWorstTrade {
 
