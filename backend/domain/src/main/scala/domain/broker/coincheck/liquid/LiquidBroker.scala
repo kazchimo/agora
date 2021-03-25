@@ -65,8 +65,9 @@ object LiquidBroker {
       ref                 <- Ref.make(trades.size)
       str: EStream[Trade] <- LiquidExchange.tradesStream
       _                   <- str.foreach { t =>
-                               log.debug(t.toString) *> (if (t.closed) ref.update(_ - 1)
-                                                         else ref.update(_ + 1))
+                               log.debug("New trade result: " + t.toString) *>
+                                 (if (t.closed) ref.update(_ - 1)
+                                  else ref.update(_ + 1))
                              }.fork
     } yield ref.readOnly
 
