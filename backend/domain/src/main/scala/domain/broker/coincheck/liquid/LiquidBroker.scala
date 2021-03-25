@@ -10,6 +10,7 @@ import domain.exchange.liquid.Trade.TradingType.Cfd
 import domain.exchange.liquid._
 import domain.exchange.liquid.errors.NotEnoughBalance
 import eu.timepit.refined.auto._
+import lib.refined.PositiveInt
 import lib.zio.{EStream, UReadOnlyRef}
 import zio.duration._
 import zio.logging.log
@@ -69,6 +70,13 @@ object LiquidBroker {
                   .fork
     } yield ref.readOnly
   }
+
+  def waitIfTradeCountIsOver(side: Trade.Side, threshold: PositiveInt) = for {
+    ref        <- openTradeCountRef(side)
+    countIsOver = ref.map(_ >= threshold.value)
+    _          <- (countIsOver.get <* ZIO.sleep(1.seconds))
+                    .repeatWhileEquals(true).whenM(countIsOver.get)
+  } yield ()
 
   def createOrderWithWait[O <: OrderType, S <: Side](
     orderRequest: LiquidOrderRequest[O, S]

@@ -24,11 +24,8 @@ object TradeHeadSpreadWithLeveraged {
 
   def trade(tradeCount: PositiveInt) = for {
     latestBuyHeadPriceRef <- LiquidBroker.latestHeadPriceRef(Buy)
-    countRef              <- LiquidBroker.openTradeCountRef(Trade.Side.Long)
-    countIsOver            = countRef.map(_ >= tradeCount.value)
     requestOrder           = for {
-      _        <- (countIsOver.get <* ZIO.sleep(1.seconds))
-                    .repeatWhileEquals(true).whenM(countIsOver.get)
+      _        <- LiquidBroker.waitIfTradeCountIsOver(Trade.Side.Long, tradeCount)
       buyPrice <- latestBuyHeadPriceRef.get.someOrFailException
       quote    <- TakeProfit(buyPrice.deepInnerV * 1.0005)
       stopLoss <- StopLoss(buyPrice.value * 0.995)
