@@ -16,6 +16,7 @@ import domain.exchange.liquid.{
 }
 import lib.zio.{EStream, UReadOnlyRef}
 import zio.duration._
+import zio.logging.log
 import zio.{Has, RIO, Ref, ZIO, ZRef}
 
 object LiquidBroker {
@@ -30,13 +31,14 @@ object LiquidBroker {
       stream: EStream[LiquidOrder] <- LiquidExchange.ordersStream
       filledRef                    <- Ref.make(false)
       _                            <- stream.interruptAfter(d).foreachWhile { o =>
-                                        val filled = ZIO.succeed(
+                                        val notFilled = ZIO.succeed(
                                           o.notFilled
                                             || o.id != id
                                         )
-                                        filledRef.set(true).whenM(filled) *> filled
+                                        filledRef.set(true).unlessM(notFilled) *> notFilled
                                       }
       filled                       <- filledRef.get
+      _                            <- log.debug(s"order filled: $filled")
     } yield filled
 
   def latestHeadPriceRef(side: Side): RIO[AllEnv, Ref[Option[Price]]] = for {
@@ -63,7 +65,8 @@ object LiquidBroker {
       ref                 <- Ref.make(trades.size)
       str: EStream[Trade] <- LiquidExchange.tradesStream
       _                   <- str.foreach { t =>
-                               if (t.closed) ref.update(_ - 1) else ref.update(_ + 1)
+                               log.debug(t.toString) *> (if (t.closed) ref.update(_ - 1)
+                                                         else ref.update(_ + 1))
                              }.fork
     } yield ref.readOnly
 
