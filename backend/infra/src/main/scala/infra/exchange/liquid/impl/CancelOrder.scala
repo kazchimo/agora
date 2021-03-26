@@ -12,7 +12,7 @@ trait CancelOrder extends AuthRequest { self: LiquidExchange.Service =>
   override def cancelOrder(id: LiquidOrder.Id): RIO[AllEnv, Unit] = for {
     req <- authRequest(Endpoints.cancelOrder(id))
     uri  = Endpoints.root + Endpoints.cancelOrder(id)
-    _   <- recover401Send(
+    _   <- recoverUnauthorizedSend(
              req.put(uri"$uri").mapResponse(_.leftMap(e => InternalInfraError(e)))
            )
   } yield ()

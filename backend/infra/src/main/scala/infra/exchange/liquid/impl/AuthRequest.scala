@@ -61,12 +61,10 @@ private[liquid] trait AuthRequest {
            }.when(res.code.isClientError || res.code.isServerError)
   } yield res
 
-  private object ShouldRetry extends Exception
-
-  def recover401Send[L <: Throwable, R](
+  def recoverUnauthorizedSend[L <: Throwable, R](
     req: Request[Either[L, R], Effect[Task] with ZioStreams with WebSockets]
   ): ZIO[AllEnv, Throwable, R] = (for {
     res     <- sendReq(req)
     content <- ZIO.fromEither(res.body)
-  } yield content).retryWhileEquals(ShouldRetry)
+  } yield content).retryWhile(_.isInstanceOf[Unauthorized])
 }

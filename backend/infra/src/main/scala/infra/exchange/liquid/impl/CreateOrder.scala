@@ -23,7 +23,7 @@ private[liquid] trait CreateOrder extends AuthRequest {
     orderRequest: LiquidOrderRequest[O, S]
   ): RIO[AllEnv, LiquidOrder] = for {
     req   <- authRequest(Endpoints.ordersPath)
-    res   <- recover401Send(
+    res   <- recoverUnauthorizedSend(
                req
                  .post(uri"${Endpoints.orders}").body(
                    orderRequest.asJson.noSpaces

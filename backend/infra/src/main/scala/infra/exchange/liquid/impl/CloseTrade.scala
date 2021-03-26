@@ -19,7 +19,9 @@ private[liquid] trait CloseTrade extends AuthRequest {
 
     for {
       req <- authRequest(path)
-      _   <- recover401Send(req.put(uri"$uri").response(asJson[TradeResponse]))
+      _   <- recoverUnauthorizedSend(
+               req.put(uri"$uri").response(asJson[TradeResponse])
+             )
     } yield ()
   }
 }

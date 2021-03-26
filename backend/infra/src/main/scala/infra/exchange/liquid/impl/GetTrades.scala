@@ -34,7 +34,7 @@ private[liquid] trait GetTrades extends AuthRequest {
       req    <- authRequest(url(params))
       uri     = Endpoints.root + url(params)
       res    <-
-        recover401Send(
+        recoverUnauthorizedSend(
           req
             .get(uri"$uri").response(asJson[PaginationContainer[TradeResponse]])
         )
