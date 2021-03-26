@@ -16,7 +16,7 @@ object TradeHeadSpreadWithLeveraged {
   val quantity: Quantity  = Quantity.unsafeFrom(0.001)
   val one: PositiveDouble = 1d
 
-  def trade(tradeCount: PositiveInt) = for {
+  def buy(tradeCount: PositiveInt) = for {
     latestBuyHeadPriceRef <- LiquidBroker.latestHeadPriceRef(Buy)
     requestOrder           = for {
       _        <- LiquidBroker.waitIfTradeCountIsOver(Trade.Side.Long, tradeCount)

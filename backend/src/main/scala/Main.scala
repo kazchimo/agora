@@ -39,7 +39,7 @@ object Main extends zio.App {
     Quantity.unsafeFrom(0.001),
     Price.unsafeFrom(6369581d)
   )
-  val liquidSpreadTrade = TradeHeadSpreadWithLeveraged.trade(20)
+  val liquidSpreadTrade = TradeHeadSpreadWithLeveraged.buy(20)
 
   private val app = log.info("start") *> (liquidSpreadTrade &> SettleWorstTrade
     .settle(30.seconds)) *> log.info("end")
