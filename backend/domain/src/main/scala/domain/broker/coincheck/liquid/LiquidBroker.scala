@@ -8,7 +8,7 @@ import domain.exchange.liquid.Pagination.Limit
 import domain.exchange.liquid.Trade.Status.Open
 import domain.exchange.liquid.Trade.TradingType.Cfd
 import domain.exchange.liquid._
-import domain.exchange.liquid.errors.NotEnoughBalance
+import domain.exchange.liquid.errors.UnprocessableEntity
 import eu.timepit.refined.auto._
 import lib.refined.PositiveInt
 import lib.zio.{EStream, UpdatingRef}
@@ -92,7 +92,7 @@ object LiquidBroker {
   ): RIO[AllEnv, LiquidOrder] = LiquidExchange
     .createOrder(orderRequest).retry(
       Schedule.fixed(retryInterval) && Schedule
-        .recurWhileEquals[Throwable](NotEnoughBalance)
+        .recurWhileEquals[Throwable](UnprocessableEntity)
     )
 
   def timeoutedOrder[O <: OrderType, S <: Side](

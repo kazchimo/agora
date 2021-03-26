@@ -2,7 +2,13 @@ package infra.exchange.liquid.impl
 
 import domain.AllEnv
 import domain.conf.Conf
-import domain.exchange.liquid.errors.{NotEnoughBalance, Unauthorized}
+import domain.exchange.liquid.errors.{
+  BadRequest,
+  ServiceUnavailable,
+  TooManyRequests,
+  Unauthorized,
+  UnprocessableEntity
+}
 import io.circe.syntax._
 import lib.sttp.jsonRequest
 import lib.syntax.all._
@@ -42,8 +48,11 @@ private[liquid] trait AuthRequest {
     _   <- log.debug(s"Response: url=${req.uri.toString} body=${res.show()}")
     _   <- ZIO.fail {
              res.code.code match {
+               case 400 => BadRequest(res.show())
                case 401 => Unauthorized(res.show())
-               case 422 => NotEnoughBalance
+               case 422 => UnprocessableEntity(res.show())
+               case 429 => TooManyRequests
+               case 503 => ServiceUnavailable(res.show())
              }
            }
   } yield res
