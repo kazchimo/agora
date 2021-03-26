@@ -10,6 +10,7 @@ import domain.exchange.liquid.errors.{
   UnprocessableEntity
 }
 import io.circe.syntax._
+import lib.error.InternalInfraError
 import lib.sttp.jsonRequest
 import lib.syntax.all._
 import pdi.jwt.{Jwt, JwtAlgorithm}
@@ -53,8 +54,11 @@ private[liquid] trait AuthRequest {
                case 422 => UnprocessableEntity(res.show())
                case 429 => TooManyRequests
                case 503 => ServiceUnavailable(res.show())
+               case a   => InternalInfraError(
+                   s"Unknown response code from Liquid api: code=$a body=${res.show()}"
+                 )
              }
-           }
+           }.when(res.code.isClientError || res.code.isServerError)
   } yield res
 
   private object ShouldRetry extends Exception
