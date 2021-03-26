@@ -18,6 +18,7 @@ import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.asynchttpclient.zio.{SttpClient, send}
 import sttp.client3.{Empty, Request, RequestT, Response}
+import sttp.model.Header
 import zio.logging.{Logging, log}
 import zio.{RIO, Task, ZIO}
 
@@ -33,13 +34,15 @@ private[liquid] trait AuthRequest {
                ).asJson.noSpaces
   } yield Jwt.encode(payload, secret.deepInnerV, JwtAlgorithm.HS256)
 
+  def authHeaders(path: String): RIO[AllEnv, Seq[Header]] =
+    createSig(path).map(sig =>
+      Seq(Header("X-Quoine-API-Version", "2"), Header("X-Quoine-Auth", sig))
+    )
+
   def authRequest(
     path: String
-  ): RIO[AllEnv, RequestT[Empty, Either[String, String], Any]] = createSig(path)
-    .map(sig =>
-      jsonRequest
-        .header("X-Quoine-API-Version", "2").header("X-Quoine-Auth", sig)
-    )
+  ): RIO[AllEnv, RequestT[Empty, Either[String, String], Any]] =
+    authHeaders(path).map(h => jsonRequest.headers(h: _*))
 
   def sendReq[T](
     req: Request[T, Effect[Task] with ZioStreams with WebSockets]
@@ -61,10 +64,10 @@ private[liquid] trait AuthRequest {
            }.when(res.code.isClientError || res.code.isServerError)
   } yield res
 
-  def recoverUnauthorizedSend[L <: Throwable, R](
+  def asEitherSend[L <: Throwable, R](
     req: Request[Either[L, R], Effect[Task] with ZioStreams with WebSockets]
-  ): ZIO[AllEnv, Throwable, R] = (for {
+  ): RIO[AllEnv, R] = for {
     res     <- sendReq(req)
     content <- ZIO.fromEither(res.body)
-  } yield content).retryWhile(_.isInstanceOf[Unauthorized])
+  } yield content
 }

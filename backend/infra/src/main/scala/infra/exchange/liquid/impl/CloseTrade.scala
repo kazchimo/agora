@@ -1,6 +1,7 @@
 package infra.exchange.liquid.impl
 
 import domain.AllEnv
+import domain.exchange.liquid.errors.Unauthorized
 import domain.exchange.liquid.{LiquidExchange, Trade}
 import infra.exchange.liquid.Endpoints
 import infra.exchange.liquid.response.TradeResponse
@@ -17,11 +18,9 @@ private[liquid] trait CloseTrade extends AuthRequest {
     val path = s"/trades/${id.deepInnerV.toString}/close"
     val uri  = Endpoints.root + path
 
-    for {
+    (for {
       req <- authRequest(path)
-      _   <- recoverUnauthorizedSend(
-               req.put(uri"$uri").response(asJson[TradeResponse])
-             )
-    } yield ()
+      _   <- asEitherSend(req.put(uri"$uri").response(asJson[TradeResponse]))
+    } yield ()).retryWhile(_.isInstanceOf[Unauthorized])
   }
 }

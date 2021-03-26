@@ -2,6 +2,7 @@ package infra.exchange.liquid.impl
 
 import cats.syntax.traverse._
 import domain.AllEnv
+import domain.exchange.liquid.errors.Unauthorized
 import domain.exchange.liquid.{GetTradesParams, LiquidExchange, Trade}
 import infra.exchange.liquid.Endpoints
 import infra.exchange.liquid.response.{PaginationContainer, TradeResponse}
@@ -30,15 +31,15 @@ private[liquid] trait GetTrades extends AuthRequest {
   }
 
   override def getTrades(params: GetTradesParams): RIO[AllEnv, Seq[Trade]] =
-    for {
+    (for {
       req    <- authRequest(url(params))
       uri     = Endpoints.root + url(params)
       res    <-
-        recoverUnauthorizedSend(
+        asEitherSend(
           req
             .get(uri"$uri").response(asJson[PaginationContainer[TradeResponse]])
         )
       _      <- log.debug(res.toString)
       trades <- res.models.map(_.toTrade).sequence
-    } yield trades
+    } yield trades).retryWhile(_.isInstanceOf[Unauthorized])
 }

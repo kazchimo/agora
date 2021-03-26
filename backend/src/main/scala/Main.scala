@@ -44,6 +44,6 @@ object Main extends zio.App {
 
   private val app = log.info(
     "start"
-  ) *> (liquidSpreadSellTrade &> SettleWorstTrade.settle(30.seconds)) *> log
-    .info("end")
+  ) *> (liquidSpreadBuyTrade &> liquidSpreadSellTrade &> SettleWorstTrade
+    .settle(30.seconds)) *> log.info("end")
 }

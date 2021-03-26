@@ -2,6 +2,7 @@ package infra.exchange.liquid.impl
 
 import domain.AllEnv
 import domain.exchange.liquid.LiquidOrder.Id
+import domain.exchange.liquid.errors.Unauthorized
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder}
 import infra.exchange.liquid.Endpoints
 import infra.exchange.liquid.response.OrderResponse
@@ -15,12 +16,10 @@ import zio.RIO
 trait GetOrder extends AuthRequest { self: LiquidExchange.Service =>
   private def url(id: Id) = Endpoints.ordersPath + s"/${id.deepInnerV.toString}"
 
-  override def getOrder(id: Id): RIO[AllEnv, LiquidOrder] = for {
+  override def getOrder(id: Id): RIO[AllEnv, LiquidOrder] = (for {
     req   <- authRequest(url(id))
     uri    = Endpoints.root + url(id)
-    res   <- recoverUnauthorizedSend(
-               req.get(uri"$uri").response(asJson[OrderResponse])
-             )
+    res   <- asEitherSend(req.get(uri"$uri").response(asJson[OrderResponse]))
     order <- res.toOrder
-  } yield order
+  } yield order).retryWhile(_.isInstanceOf[Unauthorized])
 }

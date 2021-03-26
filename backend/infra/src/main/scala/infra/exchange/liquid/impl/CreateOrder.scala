@@ -13,24 +13,24 @@ import lib.instance.all._
 import sttp.client3.UriContext
 import sttp.client3.circe.asJson
 import zio.RIO
-
 import CreateOrder._
+import domain.exchange.liquid.errors.Unauthorized
 
 private[liquid] trait CreateOrder extends AuthRequest {
   self: LiquidExchange.Service =>
 
   override def createOrder[O <: OrderType, S <: Side](
     orderRequest: LiquidOrderRequest[O, S]
-  ): RIO[AllEnv, LiquidOrder] = for {
+  ): RIO[AllEnv, LiquidOrder] = (for {
     req   <- authRequest(Endpoints.ordersPath)
-    res   <- recoverUnauthorizedSend(
+    res   <- asEitherSend(
                req
                  .post(uri"${Endpoints.orders}").body(
                    orderRequest.asJson.noSpaces
                  ).response(asJson[OrderResponse])
              )
     order <- res.toOrder
-  } yield order
+  } yield order).retryWhile(_.isInstanceOf[Unauthorized])
 }
 
 private[liquid] object CreateOrder {
