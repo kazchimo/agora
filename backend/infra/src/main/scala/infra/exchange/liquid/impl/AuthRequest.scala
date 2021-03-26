@@ -2,16 +2,16 @@ package infra.exchange.liquid.impl
 
 import domain.AllEnv
 import domain.conf.Conf
-import domain.exchange.liquid.errors.NotEnoughBalance
+import domain.exchange.liquid.errors.{NotEnoughBalance, Unauthorized}
 import io.circe.syntax._
 import lib.sttp.jsonRequest
 import lib.syntax.all._
 import pdi.jwt.{Jwt, JwtAlgorithm}
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
-import sttp.client3.asynchttpclient.zio.send
-import sttp.client3.{Empty, Request, RequestT}
-import zio.logging.log
+import sttp.client3.asynchttpclient.zio.{SttpClient, send}
+import sttp.client3.{Empty, Request, RequestT, Response}
+import zio.logging.{Logging, log}
 import zio.{RIO, Task, ZIO}
 
 private[liquid] trait AuthRequest {
@@ -34,16 +34,26 @@ private[liquid] trait AuthRequest {
         .header("X-Quoine-API-Version", "2").header("X-Quoine-Auth", sig)
     )
 
+  def sendReq[T](
+    req: Request[T, Effect[Task] with ZioStreams with WebSockets]
+  ): RIO[AllEnv, Response[T]] = for {
+    _   <- log.debug(s"Request: url=${req.uri.toString} body=${req.body.show}")
+    res <- send(req)
+    _   <- log.debug(s"Response: url=${req.uri.toString} body=${res.show()}")
+    _   <- ZIO.fail {
+             res.code.code match {
+               case 401 => Unauthorized(res.show())
+               case 422 => NotEnoughBalance
+             }
+           }
+  } yield res
+
   private object ShouldRetry extends Exception
 
   def recover401Send[L <: Throwable, R](
     req: Request[Either[L, R], Effect[Task] with ZioStreams with WebSockets]
   ): ZIO[AllEnv, Throwable, R] = (for {
-    _       <- log.debug(s"Request: url=${req.uri.toString} body=${req.body.show}")
-    res     <- send(req)
-    _       <- ZIO.fail(ShouldRetry).when(res.code.code == 401)
-    _       <- ZIO.fail(NotEnoughBalance).when(res.code.code == 422)
-    _       <- log.debug(s"Response: url=${req.uri.toString} body=${res.show()}")
+    res     <- sendReq(req)
     content <- ZIO.fromEither(res.body)
   } yield content).retryWhileEquals(ShouldRetry)
 }
