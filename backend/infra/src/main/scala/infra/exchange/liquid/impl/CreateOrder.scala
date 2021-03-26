@@ -2,6 +2,7 @@ package infra.exchange.liquid.impl
 
 import domain.AllEnv
 import domain.exchange.liquid.LiquidOrder.{OrderType, Side}
+import domain.exchange.liquid.errors.Unauthorized
 import domain.exchange.liquid.{LiquidExchange, LiquidOrder, LiquidOrderRequest}
 import infra.exchange.liquid.Endpoints
 import infra.exchange.liquid.response.OrderResponse
@@ -13,8 +14,8 @@ import lib.instance.all._
 import sttp.client3.UriContext
 import sttp.client3.circe.asJson
 import zio.RIO
+
 import CreateOrder._
-import domain.exchange.liquid.errors.Unauthorized
 
 private[liquid] trait CreateOrder extends AuthRequest {
   self: LiquidExchange.Service =>

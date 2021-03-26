@@ -2,13 +2,7 @@ package infra.exchange.liquid.impl
 
 import domain.AllEnv
 import domain.conf.Conf
-import domain.exchange.liquid.errors.{
-  BadRequest,
-  ServiceUnavailable,
-  TooManyRequests,
-  Unauthorized,
-  UnprocessableEntity
-}
+import domain.exchange.liquid.errors._
 import io.circe.syntax._
 import lib.error.InternalInfraError
 import lib.sttp.jsonRequest
@@ -16,10 +10,10 @@ import lib.syntax.all._
 import pdi.jwt.{Jwt, JwtAlgorithm}
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
-import sttp.client3.asynchttpclient.zio.{SttpClient, send}
+import sttp.client3.asynchttpclient.zio.send
 import sttp.client3.{Empty, Request, RequestT, Response}
 import sttp.model.Header
-import zio.logging.{Logging, log}
+import zio.logging.log
 import zio.{RIO, Task, ZIO}
 
 private[liquid] trait AuthRequest {

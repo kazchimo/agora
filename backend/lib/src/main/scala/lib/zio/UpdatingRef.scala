@@ -1,6 +1,6 @@
 package lib.zio
 
-import zio.{Exit, Fiber, IO, UIO, ZRef}
+import zio._
 
 final case class UpdatingRef[+EA, +EB, -A, +B, +FE, +FA](
   ref: ZRef[EA, EB, A, B],
