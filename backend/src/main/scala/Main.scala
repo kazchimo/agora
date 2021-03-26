@@ -34,13 +34,16 @@ object Main extends zio.App {
   val cancelAll  = CancelAllInCoincheckUC.cancelAll
   val settleAll  = sellAll <&> cancelAll
 
-  val liquidOrder       = LiquidOrderRequest.limitBuy(
+  val liquidOrder           = LiquidOrderRequest.limitBuy(
     btcJpyId,
     Quantity.unsafeFrom(0.001),
     Price.unsafeFrom(6369581d)
   )
-  val liquidSpreadTrade = TradeHeadSpreadWithLeveraged.buy(20)
+  val liquidSpreadBuyTrade  = TradeHeadSpreadWithLeveraged.buy(12)
+  val liquidSpreadSellTrade = TradeHeadSpreadWithLeveraged.sell(12)
 
-  private val app = log.info("start") *> (liquidSpreadTrade &> SettleWorstTrade
-    .settle(30.seconds)) *> log.info("end")
+  private val app = log.info(
+    "start"
+  ) *> (liquidSpreadSellTrade &> SettleWorstTrade.settle(30.seconds)) *> log
+    .info("end")
 }
