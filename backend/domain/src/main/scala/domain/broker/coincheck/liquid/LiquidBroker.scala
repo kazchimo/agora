@@ -92,7 +92,7 @@ object LiquidBroker {
   ): RIO[AllEnv, LiquidOrder] = LiquidExchange
     .createOrder(orderRequest).retry(
       Schedule.fixed(retryInterval) && Schedule
-        .recurWhileEquals[Throwable](UnprocessableEntity)
+        .recurWhile(_.isInstanceOf[UnprocessableEntity])
     )
 
   def timeoutedOrder[O <: OrderType, S <: Side](
